@@ -1,0 +1,19 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="NoodleManagerX.MainWindow"
+        HasSystemDecorations="False"
+        Title="NoodleManagerX">
+
+  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+    <TextBlock Text="{Binding Greeting}"/>
+    <TextBox Text="{Binding Name}"/>
+    <Button Content="Hi" Command="{Binding NameCommand}"/>
+    <Button Content="Minimize" Command="{Binding MinimizeCommand}"/>
+    <Button Content="Normal" Command="{Binding NormalCommand}"/>
+    <Button Content="Maximize" Command="{Binding MaximizeCommand}"/>
+    <Button Content="Close" Command="{Binding CloseCommand}"/>
+  </StackPanel>
+</Window>
