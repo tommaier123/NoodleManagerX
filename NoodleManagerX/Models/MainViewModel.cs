@@ -88,7 +88,7 @@ namespace NoodleManagerX.Models
                     if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                     {
                         Point mouseonclient = desktop.MainWindow.PointToClient(mouse.Position);
-                        bool onwindow = mouseonclient.X >= 0 && mouseonclient.Y >= 0;
+                        bool onwindow = mouseonclient.Y < 70;
 
                         if (!lastleftclick && leftclick && onwindow)//rising edge
                         {
