@@ -30,6 +30,7 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> MinimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NormalCommand { get; set; }
         public ReactiveCommand<Unit, Unit> MaximizeCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> ToggleFullscreenCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CloseCommand { get; set; }
 
 
@@ -41,7 +42,6 @@ namespace NoodleManagerX.Models
 
         public MainViewModel()
         {
-            NameCommand = ReactiveCommand.Create((Action<Unit>)(x => Greeting = "Greetings " + Name));
 
             MinimizeCommand = ReactiveCommand.Create((Action<Unit>)(x =>
             {
@@ -51,19 +51,18 @@ namespace NoodleManagerX.Models
                 }
             }));
 
-            NormalCommand = ReactiveCommand.Create((Action<Unit>)(x =>
+            ToggleFullscreenCommand = ReactiveCommand.Create((Action<Unit>)(x =>
             {
                 if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 {
-                    desktop.MainWindow.WindowState = WindowState.Normal;
+                    if (desktop.MainWindow.WindowState != WindowState.Maximized)
+                    { 
+                        desktop.MainWindow.WindowState = WindowState.Maximized;
                 }
-            }));
-
-            MaximizeCommand = ReactiveCommand.Create((Action<Unit>)(x =>
-            {
-                if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                {
-                    desktop.MainWindow.WindowState = WindowState.Maximized;
+                    else if(desktop.MainWindow.WindowState != WindowState.Normal)
+                    {
+                        desktop.MainWindow.WindowState = WindowState.Normal;
+                    }
                 }
             }));
 

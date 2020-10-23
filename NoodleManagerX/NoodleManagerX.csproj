@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <ApplicationIcon>icon-nm.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\NoodleManagerLogo.png" />
@@ -14,5 +15,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\NoodleManagerLogo.png" />
+    <EmbeddedResource Include="Assets\close.png" />
+    <EmbeddedResource Include="Assets\fullscreen.png" />
+    <EmbeddedResource Include="Assets\minimize.png" />
+    <EmbeddedResource Include="Assets\search.png" />
+    <EmbeddedResource Include="Assets\icon-nm.ico" />
   </ItemGroup>
 </Project>
