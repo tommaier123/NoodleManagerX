@@ -5,6 +5,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using NoodleManagerX.Models;
 using System;
 using System.Globalization;
@@ -13,6 +14,13 @@ namespace NoodleManagerX
 {
     public class MainWindow : Window
     {
+        private BrushConverter brushConverter = new BrushConverter();
+
+        private const string tabActiveColor = "#f91c85";
+        private const string tabInactiveColor = "#aa49e0";
+        public static Brush tabActiveBrush;
+        public static Brush tabInactiveBrush;
+
         private Grid blackBar;
         private MouseDevice mouse;
         private bool lastleftclick = false;
@@ -21,6 +29,9 @@ namespace NoodleManagerX
 
         public MainWindow()
         {
+            tabActiveBrush = (Brush)brushConverter.ConvertFromString(tabActiveColor);
+            tabInactiveBrush = (Brush)brushConverter.ConvertFromString(tabInactiveColor);
+
             InitializeComponent();
 
             this.DataContext = new MainViewModel();
@@ -79,6 +90,24 @@ namespace NoodleManagerX
             }
 
             return value.ToString() == parameter.ToString();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class TabHilightConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            return (value.ToString() == parameter.ToString()) ? MainWindow.tabActiveBrush : MainWindow.tabInactiveBrush;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

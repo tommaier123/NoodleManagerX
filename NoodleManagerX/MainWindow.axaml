@@ -14,6 +14,7 @@
 
   <Window.Resources>
     <local:EqualsConverter x:Key="EqualsConverter"/>
+    <local:TabHilightConverter x:Key="TabHilightConverter"/>
   </Window.Resources>
   
   <Window.Styles>
@@ -30,7 +31,7 @@
       <Setter Property="Margin" Value="10,0,10,0"/>
       <Setter Property="FontWeight" Value="Bold"/>
       <Setter Property="FontSize" Value="20"/>
-      <Setter Property="Foreground" Value="#aa49fe"/>
+
     </Style>
 
   </Window.Styles>
@@ -54,15 +55,25 @@
       </Grid.ColumnDefinitions>
 
       <Image Source="resm:NoodleManagerX.Assets.NoodleManagerLogo.png" Grid.Column="0" Margin="12,12,20,12"/>
+      
+      
       <!--Menu tabs-->
-      <Button Grid.Column="1" Classes="BlankButton Tab" Content="MAPS" Command="{Binding TabSelectCommand}" CommandParameter="0"/>
-      <Button Grid.Column="2" Classes="BlankButton Tab" Content="PLAYLISTS" Command="{Binding TabSelectCommand}" CommandParameter="1"/>
-      <Button Grid.Column="3" Classes="BlankButton Tab" Content="STAGES" Command="{Binding TabSelectCommand}" CommandParameter="2"/>
-      <Button Grid.Column="4" Classes="BlankButton Tab" Content="AVATARS" Command="{Binding TabSelectCommand}" CommandParameter="3"/>
-      <Button Grid.Column="5" Classes="BlankButton Tab" Content="MODS" Command="{Binding TabSelectCommand}" CommandParameter="4"/>
-      <Button Grid.Column="6" Classes="BlankButton Tab" Content="TOOLS" Command="{Binding TabSelectCommand}" CommandParameter="5"/>
-      <Button Grid.Column="7" Classes="BlankButton Tab" Content="SETTINGS" Command="{Binding TabSelectCommand}" CommandParameter="6"/>
+      <Button Grid.Column="1" Classes="BlankButton Tab" Content="MAPS" Command="{Binding TabSelectCommand}" CommandParameter="0" 
+              Foreground="{Binding Path=SelectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=0}"/>
+      <Button Grid.Column="2" Classes="BlankButton Tab" Content="PLAYLISTS" Command="{Binding TabSelectCommand}" CommandParameter="1"
+              Foreground="{Binding Path=SelectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=1}"/>
+      <Button Grid.Column="3" Classes="BlankButton Tab" Content="STAGES" Command="{Binding TabSelectCommand}" CommandParameter="2"
+              Foreground="{Binding Path=SelectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=2}"/>
+      <Button Grid.Column="4" Classes="BlankButton Tab" Content="AVATARS" Command="{Binding TabSelectCommand}" CommandParameter="3"
+              Foreground="{Binding Path=SelectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=3}"/>
+      <Button Grid.Column="5" Classes="BlankButton Tab" Content="MODS" Command="{Binding TabSelectCommand}" CommandParameter="4"
+              Foreground="{Binding Path=SelectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=4}"/>
+      <Button Grid.Column="6" Classes="BlankButton Tab" Content="TOOLS" Command="{Binding TabSelectCommand}" CommandParameter="5"
+              Foreground="{Binding Path=SelectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=5}"/>
+      <Button Grid.Column="7" Classes="BlankButton Tab" Content="SETTINGS" Command="{Binding TabSelectCommand}" CommandParameter="6"
+              Foreground="{Binding Path=SelectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=6}"/>
 
+      
       <!--Minimize, maximize and close-->
       <Button Grid.Column="9" Classes="BlankButton" VerticalAlignment="Top" Height="20" Padding="0" Margin="3,5,3,0" Command="{Binding MinimizeCommand}">
         <Image Source="resm:NoodleManagerX.Assets.minimize.png"/>
@@ -76,41 +87,26 @@
     </Grid>
 
     <!--This is where the tab content begins-->
-    
     <StackPanel Margin="10,10,10,10">
-      <Carousel IsVisible="{Binding Path=SelectedTabIndex, 
-                              Converter={StaticResource EqualsConverter},
-                              ConverterParameter=0}">
+      <Carousel IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
         <TextBlock Text="These are the maps"/>
       </Carousel>
-      <Carousel IsVisible="{Binding Path=SelectedTabIndex, 
-                              Converter={StaticResource EqualsConverter},
-                              ConverterParameter=1}">
+      <Carousel IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1}">
         <TextBlock Text="These are the playlists"/>
       </Carousel>
-      <Carousel IsVisible="{Binding Path=SelectedTabIndex, 
-                              Converter={StaticResource EqualsConverter},
-                              ConverterParameter=2}">
+      <Carousel IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=2}">
         <TextBlock Text="These are the stages"/>
       </Carousel>
-      <Carousel IsVisible="{Binding Path=SelectedTabIndex, 
-                              Converter={StaticResource EqualsConverter},
-                              ConverterParameter=3}">
+      <Carousel IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=3}">
         <TextBlock Text="These are the avatars"/>
       </Carousel>
-      <Carousel IsVisible="{Binding Path=SelectedTabIndex, 
-                              Converter={StaticResource EqualsConverter},
-                              ConverterParameter=4}">
+      <Carousel IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=4}">
         <TextBlock Text="These are the mods"/>
       </Carousel>
-      <Carousel IsVisible="{Binding Path=SelectedTabIndex, 
-                              Converter={StaticResource EqualsConverter},
-                              ConverterParameter=5}">
+      <Carousel IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
         <TextBlock Text="These are the tools"/>
       </Carousel>
-      <Carousel IsVisible="{Binding Path=SelectedTabIndex, 
-                              Converter={StaticResource EqualsConverter},
-                              ConverterParameter=6}">
+      <Carousel IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
         <TextBlock Text="These are the settings"/>
       </Carousel>
     </StackPanel>
