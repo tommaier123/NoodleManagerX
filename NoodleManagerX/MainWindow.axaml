@@ -16,8 +16,9 @@
     <local:EqualsConverter x:Key="EqualsConverter"/>
     <local:TabHilightConverter x:Key="TabHilightConverter"/>
   </Window.Resources>
-  
+
   <Window.Styles>
+    <!--Make a button without animations-->
     <Style Selector="Button.BlankButton">
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="BorderThickness" Value="0"/>
@@ -26,14 +27,20 @@
       <Setter Property="Background" Value="Transparent"/>
     </Style>
 
+    <!--Special style for the tab header-->
     <Style Selector="Button.Tab">
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="Margin" Value="10,0,10,0"/>
       <Setter Property="FontWeight" Value="Bold"/>
       <Setter Property="FontSize" Value="20"/>
-
+      <Setter Property="ClickMode" Value="1"/>
     </Style>
 
+    <Style Selector="Button.WControls">
+      <Setter Property="VerticalAlignment" Value="Top"/>
+      <Setter Property="Height" Value="20"/>
+      <Setter Property="Padding" Value="0"/>
+    </Style>
   </Window.Styles>
 
 
@@ -55,10 +62,10 @@
       </Grid.ColumnDefinitions>
 
       <Image Source="resm:NoodleManagerX.Assets.NoodleManagerLogo.png" Grid.Column="0" Margin="12,12,20,12"/>
-      
-      
-      <!--Menu tabs-->
-      <Button Grid.Column="1" Classes="BlankButton Tab" Content="MAPS" Command="{Binding TabSelectCommand}" CommandParameter="0" 
+
+
+      <!--Tab header buttons-->
+      <Button Grid.Column="1" Classes="BlankButton Tab" Content="MAPS" Command="{Binding TabSelectCommand}" CommandParameter="0"
               Foreground="{Binding Path=SelectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=0}"/>
       <Button Grid.Column="2" Classes="BlankButton Tab" Content="PLAYLISTS" Command="{Binding TabSelectCommand}" CommandParameter="1"
               Foreground="{Binding Path=SelectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=1}"/>
@@ -73,15 +80,15 @@
       <Button Grid.Column="7" Classes="BlankButton Tab" Content="SETTINGS" Command="{Binding TabSelectCommand}" CommandParameter="6"
               Foreground="{Binding Path=SelectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=6}"/>
 
-      
+
       <!--Minimize, maximize and close-->
-      <Button Grid.Column="9" Classes="BlankButton" VerticalAlignment="Top" Height="20" Padding="0" Margin="3,5,3,0" Command="{Binding MinimizeCommand}">
+      <Button Grid.Column="9" Classes="BlankButton WControls"  Margin="3,5,3,0" Command="{Binding MinimizeCommand}">
         <Image Source="resm:NoodleManagerX.Assets.minimize.png"/>
       </Button>
-      <Button Grid.Column="10" Classes="BlankButton" VerticalAlignment="Top" Height="20" Padding="0" Margin="3,5,3,0" Command="{Binding ToggleFullscreenCommand}">
+      <Button Grid.Column="10" Classes="BlankButton WControls" Margin="3,5,3,0" Command="{Binding ToggleFullscreenCommand}">
         <Image Source="resm:NoodleManagerX.Assets.fullscreen.png"/>
       </Button>
-      <Button Grid.Column="11" Classes="BlankButton" VerticalAlignment="Top" Height="20" Padding="0" Margin="3,5,6,0" Command="{Binding CloseCommand}">
+      <Button Grid.Column="11" Classes="BlankButton WControls" Margin="3,5,6,0" Command="{Binding CloseCommand}">
         <Image Source="resm:NoodleManagerX.Assets.close.png"/>
       </Button>
     </Grid>

@@ -22,6 +22,8 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> CloseCommand { get; set; }
         public ReactiveCommand<string, Unit> TabSelectCommand { get; set; }
 
+
+
         public MainViewModel()
         {
 
