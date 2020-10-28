@@ -36,6 +36,7 @@
       <Setter Property="ClickMode" Value="1"/>
     </Style>
 
+    <!--Style for minimize, maximize, close-->
     <Style Selector="Button.WControls">
       <Setter Property="VerticalAlignment" Value="Top"/>
       <Setter Property="Height" Value="20"/>
