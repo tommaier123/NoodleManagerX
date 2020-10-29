@@ -15,6 +15,9 @@
   <Window.Resources>
     <local:EqualsConverter x:Key="EqualsConverter"/>
     <local:TabHilightConverter x:Key="TabHilightConverter"/>
+
+    <SolidColorBrush x:Key = "ComboBoxSelected" Color = "#661890" />
+    <SolidColorBrush x:Key = "ComboBoxPointerover" Color = "#bd055e" />
   </Window.Resources>
 
   <Window.Styles>
@@ -23,8 +26,22 @@
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="BorderThickness" Value="0"/>
     </Style>
-    <Style Selector="Button.BlankButton:pressed /template/ ContentPresenter">
+    <Style Selector="Button.BlankButton ContentPresenter">
       <Setter Property="Background" Value="Transparent"/>
+    </Style>
+
+    <!--Make a combobox without animations-->
+    <Style Selector="ComboBox.BlankBox">
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="ComboBox.BlankBox ToggleButton ContentPresenter">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ComboBox.BlankBox ComboBoxItem:selected ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource ComboBoxSelected}"/>
+    </Style>
+    <Style Selector="ComboBox.BlankBox ComboBoxItem:pointerover ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource ComboBoxPointerover}"/>
     </Style>
 
     <!--Special style for the tab header-->
@@ -42,24 +59,25 @@
       <Setter Property="Height" Value="20"/>
       <Setter Property="Padding" Value="0"/>
     </Style>
+
   </Window.Styles>
 
 
-  <StackPanel  VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-    <Grid Height="70" VerticalAlignment="Stretch" Background="Black" Name="BlackBar">
+  <StackPanel>
+    <Grid Height="70" Background="Black" Name="BlackBar">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition Width="*" />
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition Width="auto" />
-        <ColumnDefinition Width="auto" />
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
       </Grid.ColumnDefinitions>
 
       <Image Source="resm:NoodleManagerX.Assets.NoodleManagerLogo.png" Grid.Column="0" Margin="12,12,20,12"/>
@@ -94,8 +112,61 @@
       </Button>
     </Grid>
 
+    <!--Control Header-->
+    <Grid Height="50" Background="DarkBlue" IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="136"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="50"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="50"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="20"/>
+      </Grid.ColumnDefinitions>
+
+      <!--Search-->
+      <StackPanel Grid.Column="1" VerticalAlignment="Center">
+        <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff"/>
+        <Image Source="resm:NoodleManagerX.Assets.searchbar.png" Height="2" Width="200" Stretch="Fill"/>
+      </StackPanel>
+      <Image Grid.Column="2" Source="resm:NoodleManagerX.Assets.search.png" Height="22"/>
+
+      <!--Filter-->
+      <ComboBox Grid.Column="4" Classes="BlankBox" Width="95" SelectedIndex="0">
+        <ComboBoxItem>Upload Date</ComboBoxItem>
+        <ComboBoxItem>Hypefactor</ComboBoxItem>
+        <ComboBoxItem>Downloads</ComboBoxItem>
+        <ComboBoxItem>Rating</ComboBoxItem>
+        <ComboBoxItem IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Difficulty</ComboBoxItem>
+      </ComboBox>
+      <ComboBox Grid.Column="5" Classes="BlankBox" Width="50" SelectedIndex="0">
+        <ComboBoxItem>DSC</ComboBoxItem>
+        <ComboBoxItem>ASC</ComboBoxItem>
+      </ComboBox>
+
+      <!--Selection-->
+      <TextBlock Grid.Column="7" VerticalAlignment="Center" Text="Select All" Margin="0,0,8,0"/>
+      <TextBlock Grid.Column="8" VerticalAlignment="Center" Text="Get Selected" Margin="8,0,0,0"/>
+      
+      <!--Pagination-->
+      <Button Grid.Column="10" Classes="BlankButton" Content="&lt;">
+        <TextBlock Text="&lt;" FontSize="30" Margin="0,-3,0,0"/>
+      </Button>
+      <TextBlock Grid.Column="11" VerticalAlignment="Center" Text="1/12"/>
+      <Button Grid.Column="12" Classes="BlankButton">
+        <TextBlock Text="&gt;" FontSize="30" Margin="0,-3,0,0"/>
+      </Button>
+    </Grid>
+
     <!--This is where the tab content begins-->
-    <StackPanel Margin="10,10,10,10">
+    <StackPanel Margin="0,0,0,10">
       <Carousel IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
         <TextBlock Text="These are the maps"/>
       </Carousel>
@@ -112,10 +183,10 @@
         <TextBlock Text="These are the mods"/>
       </Carousel>
       <Carousel IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
-        <TextBlock Text="These are the tools"/>
+        <TextBlock Text="These are the tools (Get All, Send Favorites to Quest, Download Songs from Playlist, Setup Twitch Integration)"/>
       </Carousel>
       <Carousel IsVisible="{Binding Path=SelectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
-        <TextBlock Text="These are the settings"/>
+        <TextBlock Text="These are the settings (Path, Auto Download Playlists, Quest Mode (local, quest, both), Auto Update Content, Disable NM Update Notification"/>
       </Carousel>
     </StackPanel>
   </StackPanel>
