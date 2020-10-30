@@ -28,7 +28,6 @@ namespace NoodleManagerX
         private bool lastHandled = false;
         private Point lastclickposition;
 
-
         public MainWindow()
         {
             tabActiveBrush = (Brush)brushConverter.ConvertFromString(tabActiveColor);
@@ -98,7 +97,7 @@ namespace NoodleManagerX
             string val = value.ToString();
             var tmp = parameter.ToString().Split("-").Where(x => x == val);
 
-            return tmp.Count()>0;
+            return tmp.Count() > 0;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

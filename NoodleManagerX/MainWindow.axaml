@@ -4,8 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:NoodleManagerX"
-        mc:Ignorable="d" d:DesignWidth="950" d:DesignHeight="600"
-        Width="950" Height="600"
+        mc:Ignorable="d" d:DesignWidth="950" d:DesignHeight="620"
+        Width="950" Height="620"
         Background="#1a1b1f"
         x:Class="NoodleManagerX.MainWindow"
         HasSystemDecorations="False"
@@ -65,10 +65,26 @@
       <Setter Property="IsVisible" Value="False"/>
     </Style>
     <Style Selector="ListBox.MyListBox ScrollBar:vertical">
-      <Setter Property="Width" Value="25"/>
+      <Setter Property="Width" Value="22"/>
     </Style>
     <Style Selector="ListBox.MyListBox ScrollBar:vertical Thumb">
-      <Setter Property="Width" Value="25"/>
+      <Setter Property="Width" Value="22"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox ListBoxItem">
+      <Setter Property="Padding" Value="0"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox ItemsPresenter">
+      <Setter Property="Margin" Value="0"/>
+    </Style>
+
+    <!--Grow and shrink the image-->
+    <Style Selector="ListBox.MyListBox ListBoxItem:pointerover Image">
+      <Setter Property="Width" Value="160"/>
+      <Setter Property="Height" Value="160"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox ListBoxItem:not(:pointerover) Image">
+      <Setter Property="Width" Value="140"/>
+      <Setter Property="Height" Value="140"/>
     </Style>
 
   </Window.Styles>
@@ -134,7 +150,7 @@
 
       <!--Selection-->
       <TextBlock Grid.Column="7" VerticalAlignment="Center" Text="Get All" Margin="0,0,8,0"/>
-      <TextBlock Grid.Column="8" VerticalAlignment="Center" Text="Get Filtered" Margin="8,0,0,0"/>
+      <TextBlock Grid.Column="8" VerticalAlignment="Center" Text="Get Selected" Margin="8,0,0,0"/>
 
       <!--Pagination-->
       <Button Grid.Column="10" Classes="BlankButton" Content="&lt;">
@@ -149,11 +165,12 @@
     <!--This is where the tab content begins-->
     <Grid Grid.Row="2">
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
-        <ListBox Items="{Binding Path=maps}"  Classes="MyListBox" Margin="10,10,10,10" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent">
+        <ListBox Items="{Binding Path=maps}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Multiple" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent">
           <ListBox.ItemTemplate>
             <DataTemplate>
-              <Grid Height="30">
-                <TextBlock Text="{Binding title}"/>
+              <Grid Height="160" ColumnDefinitions="auto, auto, *">
+                <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
+                <TextBlock Grid.Column="1" Text="{Binding title}" VerticalAlignment="Center" Margin="20,0,0,0" FontSize="20"/>
               </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>
