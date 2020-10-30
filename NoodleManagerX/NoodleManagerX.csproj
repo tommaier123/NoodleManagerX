@@ -1,25 +1,26 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <ApplicationIcon>icon-nm.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Assets\NoodleManagerLogo.png"/>
+    <None Remove="Assets\NoodleManagerLogo.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.9.12"/>
-    <PackageReference Include="Avalonia.Desktop" Version="0.9.12"/>
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.12"/>
-    <PackageReference Include="ReactiveUI.Fody" Version="12.1.1"/>
+    <PackageReference Include="Avalonia" Version="0.9.12" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.9.12" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.12" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="ReactiveUI.Fody" Version="12.1.5" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Assets\NoodleManagerLogo.png"/>
-    <EmbeddedResource Include="Assets\close.png"/>
-    <EmbeddedResource Include="Assets\fullscreen.png"/>
-    <EmbeddedResource Include="Assets\minimize.png"/>
-    <EmbeddedResource Include="Assets\search.png"/>
-    <EmbeddedResource Include="Assets\icon-nm.ico"/>
-    <EmbeddedResource Include="Assets\searchbar.png"/>
+    <EmbeddedResource Include="Assets\NoodleManagerLogo.png" />
+    <EmbeddedResource Include="Assets\close.png" />
+    <EmbeddedResource Include="Assets\fullscreen.png" />
+    <EmbeddedResource Include="Assets\minimize.png" />
+    <EmbeddedResource Include="Assets\search.png" />
+    <EmbeddedResource Include="Assets\icon-nm.ico" />
+    <EmbeddedResource Include="Assets\searchbar.png" />
   </ItemGroup>
 </Project>

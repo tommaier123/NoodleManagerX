@@ -98,7 +98,6 @@ namespace NoodleManagerX
             string val = value.ToString();
             var tmp = parameter.ToString().Split("-").Where(x => x == val);
 
-
             return tmp.Count()>0;
         }
 
