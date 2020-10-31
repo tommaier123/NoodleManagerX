@@ -104,7 +104,7 @@ namespace NoodleManagerX.Models
                 apiMapThreadCancel = true;
                 //apiMapThread.Join();
             }
-            apiMapThread = new Thread(MapPageThreadFunction);
+            apiMapThread = new Thread(MapPageThreadFunction);//todo apparently you should avoid using threads and use tasks instead
             apiMapThread.Start(page);
         }
 

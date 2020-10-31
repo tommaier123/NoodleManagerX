@@ -27,7 +27,7 @@ namespace NoodleManagerX.Models
             LoadBitmap();
         }
 
-        public void LoadBitmap()
+        public void LoadBitmap()//todo starting 50 threads might be a bad idea, try tasks instead
         {
             MemoryStream outstream = new MemoryStream();
 
