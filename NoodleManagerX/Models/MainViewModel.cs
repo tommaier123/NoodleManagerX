@@ -20,16 +20,24 @@ namespace NoodleManagerX.Models
         //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true
         //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true
 
+        public const int pagecount = 10;
+        public const int pagesize = 5;
+
         [Reactive] public int selectedTabIndex { get; set; } = 0;
+        [Reactive] public int currentPage { get; set; } = 1;
+        [Reactive] public int numberOfPages { get; set; }
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
         public ReactiveCommand<Unit, Unit> closeCommand { get; set; }
         public ReactiveCommand<string, Unit> tabSelectCommand { get; set; }
+        public ReactiveCommand<string, Unit> pageUpCommand { get; set; }
+        public ReactiveCommand<string, Unit> pageDownCommand { get; set; }
 
         public ObservableCollection<Map> maps { get; set; } = new ObservableCollection<Map>();
 
         private Thread apiMapThread;
+        private bool apiMapThreadCancel = false;
 
         public MainViewModel()
         {
@@ -69,21 +77,64 @@ namespace NoodleManagerX.Models
                 selectedTabIndex = Int32.Parse(x);
             }));
 
-            apiMapThread = new Thread(GetMaps);
-            apiMapThread.Start("https://synthriderz.com/api/beatmaps?limit=50&page=1&sort=published_at,DESC");
+            pageUpCommand = ReactiveCommand.Create<string>((x =>
+            {
+                if (currentPage < numberOfPages)
+                {
+                    GetMapPage(currentPage + 1);
+                }
+            }));
+
+            pageDownCommand = ReactiveCommand.Create<string>((x =>
+            {
+                if (currentPage > 1)
+                {
+                    GetMapPage(currentPage - 1);
+                }
+            }));
+
+            apiMapThread = new Thread(MapPageThreadFunction);
+            GetMapPage(1);
         }
 
-        public void GetMaps(object url)
+        public void GetMapPage(int page)
         {
-            using (WebClient client = new WebClient())
+            if (apiMapThread.IsAlive)
             {
-                string res = client.DownloadString(url.ToString());
-                MapPage page = JsonConvert.DeserializeObject<MapPage>(res);
-                Dispatcher.UIThread.InvokeAsync(() =>
+                apiMapThreadCancel = true;
+                //apiMapThread.Join();
+            }
+            apiMapThread = new Thread(MapPageThreadFunction);
+            apiMapThread.Start(page);
+        }
+
+        public void MapPageThreadFunction(object data)
+        {
+            int page = (int)data;
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                maps.Clear();
+                currentPage = page;
+            });
+
+            for (int i = 0; i < pagecount; i++)
+            {
+                if (apiMapThreadCancel)
                 {
-                    maps.Clear();
-                    maps.Add(page.data);
-                });
+                    apiMapThreadCancel = false;
+                    break;
+                }
+
+                using (WebClient client = new WebClient())
+                {
+                    string res = client.DownloadString("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + (page * pagecount + i) + "&sort=published_at,DESC");
+                    MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
+                    Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        maps.Add(mapPage.data);
+                        numberOfPages = (mapPage.pagecount + pagesize - 1) / pagecount;
+                    });
+                }
             }
         }
     }

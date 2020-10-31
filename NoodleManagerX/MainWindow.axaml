@@ -58,6 +58,7 @@
       <Setter Property="VerticalAlignment" Value="Top"/>
       <Setter Property="Height" Value="20"/>
       <Setter Property="Padding" Value="0"/>
+      <Setter Property="Margin" Value="3,0,0,0"/>
     </Style>
 
     <!--Style for listbox-->
@@ -90,9 +91,9 @@
   </Window.Styles>
 
 
-  <Grid RowDefinitions="auto, auto, *">
+  <Grid RowDefinitions="auto,auto,*">
     <Grid Grid.Row="0" Height="70" Background="Black" Name="BlackBar"
-          ColumnDefinitions="auto, auto, auto, auto, auto, auto, auto, auto, *, auto, auto, auto">
+          ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,auto,*,auto">
 
       <Image Source="resm:NoodleManagerX.Assets.NoodleManagerLogo.png" Grid.Column="0" Margin="12,12,20,12"/>
 
@@ -114,52 +115,64 @@
 
 
       <!--Minimize, maximize and close-->
-      <Button Grid.Column="9" Classes="BlankButton WControls"  Margin="3,5,3,0" Command="{Binding minimizeCommand}">
-        <Image Source="resm:NoodleManagerX.Assets.minimize.png"/>
-      </Button>
-      <Button Grid.Column="10" Classes="BlankButton WControls" Margin="3,5,3,0" Command="{Binding toggleFullscreenCommand}">
-        <Image Source="resm:NoodleManagerX.Assets.fullscreen.png"/>
-      </Button>
-      <Button Grid.Column="11" Classes="BlankButton WControls" Margin="3,5,6,0" Command="{Binding closeCommand}">
-        <Image Source="resm:NoodleManagerX.Assets.close.png"/>
-      </Button>
+      <Grid Grid.Column="9" ColumnDefinitions="auto,auto,auto" Margin="0,5,6,0">
+        <Button Grid.Column="0" Classes="BlankButton WControls" Command="{Binding minimizeCommand}">
+          <Image Source="resm:NoodleManagerX.Assets.minimize.png"/>
+        </Button>
+        <Button Grid.Column="1" Classes="BlankButton WControls" Command="{Binding toggleFullscreenCommand}">
+          <Image Source="resm:NoodleManagerX.Assets.fullscreen.png"/>
+        </Button>
+        <Button Grid.Column="2" Classes="BlankButton WControls" Command="{Binding closeCommand}">
+          <Image Source="resm:NoodleManagerX.Assets.close.png"/>
+        </Button>
+      </Grid>
     </Grid>
 
     <!--Control Header-->
     <Grid Grid.Row="1" Height="50" Background="DarkBlue" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}"
-          ColumnDefinitions="136, auto, auto, 50, auto, auto, 50, auto, auto, *, auto, auto, auto, 20">
+          ColumnDefinitions="auto,auto,auto,*,auto">
       <!--Search-->
-      <StackPanel Grid.Column="1" VerticalAlignment="Center">
-        <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff"/>
-        <Image Source="resm:NoodleManagerX.Assets.searchbar.png" Height="2" Width="200" Stretch="Fill"/>
-      </StackPanel>
-      <Image Grid.Column="2" Source="resm:NoodleManagerX.Assets.search.png" Height="22"/>
+      <Grid Grid.Column="0" ColumnDefinitions="auto,auto" Margin="135,0,0,0">
+        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+          <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff"/>
+          <Image Source="resm:NoodleManagerX.Assets.searchbar.png" Height="2" Width="200" Stretch="Fill"/>
+        </StackPanel>
+        <Image Grid.Column="1" Source="resm:NoodleManagerX.Assets.search.png" Height="22"/>
+      </Grid>
 
       <!--Filter-->
-      <ComboBox Grid.Column="4" Classes="BlankBox" Width="95" SelectedIndex="0">
-        <ComboBoxItem>Upload Date</ComboBoxItem>
-        <ComboBoxItem>Hypefactor</ComboBoxItem>
-        <ComboBoxItem>Downloads</ComboBoxItem>
-        <ComboBoxItem>Rating</ComboBoxItem>
-        <ComboBoxItem IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Difficulty</ComboBoxItem>
-      </ComboBox>
-      <ComboBox Grid.Column="5" Classes="BlankBox" Width="50" SelectedIndex="0">
-        <ComboBoxItem>DSC</ComboBoxItem>
-        <ComboBoxItem>ASC</ComboBoxItem>
-      </ComboBox>
+      <Grid Grid.Column="1" ColumnDefinitions="auto,auto" Margin="50,0,0,0">
+        <ComboBox Grid.Column="0" Classes="BlankBox" Width="95" SelectedIndex="0">
+          <ComboBoxItem>Upload Date</ComboBoxItem>
+          <ComboBoxItem>Hypefactor</ComboBoxItem>
+          <ComboBoxItem>Downloads</ComboBoxItem>
+          <ComboBoxItem>Rating</ComboBoxItem>
+          <ComboBoxItem IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Difficulty</ComboBoxItem>
+        </ComboBox>
+        <ComboBox Grid.Column="1" Classes="BlankBox" Width="50" SelectedIndex="0">
+          <ComboBoxItem>DSC</ComboBoxItem>
+          <ComboBoxItem>ASC</ComboBoxItem>
+        </ComboBox>
+      </Grid>
 
       <!--Selection-->
-      <TextBlock Grid.Column="7" VerticalAlignment="Center" Text="Get All" Margin="0,0,8,0"/>
-      <TextBlock Grid.Column="8" VerticalAlignment="Center" Text="Get Selected" Margin="8,0,0,0"/>
+      <Grid Grid.Column="2" ColumnDefinitions="auto,auto" Margin="50,0,0,0">
+        <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Get All" Margin="0,0,16,0"/>
+        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="Get Selected" Margin="0,0,16,0"/>
+      </Grid>
 
       <!--Pagination-->
-      <Button Grid.Column="10" Classes="BlankButton" Content="&lt;">
-        <TextBlock Text="&lt;" FontSize="30" Margin="0,-3,0,0"/>
-      </Button>
-      <TextBlock Grid.Column="11" VerticalAlignment="Center" Text="1/12"/>
-      <Button Grid.Column="12" Classes="BlankButton">
-        <TextBlock Text="&gt;" FontSize="30" Margin="0,-3,0,0"/>
-      </Button>
+      <Grid Grid.Column="4" ColumnDefinitions="auto,auto,auto,auto,auto" Margin="0,0,20,0">
+        <Button Grid.Column="0" Classes="BlankButton" Command="{Binding pageDownCommand}">
+          <TextBlock Text="&lt;" FontSize="30" Margin="0,-3,0,0"/>
+        </Button>
+        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding currentPage}"/>
+        <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="/"/>
+        <TextBlock Grid.Column="3" VerticalAlignment="Center" Text="{Binding numberOfPages}"/>
+        <Button Grid.Column="4" Classes="BlankButton" Command="{Binding pageUpCommand}">
+          <TextBlock Text="&gt;" FontSize="30" Margin="0,-3,0,0"/>
+        </Button>
+      </Grid>
     </Grid>
 
     <!--This is where the tab content begins-->
