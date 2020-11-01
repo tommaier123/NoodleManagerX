@@ -11,6 +11,7 @@ using System.Net;
 using Newtonsoft.Json;
 using Avalonia.Threading;
 using DynamicData;
+using System.Threading.Tasks;
 
 namespace NoodleManagerX.Models
 {
@@ -20,12 +21,12 @@ namespace NoodleManagerX.Models
         //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true
         //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true
 
-        public const int pagecount = 10;
-        public const int pagesize = 5;
+        public const int pagecount = 20;
+        public const int pagesize = 3;
 
         [Reactive] public int selectedTabIndex { get; set; } = 0;
         [Reactive] public int currentPage { get; set; } = 1;
-        [Reactive] public int numberOfPages { get; set; }
+        [Reactive] public int numberOfPages { get; set; } = 1;
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
@@ -36,8 +37,10 @@ namespace NoodleManagerX.Models
 
         public ObservableCollection<Map> maps { get; set; } = new ObservableCollection<Map>();
 
-        private Thread apiMapThread;
-        private bool apiMapThreadCancel = false;
+        public static int bmpConversionsRunning = 0;
+
+        private Task apiMapTask;
+        private bool apiMapTaskCancel = false;
 
         public MainViewModel()
         {
@@ -81,7 +84,7 @@ namespace NoodleManagerX.Models
             {
                 if (currentPage < numberOfPages)
                 {
-                    GetMapPage(currentPage + 1);
+                    currentPage++;
                 }
             }));
 
@@ -89,50 +92,46 @@ namespace NoodleManagerX.Models
             {
                 if (currentPage > 1)
                 {
-                    GetMapPage(currentPage - 1);
+                    currentPage--;
                 }
             }));
 
-            apiMapThread = new Thread(MapPageThreadFunction);
-            GetMapPage(1);
+            this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());
         }
 
-        public void GetMapPage(int page)
+        public void GetMapPage()
         {
-            if (apiMapThread.IsAlive)
+            if (apiMapTask != null && apiMapTask.Status.Equals(TaskStatus.Running))
             {
-                apiMapThreadCancel = true;
-                //apiMapThread.Join();
+                apiMapTaskCancel = true;
+                apiMapTask.Wait();
             }
-            apiMapThread = new Thread(MapPageThreadFunction);//todo apparently you should avoid using threads and use tasks instead
-            apiMapThread.Start(page);
+            apiMapTask = Task.Factory.StartNew(MapPageThreadFunction);
         }
 
-        public void MapPageThreadFunction(object data)
+        public void MapPageThreadFunction()
         {
-            int page = (int)data;
             Dispatcher.UIThread.InvokeAsync(() =>
             {
                 maps.Clear();
-                currentPage = page;
             });
 
             for (int i = 0; i < pagecount; i++)
             {
-                if (apiMapThreadCancel)
+                if (apiMapTaskCancel)
                 {
-                    apiMapThreadCancel = false;
+                    apiMapTaskCancel = false;
                     break;
                 }
 
                 using (WebClient client = new WebClient())
                 {
-                    string res = client.DownloadString("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + (page * pagecount + i) + "&sort=published_at,DESC");
+                    string res = client.DownloadString("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + (currentPage * pagecount + i) + "&sort=published_at,DESC");
                     MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
                     Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         maps.Add(mapPage.data);
-                        numberOfPages = (mapPage.pagecount + pagesize - 1) / pagecount;
+                        numberOfPages = (mapPage.pagecount) / pagecount;
                     });
                 }
             }

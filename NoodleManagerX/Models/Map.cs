@@ -2,11 +2,13 @@
 using Avalonia.Threading;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace NoodleManagerX.Models
 {
@@ -27,12 +29,15 @@ namespace NoodleManagerX.Models
             LoadBitmap();
         }
 
-        public void LoadBitmap()//todo starting 50 threads might be a bad idea, try tasks instead
+        public void LoadBitmap()
         {
             MemoryStream outstream = new MemoryStream();
 
-            Thread th = new Thread(() =>
+            Task task = Task.Factory.StartNew(() =>
             {
+                while (MainViewModel.bmpConversionsRunning>=3) { }//todo measure if it matters
+                MainViewModel.bmpConversionsRunning++;
+
                 using (WebClient client = new WebClient())
                 using (Stream instream = client.OpenRead("https://synthriderz.com" + cover_url.ToString() + "?size=150"))
                 {
@@ -45,8 +50,9 @@ namespace NoodleManagerX.Models
                         cover_bmp = new Bitmap(outstream);
                     });
                 }
+                MainViewModel.bmpConversionsRunning--;
             });
-            th.Start();
+
         }
     }
 
