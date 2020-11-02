@@ -35,9 +35,6 @@ namespace NoodleManagerX.Models
 
             Task task = Task.Factory.StartNew(() =>
             {
-                while (MainViewModel.bmpConversionsRunning>=3) { }//todo measure if it matters
-                MainViewModel.bmpConversionsRunning++;
-
                 using (WebClient client = new WebClient())
                 using (Stream instream = client.OpenRead("https://synthriderz.com" + cover_url.ToString() + "?size=150"))
                 {
@@ -50,9 +47,7 @@ namespace NoodleManagerX.Models
                         cover_bmp = new Bitmap(outstream);
                     });
                 }
-                MainViewModel.bmpConversionsRunning--;
             });
-
         }
     }
 

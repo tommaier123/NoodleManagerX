@@ -21,8 +21,8 @@ namespace NoodleManagerX.Models
         //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true
         //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true
 
-        public const int pagecount = 20;
-        public const int pagesize = 3;
+        public const int pagecount = 6;
+        public const int pagesize = 10;
 
         [Reactive] public int selectedTabIndex { get; set; } = 0;
         [Reactive] public int currentPage { get; set; } = 1;
@@ -36,8 +36,6 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<string, Unit> pageDownCommand { get; set; }
 
         public ObservableCollection<Map> maps { get; set; } = new ObservableCollection<Map>();
-
-        public static int bmpConversionsRunning = 0;
 
         private Task apiMapTask;
         private bool apiMapTaskCancel = false;
@@ -111,6 +109,7 @@ namespace NoodleManagerX.Models
 
         public void MapPageThreadFunction()
         {
+            long sum = 0;
             Dispatcher.UIThread.InvokeAsync(() =>
             {
                 maps.Clear();
@@ -118,6 +117,7 @@ namespace NoodleManagerX.Models
 
             for (int i = 0; i < pagecount; i++)
             {
+
                 if (apiMapTaskCancel)
                 {
                     apiMapTaskCancel = false;
@@ -126,7 +126,12 @@ namespace NoodleManagerX.Models
 
                 using (WebClient client = new WebClient())
                 {
+                    var watch = System.Diagnostics.Stopwatch.StartNew();
                     string res = client.DownloadString("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + (currentPage * pagecount + i) + "&sort=published_at,DESC");
+                    watch.Stop();
+                    Console.WriteLine(watch.ElapsedMilliseconds);
+                    sum += watch.ElapsedMilliseconds;
+                    
                     MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
                     Dispatcher.UIThread.InvokeAsync(() =>
                     {
@@ -134,7 +139,10 @@ namespace NoodleManagerX.Models
                         numberOfPages = (mapPage.pagecount) / pagecount;
                     });
                 }
+
+
             }
+            Console.WriteLine(sum);
         }
     }
 }
