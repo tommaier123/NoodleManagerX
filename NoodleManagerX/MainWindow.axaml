@@ -16,8 +16,7 @@
     <local:EqualsConverter x:Key="EqualsConverter"/>
     <local:TabHilightConverter x:Key="TabHilightConverter"/>
 
-    <SolidColorBrush x:Key = "ComboBoxSelected" Color = "#661890" />
-    <SolidColorBrush x:Key = "ComboBoxPointerover" Color = "#bd055e" />
+    <SolidColorBrush x:Key = "ControlHeaderColor" Color = "#322680" />
   </Window.Resources>
 
   <Window.Styles>
@@ -37,12 +36,7 @@
     <Style Selector="ComboBox.BlankBox ToggleButton ContentPresenter">
       <Setter Property="Background" Value="Transparent"/>
     </Style>
-    <Style Selector="ComboBox.BlankBox ComboBoxItem:selected ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource ComboBoxSelected}"/>
-    </Style>
-    <Style Selector="ComboBox.BlankBox ComboBoxItem:pointerover ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource ComboBoxPointerover}"/>
-    </Style>
+
 
     <!--Style for the tab header-->
     <Style Selector="Button.Tab">
@@ -129,7 +123,7 @@
     </Grid>
 
     <!--Control Header-->
-    <Grid Grid.Row="1" Height="50" Background="DarkBlue" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}"
+    <Grid Grid.Row="1" Height="50" Background="{StaticResource ControlHeaderColor}" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}"
           ColumnDefinitions="auto,auto,auto,*,auto">
       <!--Search-->
       <Grid Grid.Column="0" ColumnDefinitions="auto,auto" Margin="135,0,0,0">
@@ -183,7 +177,7 @@
             <DataTemplate>
               <Grid Height="160" ColumnDefinitions="auto, auto, *">
                 <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
-                <TextBlock Grid.Column="1" Text="{Binding title}" VerticalAlignment="Center" Margin="20,0,0,0" FontSize="20"/>
+                <TextBlock Grid.Column="1" Text="{Binding index}" VerticalAlignment="Center" Margin="20,0,0,0" FontSize="20"/>
               </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>
