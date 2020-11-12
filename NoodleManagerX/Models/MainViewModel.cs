@@ -104,34 +104,24 @@ namespace NoodleManagerX.Models
                 apiMapTaskCancel = true;
                 apiMapTask.Wait();
             }
+            maps.Clear();
             apiMapTask = Task.Factory.StartNew(MapPageThreadFunction);
         }
 
-        public void MapPageThreadFunction()
+        public async void MapPageThreadFunction()
         {
             long sum = 0;
-            Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                maps.Clear();
-            });
 
             for (int i = 0; i < pagecount; i++)
             {
-
-                if (apiMapTaskCancel)
-                {
-                    apiMapTaskCancel = false;
-                    break;
-                }
-
                 using (WebClient client = new WebClient())
                 {
                     var watch = System.Diagnostics.Stopwatch.StartNew();
-                    string res = client.DownloadString("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + (currentPage * pagecount + i) + "&sort=published_at,DESC");
+                    string res = await client.DownloadStringTaskAsync(new Uri("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + (currentPage * pagecount + i) + "&sort=published_at,DESC"));
                     watch.Stop();
                     Console.WriteLine(watch.ElapsedMilliseconds);
                     sum += watch.ElapsedMilliseconds;
-                    
+
                     MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
                     Dispatcher.UIThread.InvokeAsync(() =>
                     {
@@ -139,8 +129,6 @@ namespace NoodleManagerX.Models
                         numberOfPages = (mapPage.pagecount) / pagecount;
                     });
                 }
-
-
             }
             Console.WriteLine(sum);
         }

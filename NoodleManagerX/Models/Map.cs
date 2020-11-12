@@ -31,23 +31,23 @@ namespace NoodleManagerX.Models
 
         public void LoadBitmap()
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
             MemoryStream outstream = new MemoryStream();
 
-            Task task = Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(async () =>
             {
                 using (WebClient client = new WebClient())
-                using (Stream instream = client.OpenRead("https://synthriderz.com" + cover_url.ToString() + "?size=150"))
+                using (Stream instream = await client.OpenReadTaskAsync(new Uri("https://synthriderz.com" + cover_url.ToString() + "?size=150")))
                 {
                     System.Drawing.Image image = System.Drawing.Image.FromStream(instream);
                     image.Save(outstream, System.Drawing.Imaging.ImageFormat.Bmp);
                     outstream.Position = 0;
-
-                    Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        cover_bmp = new Bitmap(outstream);
-                    });
                 }
-            });
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    cover_bmp = new Bitmap(outstream);
+                });
+            }, CancellationToken.None, TaskCreationOptions.PreferFairness, TaskScheduler.Current);//prefer fairness so that the first images are likely to be loaded first
         }
     }
 
