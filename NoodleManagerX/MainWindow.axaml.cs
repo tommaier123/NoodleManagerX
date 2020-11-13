@@ -19,8 +19,12 @@ namespace NoodleManagerX
 
         private const string tabActiveColor = "#f91c85";
         private const string tabInactiveColor = "#aa49e0";
+        private const string difficultyActiveColor = "#ffffff";
+        private const string difficultyInactiveColor = "#888888";
         public static Brush tabActiveBrush;
         public static Brush tabInactiveBrush;
+        public static Brush difficultyActiveBrush;
+        public static Brush difficultyInactiveBrush;
 
         private Grid blackBar;
         private MouseDevice mouse;
@@ -32,6 +36,8 @@ namespace NoodleManagerX
         {
             tabActiveBrush = (Brush)brushConverter.ConvertFromString(tabActiveColor);
             tabInactiveBrush = (Brush)brushConverter.ConvertFromString(tabInactiveColor);
+            difficultyActiveBrush = (Brush)brushConverter.ConvertFromString(difficultyActiveColor);
+            difficultyInactiveBrush = (Brush)brushConverter.ConvertFromString(difficultyInactiveColor);
 
             InitializeComponent();
 
@@ -116,6 +122,25 @@ namespace NoodleManagerX
             }
 
             return (value.ToString() == parameter.ToString()) ? MainWindow.tabActiveBrush : MainWindow.tabInactiveBrush;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class DifficultyColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            int index = Int32.Parse(parameter.ToString());
+            string[] difficulties = (string[])value;
+            return (difficulties[index] != "") ? MainWindow.difficultyActiveBrush : MainWindow.difficultyInactiveBrush;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

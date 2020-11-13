@@ -15,6 +15,7 @@
   <Window.Resources>
     <local:EqualsConverter x:Key="EqualsConverter"/>
     <local:TabHilightConverter x:Key="TabHilightConverter"/>
+    <local:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
 
     <SolidColorBrush x:Key = "ControlHeaderColor" Color = "#322680" />
   </Window.Resources>
@@ -77,9 +78,21 @@
       <Setter Property="Width" Value="160"/>
       <Setter Property="Height" Value="160"/>
     </Style>
-    <Style Selector="ListBox.MyListBox ListBoxItem:not(:pointerover) Image">
+    <Style Selector="ListBox.MyListBox ListBoxItem:selected Image">
+      <Setter Property="Width" Value="160"/>
+      <Setter Property="Height" Value="160"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox ListBoxItem:not(:pointerover):not(:selected) Image">
       <Setter Property="Width" Value="140"/>
       <Setter Property="Height" Value="140"/>
+    </Style>
+
+    <!--Style for the difficulties-->
+    <Style Selector="TextBlock.Difficulty">
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Margin" Value="20,0,0,0"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="15"/>
     </Style>
 
   </Window.Styles>
@@ -175,9 +188,31 @@
         <ListBox Items="{Binding Path=maps}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Multiple" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent">
           <ListBox.ItemTemplate>
             <DataTemplate>
-              <Grid Height="160" ColumnDefinitions="auto, auto, *">
-                <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
-                <TextBlock Grid.Column="1" Text="{Binding index}" VerticalAlignment="Center" Margin="20,0,0,0" FontSize="20"/>
+              <Grid RowDefinitions="*,auto">
+                <Grid Grid.Row="0" Height="160" ColumnDefinitions="auto, auto, *, auto">
+                  <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
+                  <Grid Grid.Column="1" RowDefinitions="auto,auto,auto,*,auto" Margin="20,0,0,0">
+                    <TextBlock Grid.Row="0" Text="{Binding title}" FontSize="35"/>
+                    <TextBlock Grid.Row="1" Text="{Binding artist}" FontSize="20"/>
+                    <TextBlock Grid.Row="2" Text="{Binding mapper}" FontSize="20"/>
+                    <Grid Grid.Row="4" ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,*" Margin="0,0,0,5">
+                      <TextBlock Grid.Column="0" Text="{Binding duration}" FontSize="30" FontWeight="SemiBold"/>
+                      <TextBlock Grid.Column="1" Text="EASY" Classes="Difficulty"
+                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=0}"/>
+                      <TextBlock Grid.Column="2" Text="NORMAL" Classes="Difficulty"
+                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=1}"/>
+                      <TextBlock Grid.Column="3" Text="HARD" Classes="Difficulty"
+                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=2}"/>
+                      <TextBlock Grid.Column="4" Text="EXPERT" Classes="Difficulty"
+                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=3}"/>
+                      <TextBlock Grid.Column="5" Text="MASTER" Classes="Difficulty"
+                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=4}"/>
+                      <TextBlock Grid.Column="6" Text="CUSTOM" Classes="Difficulty"
+                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=5}"/>
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid Grid.Row="1" Background="#999999" Height="2"/>
               </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>

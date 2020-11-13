@@ -19,6 +19,8 @@ namespace NoodleManagerX.Models
         [DataMember] public string title { get; set; }
         [DataMember] public string artist { get; set; }
         [DataMember] public string mapper { get; set; }
+        [DataMember] public string duration { get; set; }
+        [DataMember] public string[] difficulties { get; set; }
         [DataMember] public string cover_url { get; set; }
 
         [Reactive] public Bitmap cover_bmp { get; set; }
