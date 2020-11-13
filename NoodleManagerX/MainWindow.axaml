@@ -207,7 +207,7 @@
                     <TextBlock Grid.Row="1" Text="{Binding artist}" Classes="Downloaded" FontSize="20"/>
                     <TextBlock Grid.Row="2" Text="{Binding mapper}" Classes="Downloaded" FontSize="20"/>
                     <Grid Grid.Row="4" ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,*" Margin="0,0,0,5">
-                      <TextBlock Grid.Column="0" Text="{Binding duration}" Classes="Downloaded" FontSize="30" FontWeight="SemiBold"/>
+                      <TextBlock Grid.Column="0" Text="{Binding duration}" Classes="Downloaded" FontSize="30" FontWeight="SemiBold" Width="100"/>
                       <TextBlock Grid.Column="1" Text="EASY" Classes="Difficulty"
                                  Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=0}"/>
                       <TextBlock Grid.Column="2" Text="NORMAL" Classes="Difficulty"
