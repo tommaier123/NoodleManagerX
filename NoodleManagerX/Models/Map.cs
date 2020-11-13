@@ -24,6 +24,8 @@ namespace NoodleManagerX.Models
         [DataMember] public string cover_url { get; set; }
 
         [Reactive] public Bitmap cover_bmp { get; set; }
+        [Reactive] public bool selected { get; set; }
+        [Reactive] public bool downloaded { get; set; } = true;
 
         [OnDeserialized]
         internal void OnDeserializedMethod(StreamingContext context)
