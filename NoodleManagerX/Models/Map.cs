@@ -22,15 +22,23 @@ namespace NoodleManagerX.Models
         [DataMember] public string duration { get; set; }
         [DataMember] public string[] difficulties { get; set; }
         [DataMember] public string cover_url { get; set; }
-
+        [DataMember] public string filename_original { get; set; }
         [Reactive] public Bitmap cover_bmp { get; set; }
         [Reactive] public bool selected { get; set; }
-        [Reactive] public bool downloaded { get; set; } = true;
+        [Reactive] public bool downloaded { get; set; }
 
         [OnDeserialized]
         internal void OnDeserializedMethod(StreamingContext context)
         {
             LoadBitmap();
+
+            if (Directory.Exists(MainViewModel.synthDirectory + @"\CustomSongs"))
+            {
+                if (File.Exists(MainViewModel.synthDirectory + @"\CustomSongs\" + filename_original))
+                {
+                    downloaded = true;
+                }
+            }
         }
 
         public void LoadBitmap()

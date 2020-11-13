@@ -245,7 +245,13 @@
         <TextBlock Text="These are the tools (Send Favorites to Quest, Download Songs from Playlist, Setup Twitch Integration)"/>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
-        <TextBlock Text="These are the settings (Path, Auto Download Playlists, Quest Mode (local, quest, both), Auto Update Content, Disable NM Update Notification"/>
+        <!--Path, Auto Download Playlists, Quest Mode (local, quest, both), Auto Update Content, Disable NM Update Notification-->
+        <Grid RowDefinitions="auto,*" Margin="10,10,10,10">
+          <Grid Grid.Row="0" ColumnDefinitions="auto,*" Margin="10,10,10,10">
+            <TextBlock Grid.Column="0" Text="Synth Riders Directory" VerticalAlignment="Center"/>
+            <TextBox Grid.Column="1" Margin="20,0,0,0"/>
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   </Grid>

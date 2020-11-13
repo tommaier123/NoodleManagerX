@@ -146,7 +146,30 @@ namespace NoodleManagerX
             }
             int index = Int32.Parse(parameter.ToString());
             string[] difficulties = (string[])value;
-            return (difficulties[index] != "") ? MainWindow.difficultyActiveBrush : MainWindow.difficultyInactiveBrush;
+            bool present = false;
+
+            switch (index)
+            {
+                case 1:
+                    present = difficulties.Contains("Easy");
+                    break;
+                case 2:
+                    present = difficulties.Contains("Normal");
+                    break;
+                case 3:
+                    present = difficulties.Contains("Hard");
+                    break;
+                case 4:
+                    present = difficulties.Contains("Expert");
+                    break;
+                case 5:
+                    present = difficulties.Contains("Master");
+                    break;
+                case 6:
+                    present = difficulties.Contains("Custom");
+                    break;
+            }
+            return (present) ? MainWindow.difficultyActiveBrush : MainWindow.difficultyInactiveBrush;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

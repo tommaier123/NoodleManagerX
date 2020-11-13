@@ -27,6 +27,7 @@ namespace NoodleManagerX.Models
         [Reactive] public int selectedTabIndex { get; set; } = 0;
         [Reactive] public int currentPage { get; set; } = 1;
         [Reactive] public int numberOfPages { get; set; } = 1;
+        public static string synthDirectory { get; set; } = @"C:\Program Files (x86)\Steam\steamapps\common\SynthRiders";
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
@@ -37,8 +38,7 @@ namespace NoodleManagerX.Models
 
         public ObservableCollection<Map> maps { get; set; } = new ObservableCollection<Map>();
 
-        private Task apiMapTask;
-        private bool apiMapTaskCancel = false;
+        private int apiMapRequestCounter = 0;
 
         public MainViewModel()
         {
@@ -99,41 +99,32 @@ namespace NoodleManagerX.Models
 
         public void GetMapPage()
         {
-            if (apiMapTask != null && apiMapTask.Status.Equals(TaskStatus.Running))
-            {
-                apiMapTaskCancel = true;
-                apiMapTask.Wait();
-            }
-            apiMapTask = Task.Factory.StartNew(MapPageThreadFunction);
+            maps.Clear();
+            apiMapRequestCounter++;
+            Task.Factory.StartNew(() => MapPageThreadFunction(apiMapRequestCounter));
         }
 
-        public void MapPageThreadFunction()
+        public async void MapPageThreadFunction(int requestID)
         {
             long sum = 0;
-            Dispatcher.UIThread.InvokeAsync(() =>
+            for (int i = 1; i <= pagecount; i++)
             {
-                maps.Clear();
-            });
-
-            for (int i = 0; i < pagecount; i++)
-            {
-
-                if (apiMapTaskCancel) { apiMapTaskCancel = false; break; }
-
                 using (WebClient client = new WebClient())
                 {
                     var watch = System.Diagnostics.Stopwatch.StartNew();
-                    string res = client.DownloadString("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + (currentPage * pagecount + i) + "&sort=published_at,DESC");
+                    string res = await client.DownloadStringTaskAsync("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + ((currentPage - 1) * pagecount + i) + "&sort=published_at,DESC");
                     watch.Stop();
                     Console.WriteLine(watch.ElapsedMilliseconds);
                     sum += watch.ElapsedMilliseconds;
 
                     MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
 
+                    if (apiMapRequestCounter != requestID) break;
+
                     Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         maps.Add(mapPage.data);
-                        numberOfPages = (mapPage.pagecount) / pagecount;
+                        numberOfPages = (int)Math.Ceiling((double)mapPage.pagecount / pagecount);
                     });
                 }
             }
