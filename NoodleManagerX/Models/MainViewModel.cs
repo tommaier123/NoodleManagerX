@@ -24,9 +24,13 @@ namespace NoodleManagerX.Models
         public const int pagecount = 6;
         public const int pagesize = 10;
 
+        private const string mapSearchQuerry = "{\"$or\":[{\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}}]}";
+
         [Reactive] public int selectedTabIndex { get; set; } = 0;
         [Reactive] public int currentPage { get; set; } = 1;
         [Reactive] public int numberOfPages { get; set; } = 1;
+        [Reactive] public string searchText { get; set; } = "";
+        public string lastSearchText = "";
         [Reactive] public ComboBoxItem selectedSortMethod { get; set; }
         [Reactive] public ComboBoxItem selectedSortOrder { get; set; }
 
@@ -38,6 +42,7 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<string, Unit> tabSelectCommand { get; set; }
         public ReactiveCommand<string, Unit> pageUpCommand { get; set; }
         public ReactiveCommand<string, Unit> pageDownCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> searchCommand { get; set; }
 
         public ObservableCollection<Map> maps { get; set; } = new ObservableCollection<Map>();
 
@@ -97,13 +102,24 @@ namespace NoodleManagerX.Models
                 }
             }));
 
+            searchCommand = ReactiveCommand.Create((() =>
+            {
+                GetMapPage();
+            }));
+
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());
             this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetMapPage());
             this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetMapPage());
+            //this.WhenAnyValue(x => x.searchText).Subscribe(x => GetMapPage());
         }
 
         public void GetMapPage()
         {
+            if (lastSearchText != searchText)
+            {
+                currentPage = 1;
+                lastSearchText = searchText;
+            }
             maps.Clear();
             apiMapRequestCounter++;
             Task.Factory.StartNew(() => MapPageThreadFunction(apiMapRequestCounter));
@@ -111,45 +127,46 @@ namespace NoodleManagerX.Models
 
         public async void MapPageThreadFunction(int requestID)
         {
-            long sum = 0;
-            for (int i = 1; i <= pagecount; i++)
+            try
             {
-                using (WebClient client = new WebClient())
+                for (int i = 1; i <= pagecount; i++)
                 {
-                    var watch = System.Diagnostics.Stopwatch.StartNew();
-                    string sortMethod = "published_at";
-                    string sortOrder = "DESC";
-                    if (selectedSortMethod?.Name != null) sortMethod = selectedSortMethod.Name;
-                    if (selectedSortOrder?.Name != null) sortOrder = selectedSortOrder.Name;
-
-                    string res = await client.DownloadStringTaskAsync("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + ((currentPage - 1) * pagecount + i) + "&sort=" + sortMethod + ","+ sortOrder);
-                    watch.Stop();
-                    Console.WriteLine(watch.ElapsedMilliseconds);
-                    sum += watch.ElapsedMilliseconds;
-
-                    MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
-
-                    if (apiMapRequestCounter != requestID) break;
-
-                    if (i == 1)
+                    using (WebClient client = new WebClient())
                     {
-                        //dont wait by discarding result with _ variable
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        string sortMethod = "published_at";
+                        string sortOrder = "DESC";
+                        if (selectedSortMethod?.Name != null) sortMethod = selectedSortMethod.Name;
+                        if (selectedSortOrder?.Name != null) sortOrder = selectedSortOrder.Name;
+                        string search = "";
+                        if (searchText != "") search = "&s=" + mapSearchQuerry.Replace("<value>", searchText);
+
+                        string req = "https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + ((currentPage - 1) * pagecount + i) + search + "&sort=" + sortMethod + "," + sortOrder;
+                        Console.WriteLine(req);
+                        string res = await client.DownloadStringTaskAsync(req);
+                        MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
+
+                        if (apiMapRequestCounter != requestID) break;
+
+                        if (i == 1)
                         {
-                            maps.Add(mapPage.data);
-                            numberOfPages = (int)Math.Ceiling((double)mapPage.pagecount / pagecount);
-                        });
-                    }
-                    else //spend less time on the ui thread, not sure this is necessary
-                    {
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                            //dont wait by discarding result with _ variable
+                            _ = Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                maps.Add(mapPage.data);
+                                numberOfPages = (int)Math.Ceiling((double)mapPage.pagecount / pagecount);
+                            });
+                        }
+                        else //spend less time on the ui thread, not sure this is necessary
                         {
-                            maps.Add(mapPage.data);
-                        });
+                            _ = Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                maps.Add(mapPage.data);
+                            });
+                        }
                     }
                 }
             }
-            Console.WriteLine(sum);
+            catch { }
         }
     }
 }

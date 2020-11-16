@@ -50,6 +50,9 @@ namespace NoodleManagerX
             this.DataContext = new MainViewModel();
             blackBar = this.FindControl<Grid>("BlackBar");
 
+            TextBox searchBox = this.FindControl<TextBox>("SearchBox");
+            searchBox.KeyDown += SearchBoxKeyEvent;
+
 #if DEBUG
             this.AttachDevTools();
 #endif
@@ -90,6 +93,14 @@ namespace NoodleManagerX
                     }
                 }
             });
+        }
+
+        private void SearchBoxKeyEvent(object sender, KeyEventArgs e)
+        {
+            if (e.Key.Equals(Key.Enter))
+            {
+                ((MainViewModel)this.DataContext).GetMapPage();
+            }
         }
 
         private void InitializeComponent()

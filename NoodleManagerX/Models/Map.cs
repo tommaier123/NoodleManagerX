@@ -55,10 +55,10 @@ namespace NoodleManagerX.Models
                     image.Save(outstream, System.Drawing.Imaging.ImageFormat.Bmp);
                     outstream.Position = 0;
                 }
-                Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    cover_bmp = new Bitmap(outstream);
-                });
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                  {
+                      cover_bmp = new Bitmap(outstream);
+                  });
             }, CancellationToken.None, TaskCreationOptions.PreferFairness, TaskScheduler.Current);//prefer fairness so that the first images are likely to be loaded first
         }
     }

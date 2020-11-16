@@ -152,30 +152,47 @@
       <!--Search-->
       <Grid Grid.Column="0" ColumnDefinitions="auto,auto" Margin="135,0,0,0">
         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-          <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff"/>
-          <Image Source="resm:NoodleManagerX.Assets.searchbar.png" Height="2" Width="200" Stretch="Fill"/>
+          <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff" Text="{Binding searchText}" Name="SearchBox"/>
+            <Image Source="resm:NoodleManagerX.Assets.searchbar.png" Height="2" Width="200" Stretch="Fill"/>
         </StackPanel>
-        <Image Grid.Column="1" Source="resm:NoodleManagerX.Assets.search.png" Height="22"/>
+        <Button Grid.Column="1" Classes="BlankButton" Height="22" Padding="0" Command="{Binding searchCommand}">
+          <Image Source="resm:NoodleManagerX.Assets.search.png"/>
+        </Button>
       </Grid>
 
       <!--Filter-->
-      <Grid Grid.Column="1" ColumnDefinitions="auto,auto" Margin="50,0,0,0">
-        <ComboBox Grid.Column="0" Classes="BlankBox" Width="95" SelectedIndex="0" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
+      <Grid Grid.Column="1" ColumnDefinitions="auto,auto,auto,auto" Margin="50,0,0,0">
+        <ComboBox Grid.Column="0" Classes="BlankBox" Width="70" SelectedIndex="0">
+          <ComboBoxItem>All </ComboBoxItem>
+          <ComboBoxItem>Title</ComboBoxItem>
+          <ComboBoxItem>Artist</ComboBoxItem>
+          <ComboBoxItem>Mapper</ComboBoxItem>
+        </ComboBox>
+        <ComboBox Grid.Column="1" Classes="BlankBox" Width="70" SelectedIndex="0">
+          <ComboBoxItem>All</ComboBoxItem>
+          <ComboBoxItem>Easy</ComboBoxItem>
+          <ComboBoxItem>Normal</ComboBoxItem>
+          <ComboBoxItem>Hard</ComboBoxItem>
+          <ComboBoxItem>Expert</ComboBoxItem>
+          <ComboBoxItem>Master</ComboBoxItem>
+          <ComboBoxItem>Custom</ComboBoxItem>
+        </ComboBox>
+        <ComboBox Grid.Column="2" Classes="BlankBox" Width="95" SelectedIndex="0" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
           <ComboBoxItem Name="published_at">Upload Date</ComboBoxItem>
           <ComboBoxItem Name="score">Hypefactor</ComboBoxItem>
+          <ComboBoxItem Name="upvote_count">Vote</ComboBoxItem>
           <ComboBoxItem Name="download_count">Downloads</ComboBoxItem>
-          <ComboBoxItem IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Difficulty</ComboBoxItem>
+          <ComboBoxItem  Name="difficulties" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Difficulty</ComboBoxItem>
         </ComboBox>
-        <ComboBox Grid.Column="1" Classes="BlankBox" Width="50" SelectedIndex="0" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
+        <ComboBox Grid.Column="3" Classes="BlankBox" Width="50" SelectedIndex="0" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
           <ComboBoxItem Name="DESC">DSC</ComboBoxItem>
           <ComboBoxItem Name="ASC">ASC</ComboBoxItem>
         </ComboBox>
       </Grid>
 
       <!--Selection-->
-      <Grid Grid.Column="2" ColumnDefinitions="auto,auto" Margin="50,0,0,0">
+      <Grid Grid.Column="2" ColumnDefinitions="auto" Margin="50,0,0,0">
         <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Get All" Margin="0,0,16,0"/>
-        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="Get Selected" Margin="0,0,16,0"/>
       </Grid>
 
       <!--Pagination-->
