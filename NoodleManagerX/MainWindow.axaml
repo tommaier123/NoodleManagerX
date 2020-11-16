@@ -160,16 +160,15 @@
 
       <!--Filter-->
       <Grid Grid.Column="1" ColumnDefinitions="auto,auto" Margin="50,0,0,0">
-        <ComboBox Grid.Column="0" Classes="BlankBox" Width="95" SelectedIndex="0">
-          <ComboBoxItem>Upload Date</ComboBoxItem>
-          <ComboBoxItem>Hypefactor</ComboBoxItem>
-          <ComboBoxItem>Downloads</ComboBoxItem>
-          <ComboBoxItem>Rating</ComboBoxItem>
+        <ComboBox Grid.Column="0" Classes="BlankBox" Width="95" SelectedIndex="0" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
+          <ComboBoxItem Name="published_at">Upload Date</ComboBoxItem>
+          <ComboBoxItem Name="score">Hypefactor</ComboBoxItem>
+          <ComboBoxItem Name="download_count">Downloads</ComboBoxItem>
           <ComboBoxItem IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Difficulty</ComboBoxItem>
         </ComboBox>
-        <ComboBox Grid.Column="1" Classes="BlankBox" Width="50" SelectedIndex="0">
-          <ComboBoxItem>DSC</ComboBoxItem>
-          <ComboBoxItem>ASC</ComboBoxItem>
+        <ComboBox Grid.Column="1" Classes="BlankBox" Width="50" SelectedIndex="0" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
+          <ComboBoxItem Name="DESC">DSC</ComboBoxItem>
+          <ComboBoxItem Name="ASC">ASC</ComboBoxItem>
         </ComboBox>
       </Grid>
 

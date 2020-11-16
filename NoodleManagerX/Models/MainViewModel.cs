@@ -27,6 +27,9 @@ namespace NoodleManagerX.Models
         [Reactive] public int selectedTabIndex { get; set; } = 0;
         [Reactive] public int currentPage { get; set; } = 1;
         [Reactive] public int numberOfPages { get; set; } = 1;
+        [Reactive] public ComboBoxItem selectedSortMethod { get; set; }
+        [Reactive] public ComboBoxItem selectedSortOrder { get; set; }
+
         public static string synthDirectory { get; set; } = @"C:\Program Files (x86)\Steam\steamapps\common\SynthRiders";
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
@@ -95,6 +98,8 @@ namespace NoodleManagerX.Models
             }));
 
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());
+            this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetMapPage());
+            this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetMapPage());
         }
 
         public void GetMapPage()
@@ -112,7 +117,12 @@ namespace NoodleManagerX.Models
                 using (WebClient client = new WebClient())
                 {
                     var watch = System.Diagnostics.Stopwatch.StartNew();
-                    string res = await client.DownloadStringTaskAsync("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + ((currentPage - 1) * pagecount + i) + "&sort=published_at,DESC");
+                    string sortMethod = "published_at";
+                    string sortOrder = "DESC";
+                    if (selectedSortMethod?.Name != null) sortMethod = selectedSortMethod.Name;
+                    if (selectedSortOrder?.Name != null) sortOrder = selectedSortOrder.Name;
+
+                    string res = await client.DownloadStringTaskAsync("https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + ((currentPage - 1) * pagecount + i) + "&sort=" + sortMethod + ","+ sortOrder);
                     watch.Stop();
                     Console.WriteLine(watch.ElapsedMilliseconds);
                     sum += watch.ElapsedMilliseconds;
@@ -121,11 +131,22 @@ namespace NoodleManagerX.Models
 
                     if (apiMapRequestCounter != requestID) break;
 
-                    Dispatcher.UIThread.InvokeAsync(() =>
+                    if (i == 1)
                     {
-                        maps.Add(mapPage.data);
-                        numberOfPages = (int)Math.Ceiling((double)mapPage.pagecount / pagecount);
-                    });
+                        //dont wait by discarding result with _ variable
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            maps.Add(mapPage.data);
+                            numberOfPages = (int)Math.Ceiling((double)mapPage.pagecount / pagecount);
+                        });
+                    }
+                    else //spend less time on the ui thread, not sure this is necessary
+                    {
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            maps.Add(mapPage.data);
+                        });
+                    }
                 }
             }
             Console.WriteLine(sum);
