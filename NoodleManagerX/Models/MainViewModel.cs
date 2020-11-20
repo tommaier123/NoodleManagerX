@@ -18,6 +18,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32;
 using MsgBox;
+using static System.Environment;
 
 namespace NoodleManagerX.Models
 {
@@ -38,9 +39,10 @@ namespace NoodleManagerX.Models
         [Reactive] public ComboBoxItem selectedSortOrder { get; set; }
         [Reactive] public int selectedSortMethodIndex { get; set; } = 0;
         [Reactive] public int selectedSortOrderIndex { get; set; } = 0;
-
         [Reactive] public string synthDirectory { get; set; }
-        public extern bool directoryValid { [ObservableAsProperty] get; }
+        [Reactive] public bool directoryValid { get; set; }
+
+        [Reactive] public Settings settings { get; set; } = new Settings();
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
@@ -65,6 +67,9 @@ namespace NoodleManagerX.Models
         public MainViewModel()
         {
             s_instance = this;
+
+            LoadSettings();
+
             minimizeCommand = ReactiveCommand.Create(() =>
             {
                 if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -135,82 +140,17 @@ namespace NoodleManagerX.Models
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());
             this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetMapPage());
             this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetMapPage());
-            this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).ToPropertyEx(this, x => x.directoryValid);
+            settings.Changed.Subscribe(x => SaveSettings());
+            this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).Subscribe(x =>
+            {
+                directoryValid = CheckDirectory(synthDirectory);
+                if (directoryValid) settings.synthDirectory = synthDirectory;
+            });
 
-            if (!directoryValid)
+            if (!CheckDirectory(synthDirectory))
             {
                 GetDirectoryFromRegistry();
             }
-        }
-
-        public bool CheckDirectory(string path, bool dialog = false)
-        {
-            bool ret = false;
-            if (!String.IsNullOrEmpty(path))
-            {
-                if (Directory.Exists(path)) ret = true;
-                else if (File.Exists(Path.Combine(path, "SynthRiders.exe"))) ret = true;
-            }
-
-            if (dialog && !ret)
-            {
-                OpenErrorDialog("Invalid Synth Riders Directory");
-            }
-            return ret;
-        }
-
-        public void OpenErrorDialog(string text)
-        {
-            _ = Dispatcher.UIThread.InvokeAsync(async () =>
-            {
-                await MessageBox.Show(MainWindow.s_instance, text, "Error", MessageBox.MessageBoxButtons.Ok);
-            });
-
-        }
-
-        public async void selectDirectory()
-        {
-            OpenFolderDialog dialog = new OpenFolderDialog();
-            dialog.DefaultDirectory = synthDirectory;
-
-            string directory = await dialog.ShowAsync(MainWindow.s_instance);
-
-            if (directory != "")
-            {
-                if (CheckDirectory(directory))
-                {
-                    synthDirectory = directory;
-                }
-                else
-                {
-                    string parent = Directory.GetParent(directory).FullName;
-                    if (CheckDirectory(parent))
-                    {
-                        synthDirectory = parent;
-                    }
-                }
-            }
-        }
-
-        public void GetDirectoryFromRegistry()
-        {
-            try
-            {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    byte[] regBytes = (byte[])Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\Kluge Interactive\SynthRiders", "com.synthriders.installpath_h4259148619", "");
-                    if (regBytes != null)
-                    {
-                        string directory = Encoding.Default.GetString(regBytes);
-                        directory = string.Concat(directory.Split(Path.GetInvalidPathChars()));
-                        if (!String.IsNullOrEmpty(directory) && CheckDirectory(directory))
-                        {
-                            synthDirectory = directory;
-                        }
-                    }
-                }
-            }
-            catch { }
         }
 
         public void GetMapPage(bool download = false)
@@ -227,7 +167,7 @@ namespace NoodleManagerX.Models
 
         public void GetAll()
         {
-            if (CheckDirectory(synthDirectory, true))
+            if (CheckDirectory(settings.synthDirectory, true))
             {
                 searchText = lastSearchText = "";
                 currentPage = 1;
@@ -319,6 +259,115 @@ namespace NoodleManagerX.Models
                     }
                 }
                 while (i <= pageCountAll);
+            }
+            catch { }
+        }
+
+        public void OpenErrorDialog(string text)
+        {
+            _ = Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                await MessageBox.Show(MainWindow.s_instance, text, "Error", MessageBox.MessageBoxButtons.Ok);
+            });
+
+        }
+
+        public bool CheckDirectory(string path, bool dialog = false)
+        {
+            bool ret = false;
+            if (!String.IsNullOrEmpty(path))
+            {
+                if (Directory.Exists(path) && File.Exists(Path.Combine(path, "SynthRiders.exe"))) ret = true;
+            }
+
+            if (dialog && !ret)
+            {
+                OpenErrorDialog("Invalid Synth Riders Directory");
+            }
+            return ret;
+        }
+
+        public async void selectDirectory()
+        {
+            OpenFolderDialog dialog = new OpenFolderDialog();
+            dialog.Directory = synthDirectory;
+
+            string directory = await dialog.ShowAsync(MainWindow.s_instance);
+
+            if (directory != "")
+            {
+                if (CheckDirectory(directory))
+                {
+                    synthDirectory = directory;
+                }
+                else
+                {
+                    string parent = Directory.GetParent(directory).FullName;
+                    if (CheckDirectory(parent))
+                    {
+                        synthDirectory = parent;
+                    }
+                }
+            }
+        }
+
+        public void GetDirectoryFromRegistry()
+        {
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    byte[] regBytes = (byte[])Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\Kluge Interactive\SynthRiders", "com.synthriders.installpath_h4259148619", "");
+                    if (regBytes != null)
+                    {
+                        string directory = Encoding.Default.GetString(regBytes);
+                        directory = string.Concat(directory.Split(Path.GetInvalidPathChars()));
+                        if (!String.IsNullOrEmpty(directory) && CheckDirectory(directory))
+                        {
+                            synthDirectory = directory;
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        public void LoadSettings()
+        {
+            try
+            {
+                string path = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager", "Settings.json");
+                Console.WriteLine("Loading Settings from " + path);
+                if (File.Exists(path))
+                {
+                    using (StreamReader file = File.OpenText(path))
+                    {
+                        JsonSerializer serializer = new JsonSerializer();
+                        settings = (Settings)serializer.Deserialize(file, typeof(Settings));
+                    }
+                    synthDirectory = settings.synthDirectory;
+                }
+            }
+            catch { }
+        }
+
+        public void SaveSettings()
+        {
+            try
+            {
+                Console.WriteLine("Saving Settings");
+                string output = JsonConvert.SerializeObject(settings);
+
+                string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager");
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                using (StreamWriter sw = new StreamWriter(Path.Combine(directory, "Settings.json")))
+                {
+                    sw.Write(output);
+                }
             }
             catch { }
         }

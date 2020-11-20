@@ -33,9 +33,9 @@ namespace NoodleManagerX.Models
         {
             LoadBitmap();
 
-            if (Directory.Exists(MainViewModel.s_instance.synthDirectory + @"\CustomSongs"))
+            if (Directory.Exists(MainViewModel.s_instance.settings.synthDirectory + @"\CustomSongs"))
             {
-                if (File.Exists(MainViewModel.s_instance.synthDirectory + @"\CustomSongs\" + filename_original))
+                if (File.Exists(MainViewModel.s_instance.settings.synthDirectory + @"\CustomSongs\" + filename_original))
                 {
                     downloaded = true;
                 }
