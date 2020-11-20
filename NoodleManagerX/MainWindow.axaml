@@ -16,7 +16,7 @@
     <local:EqualsConverter x:Key="EqualsConverter"/>
     <local:TabHilightConverter x:Key="TabHilightConverter"/>
     <local:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
-    <local:DownloadColorConverter x:Key="DownloadColorConverter"/>
+    <local:BoolColorConverter x:Key="BoolColorConverter"/>
 
     <SolidColorBrush x:Key = "ControlHeaderColor" Color = "#322680" />
   </Window.Resources>
@@ -74,8 +74,14 @@
     <Style Selector="ListBox.MyListBox ItemsPresenter">
       <Setter Property="Margin" Value="0"/>
     </Style>
-    <Style Selector="ListBox.MyListBox ListBoxItem:pointerover:not(:selected) ContentPresenter">
+    <Style Selector="ListBox.MyListBox ListBoxItem:pointerover ContentPresenter">
       <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox ListBoxItem:selected ContentPresenter">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox ListBoxItem">
+      <Setter Property="FocusAdorner" Value="{x:Null}"/>
     </Style>
 
 
@@ -103,7 +109,7 @@
 
     <!--Change text color when downloaded-->
     <Style Selector="TextBlock.Downloaded">
-      <Setter Property="Foreground" Value="{Binding Path=downloaded, Converter={StaticResource DownloadColorConverter}}"/>
+      <Setter Property="Foreground" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=#888888|#ffffff}"/>
     </Style>
 
   </Window.Styles>
@@ -153,7 +159,7 @@
       <Grid Grid.Column="0" ColumnDefinitions="auto,auto" Margin="135,0,0,0">
         <StackPanel Grid.Column="0" VerticalAlignment="Center">
           <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff" Text="{Binding searchText}" Name="SearchBox"/>
-            <Image Source="resm:NoodleManagerX.Assets.searchbar.png" Height="2" Width="200" Stretch="Fill"/>
+          <Image Source="resm:NoodleManagerX.Assets.searchbar.png" Height="2" Width="200" Stretch="Fill"/>
         </StackPanel>
         <Button Grid.Column="1" Classes="BlankButton" Height="22" Padding="0" Command="{Binding searchCommand}">
           <Image Source="resm:NoodleManagerX.Assets.search.png"/>
@@ -177,22 +183,33 @@
           <ComboBoxItem>Master</ComboBoxItem>
           <ComboBoxItem>Custom</ComboBoxItem>
         </ComboBox>
-        <ComboBox Grid.Column="2" Classes="BlankBox" Width="95" SelectedIndex="0" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
+        <ComboBox Grid.Column="2" Classes="BlankBox" Width="95" SelectedIndex="{Binding selectedSortMethodIndex}" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
           <ComboBoxItem Name="published_at">Upload Date</ComboBoxItem>
           <ComboBoxItem Name="score">Hypefactor</ComboBoxItem>
           <ComboBoxItem Name="upvote_count">Vote</ComboBoxItem>
           <ComboBoxItem Name="download_count">Downloads</ComboBoxItem>
           <ComboBoxItem  Name="difficulties" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Difficulty</ComboBoxItem>
         </ComboBox>
-        <ComboBox Grid.Column="3" Classes="BlankBox" Width="50" SelectedIndex="0" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
+        <ComboBox Grid.Column="3" Classes="BlankBox" Width="50" SelectedIndex="{Binding selectedSortOrderIndex}" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
           <ComboBoxItem Name="DESC">DSC</ComboBoxItem>
           <ComboBoxItem Name="ASC">ASC</ComboBoxItem>
         </ComboBox>
       </Grid>
 
       <!--Selection-->
-      <Grid Grid.Column="2" ColumnDefinitions="auto" Margin="50,0,0,0">
-        <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Get All" Margin="0,0,16,0"/>
+      <Grid Grid.Column="2" ColumnDefinitions="auto,auto" Margin="40,0,0,0">
+        <Button Grid.Column="0" Classes="BlankButton" Command="{Binding getAllCommand}">
+          <Grid RowDefinitions="auto,auto">
+            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Get"/>
+            <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="All"/>
+          </Grid>
+        </Button>
+        <Button Grid.Column="1" Classes="BlankButton" Margin="16,0,0,0">
+          <Grid RowDefinitions="auto,auto">
+            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Get"/>
+            <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="Page"/>
+          </Grid>
+        </Button>
       </Grid>
 
       <!--Pagination-->
@@ -212,7 +229,7 @@
     <!--This is where the tab content begins-->
     <Grid Grid.Row="2">
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
-        <ListBox Items="{Binding Path=maps}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Multiple" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent">
+        <ListBox Items="{Binding Path=maps}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid RowDefinitions="*,auto">
@@ -258,14 +275,19 @@
         <TextBlock Text="These are the mods"/>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
-        <TextBlock Text="These are the tools (Send Favorites to Quest, Download Songs from Playlist, Setup Twitch Integration)"/>
+        <TextBlock Text="These are the tools (Sync to Quest, Sync to PC, Download Songs from Playlist, Setup Twitch Integration)"/>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
-        <!--Path, Auto Download Playlists, Quest Mode (local, quest, both), Auto Update Content, Disable NM Update Notification-->
+        <!--Path, Quest Enabled, Auto Update Content, Disable NM Update Notification-->
         <Grid RowDefinitions="auto,*" Margin="10,10,10,10">
-          <Grid Grid.Row="0" ColumnDefinitions="auto,*" Margin="10,10,10,10">
+          <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Margin="10,10,10,10">
             <TextBlock Grid.Column="0" Text="Synth Riders Directory" VerticalAlignment="Center"/>
-            <TextBox Grid.Column="1" Margin="20,0,0,0"/>
+            <Border Grid.Column="1" Margin="20,0,0,0" BorderBrush="{Binding Path=directoryValid, Converter={StaticResource BoolColorConverter}, ConverterParameter=#aaaaaa|#ff0000}" BorderThickness="1">
+              <TextBox   Text="{Binding synthDirectory}" BorderThickness="0"/>
+            </Border>
+            <Button Grid.Column="2" Margin="16,0,0,0" Command="{Binding selectDirectoryCommand}">
+              <TextBlock Text="Select"/>
+            </Button>
           </Grid>
         </Grid>
       </Grid>

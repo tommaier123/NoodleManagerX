@@ -12,6 +12,11 @@ using Newtonsoft.Json;
 using Avalonia.Threading;
 using DynamicData;
 using System.Threading.Tasks;
+using System.IO;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+using Microsoft.Win32;
 
 namespace NoodleManagerX.Models
 {
@@ -21,10 +26,7 @@ namespace NoodleManagerX.Models
         //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true
         //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true
 
-        public const int pagecount = 6;
-        public const int pagesize = 10;
-
-        private const string mapSearchQuerry = "{\"$or\":[{\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}}]}";
+        public static MainViewModel s_instance;
 
         [Reactive] public int selectedTabIndex { get; set; } = 0;
         [Reactive] public int currentPage { get; set; } = 1;
@@ -33,8 +35,11 @@ namespace NoodleManagerX.Models
         public string lastSearchText = "";
         [Reactive] public ComboBoxItem selectedSortMethod { get; set; }
         [Reactive] public ComboBoxItem selectedSortOrder { get; set; }
+        [Reactive] public int selectedSortMethodIndex { get; set; } = 0;
+        [Reactive] public int selectedSortOrderIndex { get; set; } = 0;
 
-        public static string synthDirectory { get; set; } = @"C:\Program Files (x86)\Steam\steamapps\common\SynthRiders";
+        [Reactive] public string synthDirectory { get; set; }
+        public extern bool directoryValid { [ObservableAsProperty] get; }
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
@@ -43,13 +48,23 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<string, Unit> pageUpCommand { get; set; }
         public ReactiveCommand<string, Unit> pageDownCommand { get; set; }
         public ReactiveCommand<Unit, Unit> searchCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> getAllCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
 
         public ObservableCollection<Map> maps { get; set; } = new ObservableCollection<Map>();
 
+
+        public const int pagecount = 6;
+        public const int pagesize = 10;
+
+
         private int apiMapRequestCounter = 0;
+
+        private const string mapSearchQuerry = "{\"$or\":[{\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}}]}";
 
         public MainViewModel()
         {
+            s_instance = this;
             minimizeCommand = ReactiveCommand.Create(() =>
             {
                 if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -107,13 +122,80 @@ namespace NoodleManagerX.Models
                 GetMapPage();
             }));
 
+            getAllCommand = ReactiveCommand.Create((() =>
+            {
+                GetAll();
+            }));
+
+            selectDirectoryCommand = ReactiveCommand.Create((() =>
+            {
+                selectDirectory();
+            }));
+
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());
             this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetMapPage());
             this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetMapPage());
-            //this.WhenAnyValue(x => x.searchText).Subscribe(x => GetMapPage());
+            this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).ToPropertyEx(this, x => x.directoryValid);
+
+            if (!directoryValid)
+            {
+                GetDirectoryFromRegistry();
+            }
         }
 
-        public void GetMapPage()
+        public bool CheckDirectory(string path)
+        {
+            if (!Directory.Exists(path)) return false;
+            if (!File.Exists(Path.Combine(path, "SynthRiders.exe"))) return false;
+            return true;
+        }
+
+        public async void selectDirectory()
+        {
+            OpenFolderDialog dialog = new OpenFolderDialog();
+            dialog.DefaultDirectory = synthDirectory;
+
+            string directory = await dialog.ShowAsync(MainWindow.s_instance);
+
+            if (directory != "")
+            {
+                if (CheckDirectory(directory))
+                {
+                    synthDirectory = directory;
+                }
+                else
+                {
+                    string parent = Directory.GetParent(directory).FullName;
+                    if (CheckDirectory(parent))
+                    {
+                        synthDirectory = parent;
+                    }
+                }
+            }
+        }
+
+        public void GetDirectoryFromRegistry()
+        {
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    byte[] regBytes = (byte[])Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\Kluge Interactive\SynthRiders", "com.synthriders.installpath_h4259148619", "");
+                    if (regBytes != null)
+                    {
+                        string directory = Encoding.Default.GetString(regBytes);
+                        directory = string.Concat(directory.Split(Path.GetInvalidPathChars()));
+                        if (!String.IsNullOrEmpty(directory) && CheckDirectory(directory))
+                        {
+                            synthDirectory = directory;
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        public void GetMapPage(bool download = false)
         {
             if (lastSearchText != searchText)
             {
@@ -122,13 +204,25 @@ namespace NoodleManagerX.Models
             }
             maps.Clear();
             apiMapRequestCounter++;
-            Task.Factory.StartNew(() => MapPageThreadFunction(apiMapRequestCounter));
+            Task.Factory.StartNew(() => MapPageTaskFunction(apiMapRequestCounter, download));
         }
 
-        public async void MapPageThreadFunction(int requestID)
+        public void GetAll()
+        {
+
+        }
+
+        public void DownloadMap(Map map)
+        {
+            Console.WriteLine("Downloading " + map.title);
+        }
+
+        public async void MapPageTaskFunction(int requestID, bool download = false)
         {
             try
             {
+                Console.WriteLine("Getting Page");
+
                 for (int i = 1; i <= pagecount; i++)
                 {
                     using (WebClient client = new WebClient())
@@ -141,7 +235,6 @@ namespace NoodleManagerX.Models
                         if (searchText != "") search = "&s=" + mapSearchQuerry.Replace("<value>", searchText);
 
                         string req = "https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + ((currentPage - 1) * pagecount + i) + search + "&sort=" + sortMethod + "," + sortOrder;
-                        Console.WriteLine(req);
                         string res = await client.DownloadStringTaskAsync(req);
                         MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
 
@@ -165,6 +258,42 @@ namespace NoodleManagerX.Models
                         }
                     }
                 }
+                if (download)
+                {
+                    foreach (Map map in maps)
+                    {
+                        DownloadMap(map);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        public async void GetAllTaskFunction()
+        {
+            try
+            {
+                Console.WriteLine("Downloading All");
+                int pageCountAll = 1;
+                int i = 1;
+                do
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        string req = "https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + i;
+                        string res = await client.DownloadStringTaskAsync(req);
+                        MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
+
+                        foreach (Map map in mapPage.data)
+                        {
+                            DownloadMap(map);
+                        }
+
+                        pageCountAll = mapPage.pagecount;
+                        i++;
+                    }
+                }
+                while (i <= pageCountAll);
             }
             catch { }
         }

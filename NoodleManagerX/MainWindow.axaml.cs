@@ -15,20 +15,17 @@ namespace NoodleManagerX
 {
     public class MainWindow : Window
     {
-        private BrushConverter brushConverter = new BrushConverter();
+        public static MainWindow s_instance;
+        public static BrushConverter brushConverter = new BrushConverter();
 
         private const string tabActiveColor = "#f91c85";
         private const string tabInactiveColor = "#aa49e0";
         private const string difficultyActiveColor = "#ffffff";
         private const string difficultyInactiveColor = "#888888";
-        private const string downloadActiveColor = "#ffffff";
-        private const string downloadInactiveColor = "#888888";
         public static Brush tabActiveBrush;
         public static Brush tabInactiveBrush;
         public static Brush difficultyActiveBrush;
         public static Brush difficultyInactiveBrush;
-        public static Brush downloadActiveBrush;
-        public static Brush downloadInactiveBrush;
 
         private Grid blackBar;
         private MouseDevice mouse;
@@ -38,12 +35,12 @@ namespace NoodleManagerX
 
         public MainWindow()
         {
+            s_instance = this;
+
             tabActiveBrush = (Brush)brushConverter.ConvertFromString(tabActiveColor);
             tabInactiveBrush = (Brush)brushConverter.ConvertFromString(tabInactiveColor);
             difficultyActiveBrush = (Brush)brushConverter.ConvertFromString(difficultyActiveColor);
             difficultyInactiveBrush = (Brush)brushConverter.ConvertFromString(difficultyInactiveColor);
-            downloadActiveBrush = (Brush)brushConverter.ConvertFromString(downloadActiveColor);
-            downloadInactiveBrush = (Brush)brushConverter.ConvertFromString(downloadInactiveColor);
 
             InitializeComponent();
 
@@ -189,7 +186,7 @@ namespace NoodleManagerX
         }
     }
 
-    public class DownloadColorConverter : IValueConverter
+    public class BoolColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -197,7 +194,12 @@ namespace NoodleManagerX
             {
                 throw new ArgumentNullException(nameof(value));
             }
-            return (!(bool)value) ? MainWindow.downloadActiveBrush : MainWindow.downloadInactiveBrush;
+            string[] par = parameter.ToString().Split("|");
+            if (par.Length != 2)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            return ((bool)value) ? (Brush)MainWindow.brushConverter.ConvertFromString(par[0]) : (Brush)MainWindow.brushConverter.ConvertFromString(par[1]);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
