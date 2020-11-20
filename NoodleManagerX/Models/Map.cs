@@ -3,6 +3,7 @@ using Avalonia.Threading;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Net;
@@ -65,7 +66,7 @@ namespace NoodleManagerX.Models
 
     class MapPage
     {
-        public ObservableCollection<Map> data;
+        public List<Map> data;
         public int count = -1;
         public int total = -1;
         public int page = -1;

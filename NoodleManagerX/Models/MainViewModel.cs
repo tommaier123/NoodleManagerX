@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32;
+using MsgBox;
 
 namespace NoodleManagerX.Models
 {
@@ -52,7 +53,6 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
 
         public ObservableCollection<Map> maps { get; set; } = new ObservableCollection<Map>();
-
 
         public const int pagecount = 6;
         public const int pagesize = 10;
@@ -143,11 +143,29 @@ namespace NoodleManagerX.Models
             }
         }
 
-        public bool CheckDirectory(string path)
+        public bool CheckDirectory(string path, bool dialog = false)
         {
-            if (!Directory.Exists(path)) return false;
-            if (!File.Exists(Path.Combine(path, "SynthRiders.exe"))) return false;
-            return true;
+            bool ret = false;
+            if (!String.IsNullOrEmpty(path))
+            {
+                if (Directory.Exists(path)) ret = true;
+                else if (File.Exists(Path.Combine(path, "SynthRiders.exe"))) ret = true;
+            }
+
+            if (dialog && !ret)
+            {
+                OpenErrorDialog("Invalid Synth Riders Directory");
+            }
+            return ret;
+        }
+
+        public void OpenErrorDialog(string text)
+        {
+            _ = Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                await MessageBox.Show(MainWindow.s_instance, text, "Error", MessageBox.MessageBoxButtons.Ok);
+            });
+
         }
 
         public async void selectDirectory()
@@ -209,7 +227,14 @@ namespace NoodleManagerX.Models
 
         public void GetAll()
         {
-
+            if (CheckDirectory(synthDirectory, true))
+            {
+                searchText = lastSearchText = "";
+                currentPage = 1;
+                selectedSortMethodIndex = 0;
+                selectedSortOrderIndex = 0;
+                Task.Run(() => GetAllTaskFunction());
+            }
         }
 
         public void DownloadMap(Map map)
