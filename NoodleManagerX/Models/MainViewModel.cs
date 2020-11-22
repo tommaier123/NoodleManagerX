@@ -331,7 +331,7 @@ namespace NoodleManagerX.Models
 
             string directory = await dialog.ShowAsync(MainWindow.s_instance);
 
-            if (directory != "")
+            if (!String.IsNullOrEmpty(directory))
             {
                 if (CheckDirectory(directory))
                 {

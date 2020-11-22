@@ -1,18 +1,14 @@
 ﻿using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using ImageMagick;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -50,18 +46,21 @@ namespace NoodleManagerX.Models
         {
             Task.Factory.StartNew(async () =>
             {
-                MemoryStream outstream = new MemoryStream();
                 using (WebClient client = new WebClient())
                 using (Stream instream = await client.OpenReadTaskAsync(new Uri("https://synthriderz.com" + cover_url.ToString() + "?size=150")))
+                using (MagickImage image = new MagickImage(instream))
+                using (MemoryStream outstream = new MemoryStream())
                 {
-                    System.Drawing.Image image = System.Drawing.Image.FromStream(instream);
-                    image.Save(outstream, System.Drawing.Imaging.ImageFormat.Bmp);
+                    image.Format = MagickFormat.Bmp;
+                    await image.WriteAsync(outstream);
                     outstream.Position = 0;
-                }
-                _ = Dispatcher.UIThread.InvokeAsync(() =>
-                  {
-                      cover_bmp = new Bitmap(outstream);
-                  });
+                    Bitmap tmp = new Bitmap(outstream);
+
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                      {
+                          cover_bmp = tmp;
+                      });
+                } 
             }, CancellationToken.None, TaskCreationOptions.PreferFairness, TaskScheduler.Current);//prefer fairness so that the first images are likely to be loaded first
         }
     }
