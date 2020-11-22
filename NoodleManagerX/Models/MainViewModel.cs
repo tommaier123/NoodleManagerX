@@ -19,6 +19,9 @@ using System.Text;
 using Microsoft.Win32;
 using MsgBox;
 using static System.Environment;
+using System.IO.Compression;
+using System.Diagnostics;
+using System.Linq;
 
 namespace NoodleManagerX.Models
 {
@@ -55,6 +58,7 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
 
         public ObservableCollection<Map> maps { get; set; } = new ObservableCollection<Map>();
+        public ObservableCollection<LocalMap> localMaps { get; set; } = new ObservableCollection<LocalMap>();
 
         public const int pagecount = 6;
         public const int pagesize = 10;
@@ -137,19 +141,55 @@ namespace NoodleManagerX.Models
                 selectDirectory();
             }));
 
-            this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());
-            this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetMapPage());
-            this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetMapPage());
-            settings.Changed.Subscribe(x => SaveSettings());
+            this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());//reload maps when the current page changes
+            this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetMapPage());//reload maps when the sort method changes
+            this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetMapPage());//reload maps when the sort order changes
+            this.WhenAnyValue(x => x.localMaps).Subscribe(x => { foreach (Map map in maps) { map.UpdateDownloaded(); } });//reload maps downloaded property when the local maps change
+            settings.Changed.Subscribe(x => SaveSettings());//save the settings when they change
             this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).Subscribe(x =>
             {
                 directoryValid = CheckDirectory(synthDirectory);
-                if (directoryValid) settings.synthDirectory = synthDirectory;
+                if (directoryValid) settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
             });
+
+            LoadLocalMaps();
 
             if (!CheckDirectory(synthDirectory))
             {
                 GetDirectoryFromRegistry();
+            }
+        }
+
+        public void LoadLocalMaps()
+        {
+            string directory = Path.Combine(settings.synthDirectory, "CustomSongs");
+            if (Directory.Exists(directory))
+            {
+                Task.Run(async () =>
+                {
+                    List<LocalMap> tmp = new List<LocalMap>();
+                    foreach (string file in Directory.GetFiles(directory))
+                    {
+                        using (ZipArchive archive = ZipFile.OpenRead(file))
+                        {
+                            foreach (ZipArchiveEntry entry in archive.Entries)
+                            {
+                                if (entry.FullName == "synthriderz.meta.json")
+                                {
+                                    using (StreamReader sr = new StreamReader(entry.Open()))
+                                    {
+                                        LocalMap localMap = JsonConvert.DeserializeObject<LocalMap>(await sr.ReadToEndAsync());
+                                        tmp.Add(localMap);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        localMaps.Add(tmp);
+                    });
+                });
             }
         }
 
@@ -162,7 +202,7 @@ namespace NoodleManagerX.Models
             }
             maps.Clear();
             apiMapRequestCounter++;
-            Task.Factory.StartNew(() => MapPageTaskFunction(apiMapRequestCounter, download));
+            Task.Run(() => MapPageTaskFunction(apiMapRequestCounter, download));
         }
 
         public void GetAll()
@@ -194,14 +234,13 @@ namespace NoodleManagerX.Models
                     {
                         string sortMethod = "published_at";
                         string sortOrder = "DESC";
+                        string search = "";
                         if (selectedSortMethod?.Name != null) sortMethod = selectedSortMethod.Name;
                         if (selectedSortOrder?.Name != null) sortOrder = selectedSortOrder.Name;
-                        string search = "";
                         if (searchText != "") search = "&s=" + mapSearchQuerry.Replace("<value>", searchText);
 
                         string req = "https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + ((currentPage - 1) * pagecount + i) + search + "&sort=" + sortMethod + "," + sortOrder;
-                        string res = await client.DownloadStringTaskAsync(req);
-                        MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
+                        MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(await client.DownloadStringTaskAsync(req));
 
                         if (apiMapRequestCounter != requestID) break;
 
@@ -246,14 +285,12 @@ namespace NoodleManagerX.Models
                     using (WebClient client = new WebClient())
                     {
                         string req = "https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + i;
-                        string res = await client.DownloadStringTaskAsync(req);
-                        MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(res);
+                        MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(await client.DownloadStringTaskAsync(req));
 
                         foreach (Map map in mapPage.data)
                         {
                             DownloadMap(map);
                         }
-
                         pageCountAll = mapPage.pagecount;
                         i++;
                     }
@@ -353,23 +390,26 @@ namespace NoodleManagerX.Models
 
         public void SaveSettings()
         {
-            try
+            Task.Run(async () =>
             {
-                Console.WriteLine("Saving Settings");
-                string output = JsonConvert.SerializeObject(settings);
-
-                string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager");
-                if (!Directory.Exists(directory))
+                try
                 {
-                    Directory.CreateDirectory(directory);
-                }
+                    Console.WriteLine("Saving Settings");
+                    string output = JsonConvert.SerializeObject(settings);
 
-                using (StreamWriter sw = new StreamWriter(Path.Combine(directory, "Settings.json")))
-                {
-                    sw.Write(output);
+                    string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager");
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    using (StreamWriter sw = new StreamWriter(Path.Combine(directory, "Settings.json")))
+                    {
+                        await sw.WriteAsync(output);
+                    }
                 }
-            }
-            catch { }
+                catch { }
+            });
         }
     }
 }

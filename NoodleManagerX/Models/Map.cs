@@ -5,9 +5,14 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,7 +21,8 @@ namespace NoodleManagerX.Models
     [DataContract]
     class Map : ReactiveObject
     {
-
+        [DataMember] public int id { get; set; }
+        [DataMember] public string hash { get; set; }
         [DataMember] public string title { get; set; }
         [DataMember] public string artist { get; set; }
         [DataMember] public string mapper { get; set; }
@@ -32,23 +38,19 @@ namespace NoodleManagerX.Models
         internal void OnDeserializedMethod(StreamingContext context)
         {
             LoadBitmap();
+            UpdateDownloaded();
+        }
 
-            if (Directory.Exists(MainViewModel.s_instance.settings.synthDirectory + @"\CustomSongs"))
-            {
-                if (File.Exists(MainViewModel.s_instance.settings.synthDirectory + @"\CustomSongs\" + filename_original))
-                {
-                    downloaded = true;
-                }
-            }
+        public void UpdateDownloaded()
+        {
+            downloaded = MainViewModel.s_instance.localMaps.Select(x => x.id).Contains(id);
         }
 
         public void LoadBitmap()
         {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            MemoryStream outstream = new MemoryStream();
-
             Task.Factory.StartNew(async () =>
             {
+                MemoryStream outstream = new MemoryStream();
                 using (WebClient client = new WebClient())
                 using (Stream instream = await client.OpenReadTaskAsync(new Uri("https://synthriderz.com" + cover_url.ToString() + "?size=150")))
                 {
@@ -71,5 +73,12 @@ namespace NoodleManagerX.Models
         public int total = -1;
         public int page = -1;
         public int pagecount = -1;
+    }
+
+    class LocalMap
+    {
+        public int id = -1;
+        public string hash = "";
+        public string filename = "";
     }
 }
