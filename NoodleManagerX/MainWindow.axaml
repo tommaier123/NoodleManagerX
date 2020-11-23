@@ -22,6 +22,11 @@
   </Window.Resources>
 
   <Window.Styles>
+    <!--Set font-->
+    <Style Selector="TextBlock">
+      <Setter Property="FontFamily" Value="resm:NoodleManagerX.Assets.Fonts?assembly=NoodleManagerX#Roboto Cn"/>
+    </Style>
+
     <!--Button without animations-->
     <Style Selector="Button.BlankButton">
       <Setter Property="Background" Value="Transparent"/>

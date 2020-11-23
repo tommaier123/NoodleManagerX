@@ -24,5 +24,7 @@
     <EmbeddedResource Include="Assets\search.png" />
     <EmbeddedResource Include="Assets\icon-nm.ico" />
     <EmbeddedResource Include="Assets\searchbar.png" />
+    <EmbeddedResource Include="Assets\Fonts\Roboto-BoldCondensed.ttf" />
+    <EmbeddedResource Include="Assets\Fonts\Roboto-Condensed.ttf" />
   </ItemGroup>
 </Project>

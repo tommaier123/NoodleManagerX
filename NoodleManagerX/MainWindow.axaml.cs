@@ -158,22 +158,22 @@ namespace NoodleManagerX
 
             switch (index)
             {
-                case 1:
+                case 0:
                     present = difficulties.Contains("Easy");
                     break;
-                case 2:
+                case 1:
                     present = difficulties.Contains("Normal");
                     break;
-                case 3:
+                case 2:
                     present = difficulties.Contains("Hard");
                     break;
-                case 4:
+                case 3:
                     present = difficulties.Contains("Expert");
                     break;
-                case 5:
+                case 4:
                     present = difficulties.Contains("Master");
                     break;
-                case 6:
+                case 5:
                     present = difficulties.Contains("Custom");
                     break;
             }
