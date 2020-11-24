@@ -24,8 +24,9 @@
   <Window.Styles>
     <!--Set font-->
     <Style Selector="TextBlock">
-      <Setter Property="FontFamily" Value="resm:NoodleManagerX.Assets.Fonts?assembly=NoodleManagerX#Roboto Cn"/>
+      <Setter Property="FontFamily" Value="resm:NoodleManagerX.Assets.Fonts?assembly=NoodleManagerX#Noto Sans"/>
     </Style>
+
 
     <!--Button without animations-->
     <Style Selector="Button.BlankButton">

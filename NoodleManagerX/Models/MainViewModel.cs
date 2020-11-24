@@ -232,6 +232,7 @@ namespace NoodleManagerX.Models
                 {
                     using (WebClient client = new WebClient())
                     {
+                        client.Encoding = Encoding.UTF8;
                         string sortMethod = "published_at";
                         string sortOrder = "DESC";
                         string search = "";
