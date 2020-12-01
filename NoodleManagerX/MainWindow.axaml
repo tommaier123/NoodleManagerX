@@ -202,7 +202,7 @@
         </ComboBox>
       </Grid>
 
-      <!--Selection-->
+      <!--Get-->
       <Grid Grid.Column="2" ColumnDefinitions="auto,auto" Margin="40,0,0,0">
         <Button Grid.Column="0" Classes="BlankButton" Command="{Binding getAllCommand}">
           <Grid RowDefinitions="auto,auto">
@@ -210,7 +210,7 @@
             <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="All"/>
           </Grid>
         </Button>
-        <Button Grid.Column="1" Classes="BlankButton" Margin="16,0,0,0">
+        <Button Grid.Column="1" Classes="BlankButton" Margin="16,0,0,0" Command="{Binding getPageCommand}">
           <Grid RowDefinitions="auto,auto">
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Get"/>
             <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="Page"/>
@@ -235,7 +235,7 @@
     <!--This is where the tab content begins-->
     <Grid Grid.Row="2">
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
-        <ListBox Items="{Binding Path=maps}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent">
+        <ListBox Items="{Binding Path=maps}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid RowDefinitions="*,auto">
@@ -261,6 +261,7 @@
                                  Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=5}"/>
                     </Grid>
                   </Grid>
+                  <Button Grid.Column="3" Command="{Binding downloadMapCommand}" Height="50"/>
                 </Grid>
                 <Grid Grid.Row="1" Background="#999999" Height="2"/>
               </Grid>

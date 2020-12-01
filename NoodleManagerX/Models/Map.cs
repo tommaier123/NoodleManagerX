@@ -8,7 +8,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Mime;
+using System.Reactive;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,21 +28,76 @@ namespace NoodleManagerX.Models
         [DataMember] public string duration { get; set; }
         [DataMember] public string[] difficulties { get; set; }
         [DataMember] public string cover_url { get; set; }
+        [DataMember] public string download_url { get; set; }
         [DataMember] public string filename_original { get; set; }
         [Reactive] public Bitmap cover_bmp { get; set; }
         [Reactive] public bool selected { get; set; }
         [Reactive] public bool downloaded { get; set; }
+
+        public ReactiveCommand<Unit, Unit> downloadMapCommand { get; set; }
 
         [OnDeserialized]
         internal void OnDeserializedMethod(StreamingContext context)
         {
             LoadBitmap();
             UpdateDownloaded();
+
+            downloadMapCommand = ReactiveCommand.Create((() =>
+            {
+                Download();
+            }));
         }
 
         public void UpdateDownloaded()
         {
-            downloaded = MainViewModel.s_instance.localMaps.Select(x => x.id).Contains(id);
+            _ = Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                downloaded = MainViewModel.s_instance.localMaps.Select(x => x.id).Contains(id) || MainViewModel.s_instance.downloadingMaps.Contains(this);
+            });
+        }
+
+        public void Download()
+        {
+            if (!downloaded)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        MainViewModel.s_instance.downloadingMaps.Add(this);
+
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            downloaded = true;
+                        });
+
+                        using (WebClient client = new WebClient())
+                        {
+                            string url = "https://synthriderz.com" + download_url;
+
+                            client.OpenRead(url);
+                            string header_contentDisposition = client.ResponseHeaders["content-disposition"];
+                            string filename = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs", new ContentDisposition(header_contentDisposition).FileName);
+
+                            Console.WriteLine("Downloading " + title + " to " + filename);
+                            await client.DownloadFileTaskAsync(new Uri(url), filename);
+
+                            if (File.Exists(filename))
+                            {
+                                MainViewModel.s_instance.localMaps.Add(new LocalMap(id, hash, filename));
+                            }
+                        }
+                    }
+                    catch { }
+
+                    MainViewModel.s_instance.downloadingMaps.Remove(this);
+
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        this.UpdateDownloaded();
+                    });
+                });
+            }
         }
 
         public void LoadBitmap()
@@ -60,7 +118,7 @@ namespace NoodleManagerX.Models
                       {
                           cover_bmp = tmp;
                       });
-                } 
+                }
             }, CancellationToken.None, TaskCreationOptions.PreferFairness, TaskScheduler.Current);//prefer fairness so that the first images are likely to be loaded first
         }
     }
@@ -76,6 +134,13 @@ namespace NoodleManagerX.Models
 
     class LocalMap
     {
+        public LocalMap(int _id, string _hash, string _filename)
+        {
+            id = _id;
+            hash = _hash;
+            filename = _filename;
+        }
+
         public int id = -1;
         public string hash = "";
         public string filename = "";
