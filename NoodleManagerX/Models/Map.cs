@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Reactive;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
@@ -33,6 +34,8 @@ namespace NoodleManagerX.Models
         [Reactive] public Bitmap cover_bmp { get; set; }
         [Reactive] public bool selected { get; set; }
         [Reactive] public bool downloaded { get; set; }
+
+        public WebClient webClient;
 
         public ReactiveCommand<Unit, Unit> downloadMapCommand { get; set; }
 
@@ -62,33 +65,40 @@ namespace NoodleManagerX.Models
             {
                 Task.Run(async () =>
                 {
+                    MainViewModel.s_instance.downloadingMaps.Add(this);
+
                     try
                     {
-                        MainViewModel.s_instance.downloadingMaps.Add(this);
-
                         _ = Dispatcher.UIThread.InvokeAsync(() =>
                         {
                             downloaded = true;
                         });
 
-                        using (WebClient client = new WebClient())
+                        //while (MainViewModel.s_instance.downloading >= MainViewModel.downloadTasks) { await Task.Delay(10); }
+                        if (!MainViewModel.s_instance.closing)
                         {
+                            MainViewModel.s_instance.downloading++;
+                            webClient = new WebClient();
                             string url = "https://synthriderz.com" + download_url;
 
-                            client.OpenRead(url);
-                            string header_contentDisposition = client.ResponseHeaders["content-disposition"];
+                            webClient.OpenRead(url);
+                            string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
                             string filename = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs", new ContentDisposition(header_contentDisposition).FileName);
 
-                            Console.WriteLine("Downloading " + title + " to " + filename);
-                            await client.DownloadFileTaskAsync(new Uri(url), filename);
+                            Console.WriteLine("Downloading " + title);
+                            await webClient.DownloadFileTaskAsync(new Uri(url), filename);
+
+                            webClient.Dispose();
 
                             if (File.Exists(filename))
                             {
                                 MainViewModel.s_instance.localMaps.Add(new LocalMap(id, hash, filename));
                             }
+
+                            MainViewModel.s_instance.downloading--;
                         }
                     }
-                    catch { }
+                    catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
 
                     MainViewModel.s_instance.downloadingMaps.Remove(this);
 
@@ -99,6 +109,7 @@ namespace NoodleManagerX.Models
                 });
             }
         }
+
 
         public void LoadBitmap()
         {
