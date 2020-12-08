@@ -74,10 +74,8 @@ namespace NoodleManagerX.Models
                             downloaded = true;
                         });
 
-                        //while (MainViewModel.s_instance.downloading >= MainViewModel.downloadTasks) { await Task.Delay(10); }
                         if (!MainViewModel.s_instance.closing)
                         {
-                            MainViewModel.s_instance.downloading++;
                             webClient = new WebClient();
                             string url = "https://synthriderz.com" + download_url;
 
@@ -94,8 +92,6 @@ namespace NoodleManagerX.Models
                             {
                                 MainViewModel.s_instance.localMaps.Add(new LocalMap(id, hash, filename));
                             }
-
-                            MainViewModel.s_instance.downloading--;
                         }
                     }
                     catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }

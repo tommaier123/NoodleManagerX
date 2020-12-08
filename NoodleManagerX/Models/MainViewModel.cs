@@ -67,10 +67,8 @@ namespace NoodleManagerX.Models
 
         public const int pagecount = 6;
         public const int pagesize = 10;
-        public const int downloadTasks = 4;
 
         public bool closing = false;
-        public int downloading = 0;
 
         private int apiMapRequestCounter = 0;
 
@@ -164,10 +162,12 @@ namespace NoodleManagerX.Models
             this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).Subscribe(x =>
             {
                 directoryValid = CheckDirectory(synthDirectory);
-                if (directoryValid) settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
+                if (directoryValid)
+                {
+                    settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
+                    LoadLocalMaps();
+                }
             });
-
-            LoadLocalMaps();
 
             if (!CheckDirectory(synthDirectory))
             {
@@ -177,42 +177,58 @@ namespace NoodleManagerX.Models
 
         public Task LoadLocalMaps()
         {
+            Console.WriteLine("Loading Local");
             string directory = Path.Combine(settings.synthDirectory, "CustomSongs");
             if (Directory.Exists(directory))
             {
                 return Task.Run(async () =>
                 {
-                    List<LocalMap> tmp = new List<LocalMap>();
-                    foreach (string file in Directory.GetFiles(directory))
+                    int errors = 0;
+                    while (errors > 0)
                     {
-                        try
+                        errors = 0;
+                        List<LocalMap> tmp = new List<LocalMap>();
+                        foreach (string file in Directory.GetFiles(directory))
                         {
-                            using (ZipArchive archive = ZipFile.OpenRead(file))
+                            try
                             {
-                                foreach (ZipArchiveEntry entry in archive.Entries)
+                                using (ZipArchive archive = ZipFile.OpenRead(file))
                                 {
-                                    if (entry.FullName == "synthriderz.meta.json")
+                                    foreach (ZipArchiveEntry entry in archive.Entries)
                                     {
-                                        using (StreamReader sr = new StreamReader(entry.Open()))
+                                        if (entry.FullName == "synthriderz.meta.json")
                                         {
-                                            LocalMap localMap = JsonConvert.DeserializeObject<LocalMap>(await sr.ReadToEndAsync());
-                                            tmp.Add(localMap);
+                                            using (StreamReader sr = new StreamReader(entry.Open()))
+                                            {
+                                                LocalMap localMap = JsonConvert.DeserializeObject<LocalMap>(await sr.ReadToEndAsync());
+                                                tmp.Add(localMap);
+                                            }
                                         }
                                     }
                                 }
                             }
+                            catch (Exception e)
+                            {
+                                Log(MethodBase.GetCurrentMethod(), e);
+                                Console.WriteLine("Deleting corrupted file " + Path.GetFileName(file));
+                                try
+                                {
+                                    File.Delete(file);
+                                }
+                                catch
+                                {
+                                    errors++;
+                                }
+                            }
                         }
-                        catch (Exception e)
-                        {
-                            Log(MethodBase.GetCurrentMethod(), e);
-                            Console.WriteLine("Deleting corrupted file " + Path.GetFileName(file));
-                            File.Delete(file);
-                        }
+                        localMaps.Add(tmp);
                     }
-                    localMaps.Add(tmp);
                 });
             }
-            return Task.CompletedTask;
+            else
+            {
+                return Task.CompletedTask;
+            }
         }
 
         public void GetMapPage(bool download = false)
@@ -456,11 +472,23 @@ namespace NoodleManagerX.Models
 
                 _ = Task.Run(async () =>
                   {
-                      while (downloadingMaps.Count() > 0)
+
+                      foreach (Map map in downloadingMaps)
                       {
-                          await Task.Delay(10);
+                          if (map.webClient != null)
+                          {
+                              try
+                              {
+                                  map.webClient.CancelAsync();
+                                  map.webClient.Dispose();
+                              }
+                              catch { }
+                          }
                       }
-                      _ = Dispatcher.UIThread.InvokeAsync(async () =>
+
+                      await LoadLocalMaps();
+
+                      _ = Dispatcher.UIThread.InvokeAsync(() =>
                       {
                           MainWindow.s_instance.Close();
                       });
