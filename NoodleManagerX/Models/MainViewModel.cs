@@ -66,7 +66,6 @@ namespace NoodleManagerX.Models
 
         public const int pagecount = 6;
         public const int pagesize = 10;
-        public const int downloadTasks = 4;
 
         public bool closing = false;
 
@@ -162,10 +161,12 @@ namespace NoodleManagerX.Models
             this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).Subscribe(x =>
             {
                 directoryValid = CheckDirectory(synthDirectory);
-                if (directoryValid) settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
+                if (directoryValid)
+                {
+                    settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
+                    LoadLocalMaps();
+                }
             });
-
-            LoadLocalMaps();
 
             if (!CheckDirectory(synthDirectory))
             {
@@ -175,6 +176,7 @@ namespace NoodleManagerX.Models
 
         public Task LoadLocalMaps()
         {
+            Console.WriteLine("Loading Local");
             string directory = Path.Combine(settings.synthDirectory, "CustomSongs");
             if (Directory.Exists(directory))
             {
@@ -210,7 +212,10 @@ namespace NoodleManagerX.Models
                     localItems.Add(tmp);
                 });
             }
-            return Task.CompletedTask;
+            else
+            {
+                return Task.CompletedTask;
+            }
         }
 
         public void GetMapPage(bool download = false)
@@ -458,7 +463,10 @@ namespace NoodleManagerX.Models
                       {
                           await Task.Delay(10);
                       }
-                      _ = Dispatcher.UIThread.InvokeAsync(async () =>
+
+                      await LoadLocalMaps();
+
+                      _ = Dispatcher.UIThread.InvokeAsync(() =>
                       {
                           MainWindow.s_instance.Close();
                       });
