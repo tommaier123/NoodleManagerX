@@ -62,15 +62,13 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
 
         public ObservableCollection<Map> maps { get; set; } = new ObservableCollection<Map>();
-        public List<LocalMap> localMaps { get; set; } = new List<LocalMap>();
-        public List<Map> downloadingMaps { get; set; } = new List<Map>();
+        public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
         public const int pagecount = 6;
         public const int pagesize = 10;
         public const int downloadTasks = 4;
 
         public bool closing = false;
-        public int downloading = 0;
 
         private int apiMapRequestCounter = 0;
 
@@ -182,7 +180,7 @@ namespace NoodleManagerX.Models
             {
                 return Task.Run(async () =>
                 {
-                    List<LocalMap> tmp = new List<LocalMap>();
+                    List<LocalItem> tmp = new List<LocalItem>();
                     foreach (string file in Directory.GetFiles(directory))
                     {
                         try
@@ -195,7 +193,7 @@ namespace NoodleManagerX.Models
                                     {
                                         using (StreamReader sr = new StreamReader(entry.Open()))
                                         {
-                                            LocalMap localMap = JsonConvert.DeserializeObject<LocalMap>(await sr.ReadToEndAsync());
+                                            LocalItem localMap = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
                                             tmp.Add(localMap);
                                         }
                                     }
@@ -209,7 +207,7 @@ namespace NoodleManagerX.Models
                             File.Delete(file);
                         }
                     }
-                    localMaps.Add(tmp);
+                    localItems.Add(tmp);
                 });
             }
             return Task.CompletedTask;
@@ -439,7 +437,7 @@ namespace NoodleManagerX.Models
 
         private void ClosingEvent(object sender, CancelEventArgs e)
         {
-            if (downloadingMaps.Count() > 0)
+            if (maps.Where(x => x.downloading).Count() > 0)
             {
                 e.Cancel = true;
                 ShowClosingDialog();
@@ -448,7 +446,7 @@ namespace NoodleManagerX.Models
 
         private async void ShowClosingDialog()
         {
-            MessageBox.MessageBoxResult res = await MessageBox.Show(MainWindow.s_instance, "There are still " + downloadingMaps.Count + " running downloads." + Environment.NewLine + "Abort?", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+            MessageBox.MessageBoxResult res = await MessageBox.Show(MainWindow.s_instance, "There are still " + maps.Where(x => x.downloading).Count() + " running downloads." + Environment.NewLine + "Abort?", "Warning", MessageBox.MessageBoxButtons.OkCancel);
 
             if (res == MessageBox.MessageBoxResult.Ok)
             {
@@ -456,7 +454,7 @@ namespace NoodleManagerX.Models
 
                 _ = Task.Run(async () =>
                   {
-                      while (downloadingMaps.Count() > 0)
+                      while (maps.Where(x=>x.downloading).Count()>0)
                       {
                           await Task.Delay(10);
                       }

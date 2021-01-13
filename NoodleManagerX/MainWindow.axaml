@@ -261,7 +261,7 @@
                                  Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=5}"/>
                     </Grid>
                   </Grid>
-                  <Button Grid.Column="3" Command="{Binding downloadMapCommand}" Height="50"/>
+                  <Button Grid.Column="3" Command="{Binding downloadCommand}" Height="50"/>
                 </Grid>
                 <Grid Grid.Row="1" Background="#999999" Height="2"/>
               </Grid>
