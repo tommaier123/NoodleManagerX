@@ -61,11 +61,15 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> getPageCommand { get; set; }
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
 
-        public ObservableCollection<Map> maps { get; set; } = new ObservableCollection<Map>();
+        public ObservableCollection<MapItem> maps { get; set; } = new ObservableCollection<MapItem>();
+        public List<MapItem> hiddenMaps { get; set; } = new List<MapItem>();
         public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
+
+        public bool getAll = false;
 
         public const int pagecount = 6;
         public const int pagesize = 10;
+        public const int downloadTasks = 4;
 
         public bool closing = false;
 
@@ -161,12 +165,10 @@ namespace NoodleManagerX.Models
             this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).Subscribe(x =>
             {
                 directoryValid = CheckDirectory(synthDirectory);
-                if (directoryValid)
-                {
-                    settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
-                    LoadLocalMaps();
-                }
+                if (directoryValid) settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
             });
+
+            LoadLocalMaps();
 
             if (!CheckDirectory(synthDirectory))
             {
@@ -176,7 +178,6 @@ namespace NoodleManagerX.Models
 
         public Task LoadLocalMaps()
         {
-            Console.WriteLine("Loading Local");
             string directory = Path.Combine(settings.synthDirectory, "CustomSongs");
             if (Directory.Exists(directory))
             {
@@ -185,37 +186,43 @@ namespace NoodleManagerX.Models
                     List<LocalItem> tmp = new List<LocalItem>();
                     foreach (string file in Directory.GetFiles(directory))
                     {
-                        try
+                        if (Path.GetExtension(file) == ".synth")
                         {
-                            using (ZipArchive archive = ZipFile.OpenRead(file))
+                            try
                             {
-                                foreach (ZipArchiveEntry entry in archive.Entries)
+                                using (ZipArchive archive = ZipFile.OpenRead(file))
                                 {
-                                    if (entry.FullName == "synthriderz.meta.json")
+                                    foreach (ZipArchiveEntry entry in archive.Entries)
                                     {
-                                        using (StreamReader sr = new StreamReader(entry.Open()))
+                                        if (entry.FullName == "synthriderz.meta.json")
                                         {
-                                            LocalItem localMap = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
-                                            tmp.Add(localMap);
+                                            using (StreamReader sr = new StreamReader(entry.Open()))
+                                            {
+                                                LocalItem localMap = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
+                                                localMap.itemType = ItemType.Map;
+                                                tmp.Add(localMap);
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Log(MethodBase.GetCurrentMethod(), e);
-                            Console.WriteLine("Deleting corrupted file " + Path.GetFileName(file));
-                            File.Delete(file);
+                            catch (Exception e)
+                            {
+                                Log(MethodBase.GetCurrentMethod(), e);
+                                Console.WriteLine("Deleting corrupted file " + Path.GetFileName(file));
+                                File.Delete(file);
+                            }
                         }
                     }
                     localItems.Add(tmp);
+
+                    foreach(MapItem map in maps)
+                    {
+                        map.UpdateDownloaded();
+                    }
                 });
             }
-            else
-            {
-                return Task.CompletedTask;
-            }
+            return Task.CompletedTask;
         }
 
         public void GetMapPage(bool download = false)
@@ -225,6 +232,7 @@ namespace NoodleManagerX.Models
                 currentPage = 1;
                 lastSearchText = searchText;
             }
+            hiddenMaps.Add(maps.Where(x => x.downloading).ToList());//stash maps that are still downloading
             maps.Clear();
             apiMapRequestCounter++;
             Task.Run(() => MapPageTaskFunction(apiMapRequestCounter, download));
@@ -265,6 +273,8 @@ namespace NoodleManagerX.Models
 
                         if (apiMapRequestCounter != requestID && !download) break;
 
+                        mapPage.data = mapPage.data.Select(x => Unduplicate(x)).ToList();//make sure there are no duplicates
+
                         if (i == 1)
                         {
                             //dont wait by discarding result with _ variable
@@ -283,9 +293,12 @@ namespace NoodleManagerX.Models
                         }
                         if (download)
                         {
-                            foreach (Map map in mapPage.data)
+                            foreach (MapItem map in mapPage.data)
                             {
-                                map.Download();
+                                if (!map.downloaded)
+                                {
+                                    map.Download();
+                                }
                             }
                         }
                     }
@@ -298,8 +311,11 @@ namespace NoodleManagerX.Models
         {
             try
             {
+                Console.WriteLine("Get All Started");
+
                 int pageCountAll = 1;
                 int i = 1;
+
                 do
                 {
                     using (WebClient client = new WebClient())
@@ -308,16 +324,28 @@ namespace NoodleManagerX.Models
                         MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(await client.DownloadStringTaskAsync(req));
 
                         if (closing) break;
-                        foreach (Map map in mapPage.data)
+                        foreach (MapItem map in mapPage.data)
                         {
                             var instances = maps.Where(x => x.id == map.id).ToList();
-                            if (instances.Count() > 0)
+                            if (instances.Count > 0)
                             {
-                                instances[0].Download();
+                                if (!instances[0].downloaded)
+                                {
+                                    instances[0].Download();
+                                }
                             }
                             else
                             {
-                                map.Download();
+                                var undup = Unduplicate(map);
+                                if (!undup.downloaded)
+                                {
+                                    undup.Download();
+
+                                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                                    {
+                                        hiddenMaps.Add(undup);
+                                    });
+                                }
                             }
                         }
                         pageCountAll = mapPage.pagecount;
@@ -325,8 +353,34 @@ namespace NoodleManagerX.Models
                     }
                 }
                 while (i <= pageCountAll);
+
             }
             catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+            Console.WriteLine("Get All Done");
+        }
+
+        public MapItem Unduplicate(MapItem map)
+        {
+            MapItem tmp = GetMap(map.id);
+            if (tmp == null)
+            {
+                return map;
+            }
+            return tmp;
+        }
+        public MapItem GetMap(int id)
+        {
+            var instances = maps.Where(x => x?.id == id).ToList();
+            var hidden = hiddenMaps.Where(x => x?.id == id).ToList();
+            if (instances.Count > 0)
+            {
+                return instances[0];
+            }
+            if (hidden.Count > 0)
+            {
+                return instances[0];
+            }
+            return null;
         }
 
         public void OpenErrorDialog(string text)
@@ -440,37 +494,28 @@ namespace NoodleManagerX.Models
             });
         }
 
+        public static int GetDownloading()
+        {
+            return s_instance.maps.Where(x => x.downloading).Count() + s_instance.hiddenMaps.Where(x => x.downloading).Count();
+        }
+
         private void ClosingEvent(object sender, CancelEventArgs e)
         {
-            if (maps.Where(x => x.downloading).Count() > 0)
+            int num = GetDownloading();
+            if (num > 0)
             {
                 e.Cancel = true;
-                ShowClosingDialog();
+                ShowClosingDialog(num);
             }
         }
 
-        private async void ShowClosingDialog()
+        private async void ShowClosingDialog(int num)
         {
-            MessageBox.MessageBoxResult res = await MessageBox.Show(MainWindow.s_instance, "There are still " + maps.Where(x => x.downloading).Count() + " running downloads." + Environment.NewLine + "Abort?", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+            MessageBox.MessageBoxResult res = await MessageBox.Show(MainWindow.s_instance, "There are still " + num + " running downloads." + Environment.NewLine + "Abort?", "Warning", MessageBox.MessageBoxButtons.OkCancel);
 
             if (res == MessageBox.MessageBoxResult.Ok)
             {
                 closing = true;
-
-                _ = Task.Run(async () =>
-                  {
-                      while (maps.Where(x=>x.downloading).Count()>0)
-                      {
-                          await Task.Delay(10);
-                      }
-
-                      await LoadLocalMaps();
-
-                      _ = Dispatcher.UIThread.InvokeAsync(() =>
-                      {
-                          MainWindow.s_instance.Close();
-                      });
-                  });
             }
         }
 

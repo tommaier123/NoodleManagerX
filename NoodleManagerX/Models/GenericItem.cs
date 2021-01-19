@@ -33,6 +33,8 @@ namespace NoodleManagerX.Models
 
         public WebClient webClient;
 
+        public virtual ItemType itemType { get; set; }
+
         public ReactiveCommand<Unit, Unit> downloadCommand { get; set; }
 
         [OnDeserialized]
@@ -58,32 +60,38 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
+
+                    while (MainViewModel.GetDownloading() >= MainViewModel.downloadTasks)
+                    {
+                        if (MainViewModel.s_instance.closing) return;
+                        await Task.Delay(10);
+                    }
+
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         downloaded = false;
                         downloading = true;
                     });
 
-                    if (!MainViewModel.s_instance.closing)
+                    Console.WriteLine("Downloading " + id);
+
+                    webClient = new WebClient();
+                    string url = "https://synthriderz.com" + download_url;
+
+                    webClient.OpenRead(url);
+                    string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
+                    string filename = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, new ContentDisposition(header_contentDisposition).FileName);
+
+                    await webClient.DownloadFileTaskAsync(new Uri(url), filename);
+
+                    webClient.Dispose();
+
+                    if (File.Exists(filename))
                     {
-                        webClient = new WebClient();
-                        string url = "https://synthriderz.com" + download_url;
-
-                        webClient.OpenRead(url);
-                        string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
-                        string filename = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, new ContentDisposition(header_contentDisposition).FileName);
-
-                        await webClient.DownloadFileTaskAsync(new Uri(url), filename);
-
-                        webClient.Dispose();
-
-                        if (File.Exists(filename))
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            _ = Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                downloaded = true;
-                            });
-                        }
+                            downloaded = true;
+                        });
                     }
                 }
                 catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
@@ -129,13 +137,13 @@ namespace NoodleManagerX.Models
             itemType = _itemType;
         }
 
-        public int id;
-        public string hash;
-        public string filename;
-        public ItemType itemType;
+        public int id = -1;
+        public string hash = "";
+        public string filename = "";
+        public ItemType itemType = ItemType.init;
     }
 
-    abstract class Page
+    abstract class GenericPage
     {
         public int count = -1;
         public int total = -1;

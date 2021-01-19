@@ -17,7 +17,6 @@
     <local:TabHilightConverter x:Key="TabHilightConverter"/>
     <local:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
     <local:BoolColorConverter x:Key="BoolColorConverter"/>
-
     <SolidColorBrush x:Key = "ControlHeaderColor" Color = "#322680" />
   </Window.Resources>
 

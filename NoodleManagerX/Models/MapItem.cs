@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 namespace NoodleManagerX.Models
 {
     [DataContract]
-    class Map : GenericItem
+    class MapItem : GenericItem
     {
         [DataMember] public string title { get; set; }
         [DataMember] public string artist { get; set; }
@@ -28,23 +28,20 @@ namespace NoodleManagerX.Models
         [DataMember] public string[] difficulties { get; set; }
         [DataMember] public string filename_original { get; set; }
         public override string target { get; set; } = "CustomSongs";
+        public override ItemType itemType { get; set; } = ItemType.Map;
 
         public override void UpdateDownloaded()
         {
             _ = Dispatcher.UIThread.InvokeAsync(() =>
             {
                 downloaded = MainViewModel.s_instance.localItems.Select(x => x.id).Contains(id);
-                if (!downloaded)
-                {
-                    //Console.WriteLine("updated " + title +" not downloaded "+id);
-                }
             });
         }
     }
 
 
-    class MapPage:Page
+    class MapPage:GenericPage
     {
-        public List<Map> data;
+        public List<MapItem> data;
     }
 }
