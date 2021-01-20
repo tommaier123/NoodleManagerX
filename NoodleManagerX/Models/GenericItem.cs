@@ -31,15 +31,12 @@ namespace NoodleManagerX.Models
         [Reactive] public bool downloaded { get; set; }
         public virtual string target { get; set; }
 
-        public int index = 0;
-
         public WebClient webClient;
 
         public virtual ItemType itemType { get; set; }
 
         public ReactiveCommand<Unit, Unit> downloadCommand { get; set; }
 
-        private int downloadcounter = 0;
 
         [OnDeserialized]
         internal void OnDeserializedMethod(StreamingContext context)
@@ -64,18 +61,10 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
-
-                    while (DownloadScheduler.downloading >= MainViewModel.downloadTasks)
-                    {
-                        if (MainViewModel.s_instance.closing) return;
-                        await Task.Delay(10);
-                    }
-
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         downloaded = false;
                         downloading = true;
-                        DownloadScheduler.downloading++;
                     });
 
                     Console.WriteLine("Downloading " + id);
@@ -98,15 +87,24 @@ namespace NoodleManagerX.Models
                             downloaded = true;
                         });
                     }
+                    else
+                    {
+                        Console.WriteLine("download failed " + id);
+                        DownloadScheduler.queue.Add(this);
+                    }
                 }
-                catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+                catch (Exception e)
+                {
+                    DownloadScheduler.queue.Add(this);
+                    MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+                }
 
                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     downloading = false;
-                    DownloadScheduler.downloading--;
                 });
 
+                DownloadScheduler.downloading.Remove(this);
             });
         }
 

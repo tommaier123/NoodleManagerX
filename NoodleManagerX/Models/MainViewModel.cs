@@ -70,7 +70,6 @@ namespace NoodleManagerX.Models
 
         public const int pagecount = 6;
         public const int pagesize = 10;
-        public const int downloadTasks = 4;
 
         public bool closing = false;
 
@@ -268,8 +267,6 @@ namespace NoodleManagerX.Models
             {
                 Console.WriteLine("Getting Page");
 
-                int index = 0;
-
                 for (int i = 1; i <= pagecount; i++)
                 {
                     using (WebClient client = new WebClient())
@@ -294,13 +291,6 @@ namespace NoodleManagerX.Models
                             {
                                 numberOfPages = (int)Math.Ceiling((double)mapPage.pagecount / pagecount);
                             });
-                        }
-
-
-                        foreach (MapItem map in mapPage.data)
-                        {
-                            map.index = index;
-                            index++;
                         }
 
                         _ = Dispatcher.UIThread.InvokeAsync(() =>
@@ -498,10 +488,13 @@ namespace NoodleManagerX.Models
 
         private void ClosingEvent(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (DownloadScheduler.downloading > 0)
+            if (DownloadScheduler.downloading.Count > 0)
             {
-                e.Cancel = true;
-                ShowClosingDialog(DownloadScheduler.downloading);
+                if (!closing)
+                {
+                    e.Cancel = true;
+                    ShowClosingDialog(DownloadScheduler.downloading.Count);
+                }
             }
         }
 
@@ -511,7 +504,25 @@ namespace NoodleManagerX.Models
 
             if (res == MessageBox.MessageBoxResult.Ok)
             {
+                DownloadScheduler.queue.Clear();
                 closing = true;
+
+                _ = Task.Run(async () =>
+                  {
+                      _ = Dispatcher.UIThread.InvokeAsync(() =>
+                      {
+                          MainWindow.s_instance.Hide();
+                      });
+
+                      while (DownloadScheduler.downloading.Count != 0)
+                      {
+                          await Task.Delay(500);
+                      }
+                      _ = Dispatcher.UIThread.InvokeAsync(() =>
+                          {
+                              MainWindow.s_instance.Close();
+                          });
+                  });
             }
         }
 

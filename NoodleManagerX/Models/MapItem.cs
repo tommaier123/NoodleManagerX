@@ -30,8 +30,6 @@ namespace NoodleManagerX.Models
         public override string target { get; set; } = "CustomSongs";
         public override ItemType itemType { get; set; } = ItemType.Map;
 
-        public int index = 0;
-
         public override void UpdateDownloaded()
         {
             _ = Dispatcher.UIThread.InvokeAsync(() =>
