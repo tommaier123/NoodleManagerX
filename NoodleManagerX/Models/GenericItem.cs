@@ -37,6 +37,8 @@ namespace NoodleManagerX.Models
 
         public ReactiveCommand<Unit, Unit> downloadCommand { get; set; }
 
+        private int downloadcounter = 0;
+
         [OnDeserialized]
         internal void OnDeserializedMethod(StreamingContext context)
         {
@@ -61,7 +63,7 @@ namespace NoodleManagerX.Models
                 try
                 {
 
-                    while (MainViewModel.GetDownloading() >= MainViewModel.downloadTasks)
+                    while (DownloadScheduler.downloading >= MainViewModel.downloadTasks)
                     {
                         if (MainViewModel.s_instance.closing) return;
                         await Task.Delay(10);
@@ -71,6 +73,7 @@ namespace NoodleManagerX.Models
                     {
                         downloaded = false;
                         downloading = true;
+                        DownloadScheduler.downloading++;
                     });
 
                     Console.WriteLine("Downloading " + id);
@@ -99,6 +102,7 @@ namespace NoodleManagerX.Models
                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     downloading = false;
+                    DownloadScheduler.downloading--;
                 });
 
             });

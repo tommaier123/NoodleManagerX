@@ -25,6 +25,7 @@ using System.Linq;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Reflection;
+using Rotorsoft.Forms;
 
 namespace NoodleManagerX.Models
 {
@@ -61,11 +62,12 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> getPageCommand { get; set; }
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
 
-        public ObservableCollection<MapItem> maps { get; set; } = new ObservableCollection<MapItem>();
-        public List<MapItem> hiddenMaps { get; set; } = new List<MapItem>();
-        public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
-        public bool getAll = false;
+        public ObservableCollection<GenericItem> items { get; set; } = new ObservableCollection<GenericItem>();
+        public ICollectionView mapView { get; set; }
+
+        //public ObservableCollection<MapItem> maps { get; set; } = new ObservableCollection<MapItem>();
+        public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
         public const int pagecount = 6;
         public const int pagesize = 10;
@@ -158,6 +160,7 @@ namespace NoodleManagerX.Models
             }));
 
 
+            this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());//reload maps when the current page changes
             this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetMapPage());//reload maps when the sort method changes
             this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetMapPage());//reload maps when the sort order changes
@@ -168,12 +171,28 @@ namespace NoodleManagerX.Models
                 if (directoryValid) settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
             });
 
+            items.CollectionChanged += ItemsCollectionChanged;
+
+            var viewSource = new CollectionViewSource();
+            viewSource.Source = items;
+
+            mapView = viewSource.View;
+
+            mapView.Filter = o => ((GenericItem)o).itemType.Equals(ItemType.Map);
+
             LoadLocalMaps();
 
             if (!CheckDirectory(synthDirectory))
             {
                 GetDirectoryFromRegistry();
             }
+        }
+
+        private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            //maps.Clear();
+            //maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
+            //Console.WriteLine("items changed");
         }
 
         public Task LoadLocalMaps()
@@ -216,9 +235,9 @@ namespace NoodleManagerX.Models
                     }
                     localItems.Add(tmp);
 
-                    foreach(MapItem map in maps)
+                    foreach (GenericItem item in items)
                     {
-                        map.UpdateDownloaded();
+                        item.UpdateDownloaded();
                     }
                 });
             }
@@ -232,8 +251,9 @@ namespace NoodleManagerX.Models
                 currentPage = 1;
                 lastSearchText = searchText;
             }
-            hiddenMaps.Add(maps.Where(x => x.downloading).ToList());//stash maps that are still downloading
-            maps.Clear();
+            var tmp = items.Where(x => x.itemType != ItemType.Map);
+            items.Clear();
+            items.Add(tmp);
             apiMapRequestCounter++;
             Task.Run(() => MapPageTaskFunction(apiMapRequestCounter, download));
         }
@@ -273,31 +293,27 @@ namespace NoodleManagerX.Models
 
                         if (apiMapRequestCounter != requestID && !download) break;
 
-                        mapPage.data = mapPage.data.Select(x => Unduplicate(x)).ToList();//make sure there are no duplicates
-
                         if (i == 1)
                         {
                             //dont wait by discarding result with _ variable
                             _ = Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                maps.Add(mapPage.data);
                                 numberOfPages = (int)Math.Ceiling((double)mapPage.pagecount / pagecount);
                             });
                         }
-                        else //spend less time on the ui thread, not sure this is necessary
+
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            _ = Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                maps.Add(mapPage.data);
-                            });
-                        }
+                            items.Add(mapPage.data);
+                        });
+
                         if (download)
                         {
                             foreach (MapItem map in mapPage.data)
                             {
                                 if (!map.downloaded)
                                 {
-                                    map.Download();
+                                    DownloadScheduler.queue.Add(map);
                                 }
                             }
                         }
@@ -305,6 +321,21 @@ namespace NoodleManagerX.Models
                 }
             }
             catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+        }
+
+        public GenericItem Unduplicate(GenericItem item, ObservableCollection<GenericItem> items, ItemType type)
+        {
+            var tmp = DownloadScheduler.queue.Where(x => x.id == item.id && x.itemType == type && x.itemType == item.itemType).ToList();
+            if (tmp.Count() > 0 && tmp[0] != null)
+            {
+                return tmp[0];
+            }
+            tmp = items.Where(x => x.id == item.id && x.itemType == type && x.itemType == item.itemType).ToList();
+            if (tmp.Count() > 0 && tmp[0] != null)
+            {
+                return tmp[0];
+            }
+            return item;
         }
 
         public async void GetAllTaskFunction()
@@ -326,25 +357,19 @@ namespace NoodleManagerX.Models
                         if (closing) break;
                         foreach (MapItem map in mapPage.data)
                         {
-                            var instances = maps.Where(x => x.id == map.id).ToList();
+                            var instances = items.Where(x => x.itemType == ItemType.Map && x.id == map.id).ToList();
                             if (instances.Count > 0)
                             {
                                 if (!instances[0].downloaded)
                                 {
-                                    instances[0].Download();
+                                    DownloadScheduler.queue.Add(instances[0]);
                                 }
                             }
                             else
                             {
-                                var undup = Unduplicate(map);
-                                if (!undup.downloaded)
+                                if (!map.downloaded)
                                 {
-                                    undup.Download();
-
-                                    _ = Dispatcher.UIThread.InvokeAsync(() =>
-                                    {
-                                        hiddenMaps.Add(undup);
-                                    });
+                                    DownloadScheduler.queue.Add(map);
                                 }
                             }
                         }
@@ -357,30 +382,6 @@ namespace NoodleManagerX.Models
             }
             catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
             Console.WriteLine("Get All Done");
-        }
-
-        public MapItem Unduplicate(MapItem map)
-        {
-            MapItem tmp = GetMap(map.id);
-            if (tmp == null)
-            {
-                return map;
-            }
-            return tmp;
-        }
-        public MapItem GetMap(int id)
-        {
-            var instances = maps.Where(x => x?.id == id).ToList();
-            var hidden = hiddenMaps.Where(x => x?.id == id).ToList();
-            if (instances.Count > 0)
-            {
-                return instances[0];
-            }
-            if (hidden.Count > 0)
-            {
-                return instances[0];
-            }
-            return null;
         }
 
         public void OpenErrorDialog(string text)
@@ -494,18 +495,12 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public static int GetDownloading()
+        private void ClosingEvent(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            return s_instance.maps.Where(x => x.downloading).Count() + s_instance.hiddenMaps.Where(x => x.downloading).Count();
-        }
-
-        private void ClosingEvent(object sender, CancelEventArgs e)
-        {
-            int num = GetDownloading();
-            if (num > 0)
+            if (DownloadScheduler.downloading > 0)
             {
                 e.Cancel = true;
-                ShowClosingDialog(num);
+                ShowClosingDialog(DownloadScheduler.downloading);
             }
         }
 
