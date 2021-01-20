@@ -32,7 +32,7 @@ namespace NoodleManagerX.Models
                     {
                         if (queue.Count > 0 && downloading.Count < downloadTasks)
                         {
-                            if (!queue[0].downloaded && !queue[0].downloading)
+                            if (queue[0] != null && !queue[0].downloaded && !queue[0].downloading)
                             {
                                 queue[0].Download();
                                 downloading.Add(queue[0]);

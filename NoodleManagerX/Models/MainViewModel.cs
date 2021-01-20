@@ -183,7 +183,6 @@ namespace NoodleManagerX.Models
         {
             maps.Clear();
             maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
-            Console.WriteLine("items changed");
         }
 
         public Task LoadLocalMaps()
