@@ -25,7 +25,7 @@ using System.Linq;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Reflection;
-using Rotorsoft.Forms;
+using System.Collections;
 
 namespace NoodleManagerX.Models
 {
@@ -64,9 +64,8 @@ namespace NoodleManagerX.Models
 
 
         public ObservableCollection<GenericItem> items { get; set; } = new ObservableCollection<GenericItem>();
-        public ICollectionView mapView { get; set; }
 
-        //public ObservableCollection<MapItem> maps { get; set; } = new ObservableCollection<MapItem>();
+        public ObservableCollection<MapItem> maps { get; private set; } = new ObservableCollection<MapItem>();
         public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
         public const int pagecount = 6;
@@ -173,13 +172,6 @@ namespace NoodleManagerX.Models
 
             items.CollectionChanged += ItemsCollectionChanged;
 
-            var viewSource = new CollectionViewSource();
-            viewSource.Source = items;
-
-            mapView = viewSource.View;
-
-            mapView.Filter = o => ((GenericItem)o).itemType.Equals(ItemType.Map);
-
             LoadLocalMaps();
 
             if (!CheckDirectory(synthDirectory))
@@ -190,9 +182,9 @@ namespace NoodleManagerX.Models
 
         private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            //maps.Clear();
-            //maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
-            //Console.WriteLine("items changed");
+            maps.Clear();
+            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
+            Console.WriteLine("items changed");
         }
 
         public Task LoadLocalMaps()
@@ -276,6 +268,8 @@ namespace NoodleManagerX.Models
             {
                 Console.WriteLine("Getting Page");
 
+                int index = 0;
+
                 for (int i = 1; i <= pagecount; i++)
                 {
                     using (WebClient client = new WebClient())
@@ -300,6 +294,13 @@ namespace NoodleManagerX.Models
                             {
                                 numberOfPages = (int)Math.Ceiling((double)mapPage.pagecount / pagecount);
                             });
+                        }
+
+
+                        foreach (MapItem map in mapPage.data)
+                        {
+                            map.index = index;
+                            index++;
                         }
 
                         _ = Dispatcher.UIThread.InvokeAsync(() =>
@@ -517,6 +518,14 @@ namespace NoodleManagerX.Models
         public static void Log(MethodBase m, Exception e)
         {
             Console.WriteLine("Error " + m.ReflectedType.Name + " " + e.Message);
+        }
+
+        public class CustomerSorter : IComparer
+        {
+            public int Compare(object x, object y)
+            {
+                return ((int)x) - ((int)y);
+            }
         }
     }
 }

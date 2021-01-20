@@ -31,6 +31,8 @@ namespace NoodleManagerX.Models
         [Reactive] public bool downloaded { get; set; }
         public virtual string target { get; set; }
 
+        public int index = 0;
+
         public WebClient webClient;
 
         public virtual ItemType itemType { get; set; }
