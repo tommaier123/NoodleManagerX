@@ -277,6 +277,7 @@
                   <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
                   <Grid Grid.Column="1" RowDefinitions="auto,auto,auto,*,auto" Margin="20,0,0,0">
                     <TextBlock Grid.Row="0" Text="{Binding name}" Classes="Downloaded" FontSize="35"/>
+                    <TextBlock Grid.Row="1" Text="{Binding user.username}" Classes="Downloaded" FontSize="20"/>
                   </Grid>
                   <Button Grid.Column="3" Command="{Binding downloadCommand}" Height="50"/>
                 </Grid>
@@ -295,6 +296,7 @@
                   <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
                   <Grid Grid.Column="1" RowDefinitions="auto,auto,auto,*,auto" Margin="20,0,0,0">
                     <TextBlock Grid.Row="0" Text="{Binding name}" Classes="Downloaded" FontSize="35"/>
+                    <TextBlock Grid.Row="1" Text="{Binding user.username}" Classes="Downloaded" FontSize="20"/>
                   </Grid>
                   <Button Grid.Column="3" Command="{Binding downloadCommand}" Height="50"/>
                 </Grid>
@@ -305,10 +307,25 @@
         </ListBox>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=3}">
-        <TextBlock Text="These are the avatars"/>
+        <ListBox Items="{Binding Path=avatars}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Grid RowDefinitions="*,auto">
+                <Grid Grid.Row="0" Height="160" ColumnDefinitions="auto, auto, *, auto">
+                  <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
+                  <Grid Grid.Column="1" RowDefinitions="auto,auto,auto,*,auto" Margin="20,0,0,0">
+                    <TextBlock Grid.Row="0" Text="{Binding name}" Classes="Downloaded" FontSize="35"/>
+                    <TextBlock Grid.Row="1" Text="{Binding user.username}" Classes="Downloaded" FontSize="20"/>
+                  </Grid>
+                  <Button Grid.Column="3" Command="{Binding downloadCommand}" Height="50"/>
+                </Grid>
+                <Grid Grid.Row="1" Background="#999999" Height="2"/>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=4}">
-        <TextBlock Text="These are the mods"/>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
         <TextBlock Text="These are the tools (Sync to Quest, Sync to PC, Download Songs from Playlist, Setup Twitch Integration)"/>

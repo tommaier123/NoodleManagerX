@@ -62,6 +62,8 @@ namespace NoodleManagerX.Models
         public ObservableCollection<MapItem> maps { get; private set; } = new ObservableCollection<MapItem>();
         public ObservableCollection<PlaylistItem> playlists { get; private set; } = new ObservableCollection<PlaylistItem>();
         public ObservableCollection<StageItem> stages { get; private set; } = new ObservableCollection<StageItem>();
+        public ObservableCollection<AvatarItem> avatars { get; private set; } = new ObservableCollection<AvatarItem>();
+
         public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
         public bool closing = false;
@@ -71,6 +73,7 @@ namespace NoodleManagerX.Models
         public MapHandler mapHandler = new MapHandler();
         public PlaylistHandler playlistHandler = new PlaylistHandler();
         public StageHandler stageHandler = new StageHandler();
+        public AvatarHandler avatarHandler = new AvatarHandler();
 
         public MainViewModel()
         {
@@ -193,6 +196,10 @@ namespace NoodleManagerX.Models
                     stages.Clear();
                     stages.Add(items.Where(x => x.itemType == ItemType.Stage).Select(x => (StageItem)x));
                     break;
+                case 3:
+                    avatars.Clear();
+                    avatars.Add(items.Where(x => x.itemType == ItemType.Avatar).Select(x => (AvatarItem)x));
+                    break;
             }
         }
 
@@ -202,6 +209,7 @@ namespace NoodleManagerX.Models
             mapHandler.LoadLocalItems();
             playlistHandler.LoadLocalItems();
             stageHandler.LoadLocalItems();
+            avatarHandler.LoadLocalItems();
 
             foreach (GenericItem item in items)
             {
@@ -229,6 +237,9 @@ namespace NoodleManagerX.Models
                 case 2:
                     stageHandler.GetPage(download);
                     break;
+                case 3:
+                    avatarHandler.GetPage(download);
+                    break;
             }
         }
 
@@ -251,6 +262,9 @@ namespace NoodleManagerX.Models
                         break;
                     case 2:
                         stageHandler.GetAll();
+                        break;
+                    case 3:
+                        avatarHandler.GetAll();
                         break;
                 }
             }

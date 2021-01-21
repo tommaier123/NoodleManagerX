@@ -54,7 +54,7 @@ namespace NoodleManagerX.Models
         {
             _ = Dispatcher.UIThread.InvokeAsync(() =>
             {
-                downloaded = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this)).Count() > 0;
+                downloaded = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).Count() > 0;
             });
         }
 
@@ -118,23 +118,25 @@ namespace NoodleManagerX.Models
         {
             Task.Factory.StartNew(async () =>
             {
-                if (!string.IsNullOrEmpty(cover_url))
+                if (string.IsNullOrEmpty(cover_url))
                 {
-                    using (WebClient client = new WebClient())
-                    using (Stream instream = await client.OpenReadTaskAsync(new Uri("https://synthriderz.com" + cover_url.ToString() + "?size=150")))
-                    using (MagickImage image = new MagickImage(instream))
-                    using (MemoryStream outstream = new MemoryStream())
-                    {
-                        image.Format = MagickFormat.Bmp;
-                        await image.WriteAsync(outstream);
-                        outstream.Position = 0;
-                        Bitmap tmp = new Bitmap(outstream);
+                    cover_url = "/img/andromeda-gradient-128.png";
+                }
 
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            cover_bmp = tmp;
-                        });
-                    }
+                using (WebClient client = new WebClient())
+                using (Stream instream = await client.OpenReadTaskAsync(new Uri("https://synthriderz.com" + cover_url.ToString() + "?size=150")))
+                using (MagickImage image = new MagickImage(instream))
+                using (MemoryStream outstream = new MemoryStream())
+                {
+                    image.Format = MagickFormat.Bmp;
+                    await image.WriteAsync(outstream);
+                    outstream.Position = 0;
+                    Bitmap tmp = new Bitmap(outstream);
+
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        cover_bmp = tmp;
+                    });
                 }
             }, CancellationToken.None, TaskCreationOptions.PreferFairness, TaskScheduler.Current);//prefer fairness so that the first images are likely to be loaded first
         }
