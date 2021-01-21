@@ -4,9 +4,7 @@ using ImageMagick;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -24,7 +22,6 @@ namespace NoodleManagerX.Models
     abstract class GenericItem : ReactiveObject
     {
         [DataMember] public int id { get; set; }
-        [DataMember] public string hash { get; set; }
         [DataMember] public string cover_url { get; set; }
         [DataMember] public string download_url { get; set; }
         [Reactive] public Bitmap cover_bmp { get; set; }
@@ -141,20 +138,23 @@ namespace NoodleManagerX.Models
         {
             Task.Factory.StartNew(async () =>
             {
-                using (WebClient client = new WebClient())
-                using (Stream instream = await client.OpenReadTaskAsync(new Uri("https://synthriderz.com" + cover_url.ToString() + "?size=150")))
-                using (MagickImage image = new MagickImage(instream))
-                using (MemoryStream outstream = new MemoryStream())
+                if (!string.IsNullOrEmpty(cover_url))
                 {
-                    image.Format = MagickFormat.Bmp;
-                    await image.WriteAsync(outstream);
-                    outstream.Position = 0;
-                    Bitmap tmp = new Bitmap(outstream);
-
-                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    using (WebClient client = new WebClient())
+                    using (Stream instream = await client.OpenReadTaskAsync(new Uri("https://synthriderz.com" + cover_url.ToString() + "?size=150")))
+                    using (MagickImage image = new MagickImage(instream))
+                    using (MemoryStream outstream = new MemoryStream())
                     {
-                        cover_bmp = tmp;
-                    });
+                        image.Format = MagickFormat.Bmp;
+                        await image.WriteAsync(outstream);
+                        outstream.Position = 0;
+                        Bitmap tmp = new Bitmap(outstream);
+
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            cover_bmp = tmp;
+                        });
+                    }
                 }
             }, CancellationToken.None, TaskCreationOptions.PreferFairness, TaskScheduler.Current);//prefer fairness so that the first images are likely to be loaded first
         }
@@ -179,9 +179,9 @@ namespace NoodleManagerX.Models
         {
             if (item != null)
             {
-                if (itemType == item.itemType && (itemType == ItemType.Map || itemType == ItemType.Playlist))
+                if (itemType == item.itemType && (itemType == ItemType.Map))
                 {
-                    return this.id == item.id && (!checkHash || hash == item.hash);
+                    return this.id == item.id && (!checkHash || hash == ((MapItem)item).hash);
                 }
                 else
                 {
@@ -198,6 +198,15 @@ namespace NoodleManagerX.Models
         public int total = -1;
         public int page = -1;
         public int pagecount = -1;
+
+        public virtual ItemType itemType { get; set; }
+    }
+
+    [DataContract]
+    class User : ReactiveObject
+    {
+        [DataMember] public int id { get; set; }
+        [DataMember] public string username { get; set; }
     }
 
     enum ItemType

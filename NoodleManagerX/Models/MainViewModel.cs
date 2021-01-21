@@ -6,8 +6,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using System.Collections.ObjectModel;
-using System.Threading;
-using System.Net;
 using Newtonsoft.Json;
 using Avalonia.Threading;
 using DynamicData;
@@ -19,11 +17,8 @@ using System.Text;
 using Microsoft.Win32;
 using MsgBox;
 using static System.Environment;
-using System.IO.Compression;
-using System.Diagnostics;
 using System.Linq;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Reflection;
 using System.Collections;
 
@@ -65,6 +60,7 @@ namespace NoodleManagerX.Models
         public ObservableCollection<GenericItem> items { get; set; } = new ObservableCollection<GenericItem>();
 
         public ObservableCollection<MapItem> maps { get; private set; } = new ObservableCollection<MapItem>();
+        public ObservableCollection<PlaylistItem> playlists { get; private set; } = new ObservableCollection<PlaylistItem>();
         public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
         public bool closing = false;
@@ -72,6 +68,7 @@ namespace NoodleManagerX.Models
         public int apiRequestCounter = 0;
 
         public MapHandler mapHandler = new MapHandler();
+        public PlaylistHandler playlistHandler = new PlaylistHandler();
 
         public MainViewModel()
         {
@@ -115,6 +112,7 @@ namespace NoodleManagerX.Models
             tabSelectCommand = ReactiveCommand.Create<string>((x =>
             {
                 selectedTabIndex = Int32.Parse(x);
+                GetPage();
             }));
 
             pageUpCommand = ReactiveCommand.Create((() =>
@@ -179,12 +177,16 @@ namespace NoodleManagerX.Models
         {
             maps.Clear();
             maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
+
+            playlists.Clear();
+            playlists.Add(items.Where(x => x.itemType == ItemType.Playlist).Select(x => (PlaylistItem)x));
         }
 
         public void LoadLocalItems()
         {
 
             mapHandler.LoadLocalItems();
+            playlistHandler.LoadLocalItems();
 
             foreach (GenericItem item in items)
             {
@@ -201,7 +203,14 @@ namespace NoodleManagerX.Models
             }
             apiRequestCounter++;
 
-            mapHandler.GetPage(download);//use correct handler!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            switch (selectedTabIndex)
+            {
+                case 0: mapHandler.GetPage(download);
+                    break;
+                case 1:
+                    playlistHandler.GetPage(download);
+                    break;
+            }
         }
 
         public void GetAll()
@@ -213,7 +222,15 @@ namespace NoodleManagerX.Models
                 selectedSortMethodIndex = 0;
                 selectedSortOrderIndex = 0;
 
-                mapHandler.GetAll();//use correct handler!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                switch (selectedTabIndex)
+                {
+                    case 0:
+                        mapHandler.GetAll();
+                        break;
+                    case 1:
+                        playlistHandler.GetAll();
+                        break;
+                }
             }
         }
 

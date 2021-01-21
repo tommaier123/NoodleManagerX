@@ -5,11 +5,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Collections.Generic;
 using System.IO.Compression;
-using System.Net;
-using System.Text;
-using Avalonia.Threading;
-using System.Reflection;
-using System.Linq;
+using System.Runtime.Serialization;
 
 namespace NoodleManagerX.Models
 {
@@ -17,7 +13,8 @@ namespace NoodleManagerX.Models
     {
         public override ItemType itemType { get; set; } = ItemType.Map;
 
-        private const string mapSearchQuerry = "{\"$or\":[{\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}}]}";
+        public override string searchQuerry { get; set; } = "{\"$or\":[{\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}}]}";
+        public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
         public override void LoadLocalItems()
         {
@@ -41,9 +38,9 @@ namespace NoodleManagerX.Models
                                         {
                                             using (StreamReader sr = new StreamReader(entry.Open()))
                                             {
-                                                LocalItem localMap = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
-                                                localMap.itemType = ItemType.Map;
-                                                tmp.Add(localMap);
+                                                LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
+                                                localItem.itemType = ItemType.Map;
+                                                tmp.Add(localItem);
                                             }
                                         }
                                     }
@@ -61,103 +58,31 @@ namespace NoodleManagerX.Models
             }
         }
 
-        public override async void PageTaskFunction(int requestID, bool download = false)
+        public override dynamic DeserializePage(string json)
         {
-            try
-            {
-                Console.WriteLine("Getting Page");
-
-                for (int i = 1; i <= pagecount; i++)
-                {
-                    using (WebClient client = new WebClient())
-                    {
-                        client.Encoding = Encoding.UTF8;
-                        string sortMethod = "published_at";
-                        string sortOrder = "DESC";
-                        string search = "";
-                        if (MainViewModel.s_instance.selectedSortMethod?.Name != null) sortMethod = MainViewModel.s_instance.selectedSortMethod.Name;
-                        if (MainViewModel.s_instance.selectedSortOrder?.Name != null) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
-                        if (MainViewModel.s_instance.searchText != "") search = "&s=" + mapSearchQuerry.Replace("<value>", MainViewModel.s_instance.searchText);
-
-                        string req = "https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + search + "&sort=" + sortMethod + "," + sortOrder;
-                        MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(await client.DownloadStringTaskAsync(req));
-
-                        if (MainViewModel.s_instance.apiRequestCounter != requestID && !download) break;
-
-                        if (i == 1)
-                        {
-                            //dont wait by discarding result with _ variable
-                            _ = Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                MainViewModel.s_instance.numberOfPages = (int)Math.Ceiling((double)mapPage.pagecount / pagecount);
-                            });
-                        }
-
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            MainViewModel.s_instance.items.Add(mapPage.data);
-                        });
-
-                        if (download)
-                        {
-                            foreach (MapItem map in mapPage.data)
-                            {
-                                if (!map.downloaded)
-                                {
-                                    DownloadScheduler.queue.Add(map);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+            return JsonConvert.DeserializeObject<MapPage>(json);
         }
 
-        public override async void GetAllTaskFunction()
-        {
-            try
-            {
-                Console.WriteLine("Get All Started");
+    }
 
-                int pageCountAll = 1;
-                int i = 1;
+    [DataContract]
+    class MapItem : GenericItem
+    {
+        [DataMember] public string title { get; set; }
+        [DataMember] public string artist { get; set; }
+        [DataMember] public string mapper { get; set; }
+        [DataMember] public string duration { get; set; }
+        [DataMember] public string[] difficulties { get; set; }
+        [DataMember] public string hash { get; set; }
+        public override string target { get; set; } = "CustomSongs";
+        public override ItemType itemType { get; set; } = ItemType.Map;
+    }
 
-                do
-                {
-                    using (WebClient client = new WebClient())
-                    {
-                        string req = "https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + i;
-                        MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(await client.DownloadStringTaskAsync(req));
 
-                        if (MainViewModel.s_instance.closing) break;
-                        foreach (MapItem map in mapPage.data)
-                        {
-                            var instances = MainViewModel.s_instance.items.Where(x => x.itemType == ItemType.Map && x.id == map.id).ToList();
-                            if (instances.Count > 0)
-                            {
-                                if (!instances[0].downloaded)
-                                {
-                                    DownloadScheduler.queue.Add(instances[0]);
-                                }
-                            }
-                            else
-                            {
-                                if (!map.downloaded)
-                                {
-                                    DownloadScheduler.queue.Add(map);
-                                }
-                            }
-                        }
-                        pageCountAll = mapPage.pagecount;
-                        i++;
-                    }
-                }
-                while (i <= pageCountAll);
+    class MapPage : GenericPage
+    {
+        public List<MapItem> data;
 
-            }
-            catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
-            Console.WriteLine("Get All Done");
-        }
+        public override ItemType itemType { get; set; } = ItemType.Map;
     }
 }
