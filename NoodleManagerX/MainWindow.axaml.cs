@@ -99,7 +99,7 @@ namespace NoodleManagerX
         {
             if (e.Key.Equals(Key.Enter))
             {
-                ((MainViewModel)this.DataContext).GetMapPage();
+                ((MainViewModel)this.DataContext).GetPage();
             }
         }
 

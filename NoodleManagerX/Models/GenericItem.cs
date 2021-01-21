@@ -5,6 +5,8 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -29,6 +31,7 @@ namespace NoodleManagerX.Models
         [Reactive] public bool selected { get; set; }
         [Reactive] public bool downloading { get; set; } = false;
         [Reactive] public bool downloaded { get; set; }
+        public string filename { get; set; } = "";
         public virtual string target { get; set; }
 
         public WebClient webClient;
@@ -50,9 +53,12 @@ namespace NoodleManagerX.Models
             }));
         }
 
-        public virtual void UpdateDownloaded()
+        public void UpdateDownloaded()
         {
-
+            _ = Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                downloaded = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this)).Count() > 0;
+            });
         }
 
         public void Download()
@@ -72,15 +78,18 @@ namespace NoodleManagerX.Models
                     webClient = new WebClient();
                     string url = "https://synthriderz.com" + download_url;
 
+                    //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     webClient.OpenRead(url);
                     string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
-                    string filename = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, new ContentDisposition(header_contentDisposition).FileName);
+                    filename = new ContentDisposition(header_contentDisposition).FileName;
 
-                    await webClient.DownloadFileTaskAsync(new Uri(url), filename);
+                    string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
+
+                    await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
 
                     webClient.Dispose();
 
-                    if (File.Exists(filename))
+                    if (File.Exists(filepath))
                     {
                         _ = Dispatcher.UIThread.InvokeAsync(() =>
                         {
@@ -106,6 +115,26 @@ namespace NoodleManagerX.Models
 
                 DownloadScheduler.downloading.Remove(this);
             });
+        }
+
+        public GenericItem Unduplicate(ObservableCollection<GenericItem> items, ItemType type)
+        {
+            var tmp = DownloadScheduler.downloading.Where(x => x.id == this.id && x.itemType == type && x.itemType == this.itemType).ToList();
+            if (tmp.Count() > 0 && tmp[0] != null)
+            {
+                return tmp[0];
+            }
+            tmp = DownloadScheduler.queue.Where(x => x.id == this.id && x.itemType == type && x.itemType == this.itemType).ToList();
+            if (tmp.Count() > 0 && tmp[0] != null)
+            {
+                return tmp[0];
+            }
+            tmp = items.Where(x => x.id == this.id && x.itemType == type && x.itemType == this.itemType).ToList();
+            if (tmp.Count() > 0 && tmp[0] != null)
+            {
+                return tmp[0];
+            }
+            return this;
         }
 
         public void LoadBitmap()
@@ -145,6 +174,22 @@ namespace NoodleManagerX.Models
         public string hash = "";
         public string filename = "";
         public ItemType itemType = ItemType.init;
+
+        public bool CheckEquality(GenericItem item, bool checkHash = false)
+        {
+            if (item != null)
+            {
+                if (itemType == item.itemType && (itemType == ItemType.Map || itemType == ItemType.Playlist))
+                {
+                    return this.id == item.id && (!checkHash || hash == item.hash);
+                }
+                else
+                {
+                    return filename == item.filename;
+                }
+            }
+            return false;
+        }
     }
 
     abstract class GenericPage

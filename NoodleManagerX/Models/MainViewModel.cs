@@ -62,20 +62,16 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> getPageCommand { get; set; }
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
 
-
         public ObservableCollection<GenericItem> items { get; set; } = new ObservableCollection<GenericItem>();
 
         public ObservableCollection<MapItem> maps { get; private set; } = new ObservableCollection<MapItem>();
         public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
-        public const int pagecount = 6;
-        public const int pagesize = 10;
-
         public bool closing = false;
 
-        private int apiMapRequestCounter = 0;
+        public int apiRequestCounter = 0;
 
-        private const string mapSearchQuerry = "{\"$or\":[{\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}}]}";
+        public MapHandler mapHandler = new MapHandler();
 
         public MainViewModel()
         {
@@ -139,7 +135,7 @@ namespace NoodleManagerX.Models
 
             searchCommand = ReactiveCommand.Create((() =>
             {
-                GetMapPage();
+                GetPage();
             }));
 
             getAllCommand = ReactiveCommand.Create((() =>
@@ -149,7 +145,7 @@ namespace NoodleManagerX.Models
 
             getPageCommand = ReactiveCommand.Create((() =>
             {
-                GetMapPage(true);
+                GetPage(true);
             }));
 
             selectDirectoryCommand = ReactiveCommand.Create((() =>
@@ -158,10 +154,10 @@ namespace NoodleManagerX.Models
             }));
 
 
-            this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());
-            this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetMapPage());//reload maps when the current page changes
-            this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetMapPage());//reload maps when the sort method changes
-            this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetMapPage());//reload maps when the sort order changes
+            this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetPage());
+            this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetPage());//reload maps when the current page changes
+            this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetPage());//reload maps when the sort method changes
+            this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetPage());//reload maps when the sort order changes
             settings.Changed.Subscribe(x => SaveSettings());//save the settings when they change
             this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).Subscribe(x =>
             {
@@ -171,7 +167,7 @@ namespace NoodleManagerX.Models
 
             items.CollectionChanged += ItemsCollectionChanged;
 
-            LoadLocalMaps();
+            LoadLocalItems();
 
             if (!CheckDirectory(synthDirectory))
             {
@@ -185,67 +181,27 @@ namespace NoodleManagerX.Models
             maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
         }
 
-        public Task LoadLocalMaps()
+        public void LoadLocalItems()
         {
-            string directory = Path.Combine(settings.synthDirectory, "CustomSongs");
-            if (Directory.Exists(directory))
-            {
-                return Task.Run(async () =>
-                {
-                    List<LocalItem> tmp = new List<LocalItem>();
-                    foreach (string file in Directory.GetFiles(directory))
-                    {
-                        if (Path.GetExtension(file) == ".synth")
-                        {
-                            try
-                            {
-                                using (ZipArchive archive = ZipFile.OpenRead(file))
-                                {
-                                    foreach (ZipArchiveEntry entry in archive.Entries)
-                                    {
-                                        if (entry.FullName == "synthriderz.meta.json")
-                                        {
-                                            using (StreamReader sr = new StreamReader(entry.Open()))
-                                            {
-                                                LocalItem localMap = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
-                                                localMap.itemType = ItemType.Map;
-                                                tmp.Add(localMap);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Log(MethodBase.GetCurrentMethod(), e);
-                                Console.WriteLine("Deleting corrupted file " + Path.GetFileName(file));
-                                File.Delete(file);
-                            }
-                        }
-                    }
-                    localItems.Add(tmp);
 
-                    foreach (GenericItem item in items)
-                    {
-                        item.UpdateDownloaded();
-                    }
-                });
+            mapHandler.LoadLocalItems();
+
+            foreach (GenericItem item in items)
+            {
+                item.UpdateDownloaded();
             }
-            return Task.CompletedTask;
         }
 
-        public void GetMapPage(bool download = false)
+        public void GetPage(bool download = false)
         {
             if (lastSearchText != searchText)
             {
                 currentPage = 1;
                 lastSearchText = searchText;
             }
-            var tmp = items.Where(x => x.itemType != ItemType.Map);
-            items.Clear();
-            items.Add(tmp);
-            apiMapRequestCounter++;
-            Task.Run(() => MapPageTaskFunction(apiMapRequestCounter, download));
+            apiRequestCounter++;
+
+            mapHandler.GetPage(download);//use correct handler!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
         public void GetAll()
@@ -256,122 +212,9 @@ namespace NoodleManagerX.Models
                 currentPage = 1;
                 selectedSortMethodIndex = 0;
                 selectedSortOrderIndex = 0;
-                Task.Run(() => GetAllTaskFunction());
+
+                mapHandler.GetAll();//use correct handler!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             }
-        }
-
-        public async void MapPageTaskFunction(int requestID, bool download = false)
-        {
-            try
-            {
-                Console.WriteLine("Getting Page");
-
-                for (int i = 1; i <= pagecount; i++)
-                {
-                    using (WebClient client = new WebClient())
-                    {
-                        client.Encoding = Encoding.UTF8;
-                        string sortMethod = "published_at";
-                        string sortOrder = "DESC";
-                        string search = "";
-                        if (selectedSortMethod?.Name != null) sortMethod = selectedSortMethod.Name;
-                        if (selectedSortOrder?.Name != null) sortOrder = selectedSortOrder.Name;
-                        if (searchText != "") search = "&s=" + mapSearchQuerry.Replace("<value>", searchText);
-
-                        string req = "https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + ((currentPage - 1) * pagecount + i) + search + "&sort=" + sortMethod + "," + sortOrder;
-                        MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(await client.DownloadStringTaskAsync(req));
-
-                        if (apiMapRequestCounter != requestID && !download) break;
-
-                        if (i == 1)
-                        {
-                            //dont wait by discarding result with _ variable
-                            _ = Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                numberOfPages = (int)Math.Ceiling((double)mapPage.pagecount / pagecount);
-                            });
-                        }
-
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            items.Add(mapPage.data);
-                        });
-
-                        if (download)
-                        {
-                            foreach (MapItem map in mapPage.data)
-                            {
-                                if (!map.downloaded)
-                                {
-                                    DownloadScheduler.queue.Add(map);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
-        }
-
-        public GenericItem Unduplicate(GenericItem item, ObservableCollection<GenericItem> items, ItemType type)
-        {
-            var tmp = DownloadScheduler.queue.Where(x => x.id == item.id && x.itemType == type && x.itemType == item.itemType).ToList();
-            if (tmp.Count() > 0 && tmp[0] != null)
-            {
-                return tmp[0];
-            }
-            tmp = items.Where(x => x.id == item.id && x.itemType == type && x.itemType == item.itemType).ToList();
-            if (tmp.Count() > 0 && tmp[0] != null)
-            {
-                return tmp[0];
-            }
-            return item;
-        }
-
-        public async void GetAllTaskFunction()
-        {
-            try
-            {
-                Console.WriteLine("Get All Started");
-
-                int pageCountAll = 1;
-                int i = 1;
-
-                do
-                {
-                    using (WebClient client = new WebClient())
-                    {
-                        string req = "https://synthriderz.com/api/beatmaps?limit=" + pagesize + "&page=" + i;
-                        MapPage mapPage = JsonConvert.DeserializeObject<MapPage>(await client.DownloadStringTaskAsync(req));
-
-                        if (closing) break;
-                        foreach (MapItem map in mapPage.data)
-                        {
-                            var instances = items.Where(x => x.itemType == ItemType.Map && x.id == map.id).ToList();
-                            if (instances.Count > 0)
-                            {
-                                if (!instances[0].downloaded)
-                                {
-                                    DownloadScheduler.queue.Add(instances[0]);
-                                }
-                            }
-                            else
-                            {
-                                if (!map.downloaded)
-                                {
-                                    DownloadScheduler.queue.Add(map);
-                                }
-                            }
-                        }
-                        pageCountAll = mapPage.pagecount;
-                        i++;
-                    }
-                }
-                while (i <= pageCountAll);
-
-            }
-            catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
-            Console.WriteLine("Get All Done");
         }
 
         public void OpenErrorDialog(string text)
