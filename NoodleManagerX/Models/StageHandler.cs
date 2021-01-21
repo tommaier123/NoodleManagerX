@@ -8,16 +8,16 @@ using System.Runtime.Serialization;
 
 namespace NoodleManagerX.Models
 {
-    class PlaylistHandler : GenericHandler
+    class StageHandler : GenericHandler
     {
-        public override ItemType itemType { get; set; } = ItemType.Playlist;
+        public override ItemType itemType { get; set; } = ItemType.Stage;
 
         public override string searchQuerry { get; set; } = "{\"$or\":[{\"name\":{\"$contL\":\"<value>\"}},{\"user.username\":{\"$contL\":\"<value>\"}}]}";
-        public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/playlists";
+        public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/models/stages";
 
         public override void LoadLocalItems()
         {
-            string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "Playlist");
+            string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomStages");
             if (Directory.Exists(directory))
             {
                 Task.Run(async () =>
@@ -25,9 +25,9 @@ namespace NoodleManagerX.Models
                     List<LocalItem> tmp = new List<LocalItem>();
                     foreach (string file in Directory.GetFiles(directory))
                     {
-                        if (Path.GetExtension(file) == ".playlist")
+                        if (Path.GetExtension(file) == ".stage"|| Path.GetExtension(file) == ".spinstage")
                         {
-                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), ItemType.Playlist));
+                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), ItemType.Stage));
                         }
                     }
                     MainViewModel.s_instance.localItems.Add(tmp);
@@ -37,24 +37,24 @@ namespace NoodleManagerX.Models
 
         public override dynamic DeserializePage(string json)
         {
-            return JsonConvert.DeserializeObject<PlaylistPage>(json);
+            return JsonConvert.DeserializeObject<StagePage>(json);
         }
 
     }
 
     [DataContract]
-    class PlaylistItem : GenericItem
+    class StageItem : GenericItem
     {
         [DataMember] public string name { get; set; }
         [DataMember] public User user { get; set; }
-        public override string target { get; set; } = "Playlist";
-        public override ItemType itemType { get; set; } = ItemType.Playlist;
+        public override string target { get; set; } = "CustomStages";
+        public override ItemType itemType { get; set; } = ItemType.Stage;
     }
 
 
-    class PlaylistPage : GenericPage
+    class StagePage : GenericPage
     {
-        public List<PlaylistItem> data;
+        public List<StageItem> data;
     }
 }
 

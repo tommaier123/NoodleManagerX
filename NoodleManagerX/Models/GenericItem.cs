@@ -114,26 +114,6 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public GenericItem Unduplicate(ObservableCollection<GenericItem> items, ItemType type)
-        {
-            var tmp = DownloadScheduler.downloading.Where(x => x.id == this.id && x.itemType == type && x.itemType == this.itemType).ToList();
-            if (tmp.Count() > 0 && tmp[0] != null)
-            {
-                return tmp[0];
-            }
-            tmp = DownloadScheduler.queue.Where(x => x.id == this.id && x.itemType == type && x.itemType == this.itemType).ToList();
-            if (tmp.Count() > 0 && tmp[0] != null)
-            {
-                return tmp[0];
-            }
-            tmp = items.Where(x => x.id == this.id && x.itemType == type && x.itemType == this.itemType).ToList();
-            if (tmp.Count() > 0 && tmp[0] != null)
-            {
-                return tmp[0];
-            }
-            return this;
-        }
-
         public void LoadBitmap()
         {
             Task.Factory.StartNew(async () =>

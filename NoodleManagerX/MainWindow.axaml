@@ -287,7 +287,22 @@
         </ListBox>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=2}">
-        <TextBlock Text="These are the stages"/>
+        <ListBox Items="{Binding Path=stages}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Grid RowDefinitions="*,auto">
+                <Grid Grid.Row="0" Height="160" ColumnDefinitions="auto, auto, *, auto">
+                  <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
+                  <Grid Grid.Column="1" RowDefinitions="auto,auto,auto,*,auto" Margin="20,0,0,0">
+                    <TextBlock Grid.Row="0" Text="{Binding name}" Classes="Downloaded" FontSize="35"/>
+                  </Grid>
+                  <Button Grid.Column="3" Command="{Binding downloadCommand}" Height="50"/>
+                </Grid>
+                <Grid Grid.Row="1" Background="#999999" Height="2"/>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=3}">
         <TextBlock Text="These are the avatars"/>

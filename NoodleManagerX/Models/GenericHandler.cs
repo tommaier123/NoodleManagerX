@@ -25,121 +25,118 @@ namespace NoodleManagerX.Models
 
         public void GetPage(bool download = false)
         {
+            int requestID = MainViewModel.s_instance.apiRequestCounter;
             Clear();
-            Task.Run(() => PageTaskFunction(MainViewModel.s_instance.apiRequestCounter, download));
+            Task.Run(async () =>
+            {
+                try
+                {
+                    Console.WriteLine("Getting Page");
+
+                    for (int i = 1; i <= pagecount; i++)
+                    {
+                        using (WebClient client = new WebClient())
+                        {
+                            client.Encoding = Encoding.UTF8;
+                            string sortMethod = "published_at";
+                            string sortOrder = "DESC";
+                            string search = "";
+                            if (MainViewModel.s_instance.selectedSortMethod?.Name != null) sortMethod = MainViewModel.s_instance.selectedSortMethod.Name;
+                            if (MainViewModel.s_instance.selectedSortOrder?.Name != null) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
+                            if (MainViewModel.s_instance.searchText != "") search = "&s=" + searchQuerry.Replace("<value>", MainViewModel.s_instance.searchText);
+
+                            string req = apiEndpoint + "?limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + search + "&sort=" + sortMethod + "," + sortOrder;
+                            var page = DeserializePage(await client.DownloadStringTaskAsync(req));
+
+                            if (MainViewModel.s_instance.apiRequestCounter != requestID && !download) break;
+
+                            if (i == 1)
+                            {
+                                //dont wait by discarding result with _ variable
+                                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                                {
+                                    MainViewModel.s_instance.numberOfPages = (int)Math.Ceiling((double)page.pagecount / pagecount);
+                                });
+                            }
+
+                            List<GenericItem> tmp = new List<GenericItem>();
+
+                            foreach (GenericItem item in page.data)
+                            {
+                                tmp.Add(item);
+                            }
+
+                            _ = Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                MainViewModel.s_instance.items.Add(tmp);
+                            });
+
+                            if (download)
+                            {
+                                foreach (GenericItem item in page.data)
+                                {
+                                    if (!item.downloaded)
+                                    {
+                                        DownloadScheduler.queue.Add(item);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+            });
 
         }
 
         public void GetAll()
         {
-            Task.Run(() => GetAllTaskFunction());
-        }
-
-        public async void PageTaskFunction(int requestID, bool download = false)
-        {
-            try
-            {
-                Console.WriteLine("Getting Page");
-
-                for (int i = 1; i <= pagecount; i++)
+            Task.Run(async () => {
+                try
                 {
-                    using (WebClient client = new WebClient())
+                    Console.WriteLine("Get All Started");
+
+                    int pageCountAll = 1;
+                    int i = 1;
+
+                    do
                     {
-                        client.Encoding = Encoding.UTF8;
-                        string sortMethod = "published_at";
-                        string sortOrder = "DESC";
-                        string search = "";
-                        if (MainViewModel.s_instance.selectedSortMethod?.Name != null) sortMethod = MainViewModel.s_instance.selectedSortMethod.Name;
-                        if (MainViewModel.s_instance.selectedSortOrder?.Name != null) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
-                        if (MainViewModel.s_instance.searchText != "") search = "&s=" + searchQuerry.Replace("<value>", MainViewModel.s_instance.searchText);
-
-                        string req = apiEndpoint + "?limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + search + "&sort=" + sortMethod + "," + sortOrder;
-                        var page = DeserializePage(await client.DownloadStringTaskAsync(req));
-
-                        if (MainViewModel.s_instance.apiRequestCounter != requestID && !download) break;
-
-                        if (i == 1)
+                        using (WebClient client = new WebClient())
                         {
-                            //dont wait by discarding result with _ variable
-                            _ = Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                MainViewModel.s_instance.numberOfPages = (int)Math.Ceiling((double)page.pagecount / pagecount);
-                            });
-                        }
+                            string req = apiEndpoint + "?limit=" + pagesize + "&page=" + i;
+                            var page = DeserializePage(await client.DownloadStringTaskAsync(req));
 
-                        List<GenericItem> tmp = new List<GenericItem>();
-
-                        foreach (GenericItem item in page.data)
-                        {
-                            tmp.Add(item);
-                        }
-
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            MainViewModel.s_instance.items.Add(tmp);
-                        });
-
-                        if (download)
-                        {
+                            if (MainViewModel.s_instance.closing) break;
                             foreach (GenericItem item in page.data)
                             {
-                                if (!item.downloaded)
+                                var instances = MainViewModel.s_instance.items.Where(x => x.itemType == ItemType.Map && x.id == item.id).ToList();
+                                if (instances.Count > 0)
                                 {
-                                    DownloadScheduler.queue.Add(item);
+                                    if (!instances[0].downloaded)
+                                    {
+                                        DownloadScheduler.queue.Add(instances[0]);
+                                    }
+                                }
+                                else
+                                {
+                                    if (!item.downloaded)
+                                    {
+                                        DownloadScheduler.queue.Add(item);
+                                    }
                                 }
                             }
+                            pageCountAll = page.pagecount;
+                            i++;
                         }
                     }
+                    while (i <= pageCountAll);
+
                 }
-            }
-            catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+                catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+                Console.WriteLine("Get All Done");
+            });
         }
 
-        public async void GetAllTaskFunction()
-        {
-            try
-            {
-                Console.WriteLine("Get All Started");
-
-                int pageCountAll = 1;
-                int i = 1;
-
-                do
-                {
-                    using (WebClient client = new WebClient())
-                    {
-                        string req = apiEndpoint + "?limit=" + pagesize + "&page=" + i;
-                        var page = DeserializePage(await client.DownloadStringTaskAsync(req));
-
-                        if (MainViewModel.s_instance.closing) break;
-                        foreach (GenericItem item in page.data)
-                        {
-                            var instances = MainViewModel.s_instance.items.Where(x => x.itemType == ItemType.Map && x.id == item.id).ToList();
-                            if (instances.Count > 0)
-                            {
-                                if (!instances[0].downloaded)
-                                {
-                                    DownloadScheduler.queue.Add(instances[0]);
-                                }
-                            }
-                            else
-                            {
-                                if (!item.downloaded)
-                                {
-                                    DownloadScheduler.queue.Add(item);
-                                }
-                            }
-                        }
-                        pageCountAll = page.pagecount;
-                        i++;
-                    }
-                }
-                while (i <= pageCountAll);
-
-            }
-            catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
-            Console.WriteLine("Get All Done");
-        }
 
 
         public virtual dynamic DeserializePage(string json) { return null; }

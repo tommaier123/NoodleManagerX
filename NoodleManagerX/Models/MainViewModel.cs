@@ -61,6 +61,7 @@ namespace NoodleManagerX.Models
 
         public ObservableCollection<MapItem> maps { get; private set; } = new ObservableCollection<MapItem>();
         public ObservableCollection<PlaylistItem> playlists { get; private set; } = new ObservableCollection<PlaylistItem>();
+        public ObservableCollection<StageItem> stages { get; private set; } = new ObservableCollection<StageItem>();
         public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
         public bool closing = false;
@@ -69,6 +70,7 @@ namespace NoodleManagerX.Models
 
         public MapHandler mapHandler = new MapHandler();
         public PlaylistHandler playlistHandler = new PlaylistHandler();
+        public StageHandler stageHandler = new StageHandler();
 
         public MainViewModel()
         {
@@ -112,6 +114,8 @@ namespace NoodleManagerX.Models
             tabSelectCommand = ReactiveCommand.Create<string>((x =>
             {
                 selectedTabIndex = Int32.Parse(x);
+                currentPage = 1;
+                numberOfPages = 1;
                 GetPage();
             }));
 
@@ -175,11 +179,21 @@ namespace NoodleManagerX.Models
 
         private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            maps.Clear();
-            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
-
-            playlists.Clear();
-            playlists.Add(items.Where(x => x.itemType == ItemType.Playlist).Select(x => (PlaylistItem)x));
+            switch (selectedTabIndex)
+            {
+                case 0:
+                    maps.Clear();
+                    maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
+                    break;
+                case 1:
+                    playlists.Clear();
+                    playlists.Add(items.Where(x => x.itemType == ItemType.Playlist).Select(x => (PlaylistItem)x));
+                    break;
+                case 2:
+                    stages.Clear();
+                    stages.Add(items.Where(x => x.itemType == ItemType.Stage).Select(x => (StageItem)x));
+                    break;
+            }
         }
 
         public void LoadLocalItems()
@@ -187,6 +201,7 @@ namespace NoodleManagerX.Models
 
             mapHandler.LoadLocalItems();
             playlistHandler.LoadLocalItems();
+            stageHandler.LoadLocalItems();
 
             foreach (GenericItem item in items)
             {
@@ -205,10 +220,14 @@ namespace NoodleManagerX.Models
 
             switch (selectedTabIndex)
             {
-                case 0: mapHandler.GetPage(download);
+                case 0:
+                    mapHandler.GetPage(download);
                     break;
                 case 1:
                     playlistHandler.GetPage(download);
+                    break;
+                case 2:
+                    stageHandler.GetPage(download);
                     break;
             }
         }
@@ -229,6 +248,9 @@ namespace NoodleManagerX.Models
                         break;
                     case 1:
                         playlistHandler.GetAll();
+                        break;
+                    case 2:
+                        stageHandler.GetAll();
                         break;
                 }
             }
