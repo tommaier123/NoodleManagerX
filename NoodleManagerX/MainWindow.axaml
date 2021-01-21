@@ -172,14 +172,16 @@
       </Grid>
 
       <!--Filter-->
-      <Grid Grid.Column="1" ColumnDefinitions="auto,auto,auto,auto" Margin="50,0,0,0">
-        <ComboBox Grid.Column="0" Classes="BlankBox" Width="70" SelectedIndex="0">
-          <ComboBoxItem>All </ComboBoxItem>
-          <ComboBoxItem>Title</ComboBoxItem>
-          <ComboBoxItem>Artist</ComboBoxItem>
-          <ComboBoxItem>Mapper</ComboBoxItem>
+      <Grid Grid.Column="1" ColumnDefinitions="70,70,95,50" Margin="50,0,0,0">
+        <ComboBox Grid.Column="0" Classes="BlankBox" SelectedIndex="{Binding selectedSearchParameterIndex}" SelectedItem="{Binding Path=selectedSearchParameter, Mode=OneWayToSource}">
+          <ComboBoxItem Name="all">All </ComboBoxItem>
+          <ComboBoxItem Name="title" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Title</ComboBoxItem>
+          <ComboBoxItem Name="name" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Title</ComboBoxItem>
+          <ComboBoxItem Name="artist" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Artist</ComboBoxItem>
+          <ComboBoxItem Name="mapper" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Mapper</ComboBoxItem>
+          <ComboBoxItem Name="user.username" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Creator</ComboBoxItem>
         </ComboBox>
-        <ComboBox Grid.Column="1" Classes="BlankBox" Width="70" SelectedIndex="0">
+        <ComboBox Grid.Column="1" Classes="BlankBox" SelectedIndex="{Binding selectedDifficultyIndex}" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
           <ComboBoxItem>All</ComboBoxItem>
           <ComboBoxItem>Easy</ComboBoxItem>
           <ComboBoxItem>Normal</ComboBoxItem>
@@ -188,14 +190,13 @@
           <ComboBoxItem>Master</ComboBoxItem>
           <ComboBoxItem>Custom</ComboBoxItem>
         </ComboBox>
-        <ComboBox Grid.Column="2" Classes="BlankBox" Width="95" SelectedIndex="{Binding selectedSortMethodIndex}" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
+        <ComboBox Grid.Column="2" Classes="BlankBox" SelectedIndex="{Binding selectedSortMethodIndex}" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
           <ComboBoxItem Name="published_at">Upload Date</ComboBoxItem>
           <ComboBoxItem Name="score">Hypefactor</ComboBoxItem>
-          <ComboBoxItem Name="upvote_count">Vote</ComboBoxItem>
+          <ComboBoxItem Name="rating">Vote</ComboBoxItem>
           <ComboBoxItem Name="download_count">Downloads</ComboBoxItem>
-          <ComboBoxItem  Name="difficulties" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Difficulty</ComboBoxItem>
         </ComboBox>
-        <ComboBox Grid.Column="3" Classes="BlankBox" Width="50" SelectedIndex="{Binding selectedSortOrderIndex}" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
+        <ComboBox Grid.Column="3" Classes="BlankBox" SelectedIndex="{Binding selectedSortOrderIndex}" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
           <ComboBoxItem Name="DESC">DSC</ComboBoxItem>
           <ComboBoxItem Name="ASC">ASC</ComboBoxItem>
         </ComboBox>

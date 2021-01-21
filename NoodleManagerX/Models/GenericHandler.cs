@@ -18,7 +18,7 @@ namespace NoodleManagerX.Models
         public const int pagecount = 6;
         public const int pagesize = 10;
 
-        public virtual string searchQuerry { get; set; } = "";
+        public virtual string searchQuery { get; set; } = "";
         public virtual string apiEndpoint { get; set; } = "";
 
         public virtual void LoadLocalItems() { }
@@ -41,9 +41,16 @@ namespace NoodleManagerX.Models
                             string sortMethod = "published_at";
                             string sortOrder = "DESC";
                             string search = "";
+                            string query = searchQuery;
+                            string searchbase = "{\"$or\":[{\"<parameter>\":{\"$contL\":\"<value>\"}}]}";
+                            if (MainViewModel.s_instance.selectedSearchParameter?.Name != null && MainViewModel.s_instance.selectedSearchParameter.Name != "all")
+                            {
+                                query = searchbase.Replace("<parameter>", MainViewModel.s_instance.selectedSearchParameter.Name);
+                            }
+
                             if (MainViewModel.s_instance.selectedSortMethod?.Name != null) sortMethod = MainViewModel.s_instance.selectedSortMethod.Name;
                             if (MainViewModel.s_instance.selectedSortOrder?.Name != null) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
-                            if (MainViewModel.s_instance.searchText != "") search = "&s=" + searchQuerry.Replace("<value>", MainViewModel.s_instance.searchText);
+                            if (MainViewModel.s_instance.searchText != "") search = "&s=" + query.Replace("<value>", MainViewModel.s_instance.searchText);
 
                             string req = apiEndpoint + "?limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + search + "&sort=" + sortMethod + "," + sortOrder;
                             var page = DeserializePage(await client.DownloadStringTaskAsync(req));
@@ -91,7 +98,8 @@ namespace NoodleManagerX.Models
 
         public void GetAll()
         {
-            Task.Run(async () => {
+            Task.Run(async () =>
+            {
                 try
                 {
                     Console.WriteLine("Get All Started");

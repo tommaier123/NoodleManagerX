@@ -12,7 +12,7 @@ namespace NoodleManagerX.Models
     {
         public override ItemType itemType { get; set; } = ItemType.Playlist;
 
-        public override string searchQuerry { get; set; } = "{\"$or\":[{\"name\":{\"$contL\":\"<value>\"}},{\"user.username\":{\"$contL\":\"<value>\"}}]}";
+        public override string searchQuery { get; set; } = "{\"$or\":[{\"name\":{\"$contL\":\"<value>\"}},{\"user.username\":{\"$contL\":\"<value>\"}}]}";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/playlists";
 
         public override void LoadLocalItems()

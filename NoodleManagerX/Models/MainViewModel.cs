@@ -37,8 +37,12 @@ namespace NoodleManagerX.Models
         [Reactive] public int numberOfPages { get; set; } = 1;
         [Reactive] public string searchText { get; set; } = "";
         public string lastSearchText = "";
+
+        [Reactive] public ComboBoxItem selectedSearchParameter { get; set; }
         [Reactive] public ComboBoxItem selectedSortMethod { get; set; }
         [Reactive] public ComboBoxItem selectedSortOrder { get; set; }
+        [Reactive] public int selectedSearchParameterIndex { get; set; } = 0;
+        [Reactive] public int selectedDifficultyIndex { get; set; } = 0;
         [Reactive] public int selectedSortMethodIndex { get; set; } = 0;
         [Reactive] public int selectedSortOrderIndex { get; set; } = 0;
         [Reactive] public string synthDirectory { get; set; }
@@ -119,6 +123,11 @@ namespace NoodleManagerX.Models
                 selectedTabIndex = Int32.Parse(x);
                 currentPage = 1;
                 numberOfPages = 1;
+                searchText = lastSearchText = "";
+                selectedSearchParameterIndex = 0;
+                selectedDifficultyIndex = 0;
+                selectedSortMethodIndex = 0;
+                selectedSortOrderIndex = 0;
                 GetPage();
             }));
 
@@ -161,6 +170,8 @@ namespace NoodleManagerX.Models
 
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetPage());
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetPage());//reload maps when the current page changes
+            this.WhenAnyValue(x => x.selectedSearchParameter).Subscribe(x => GetPage());//reload maps when the search parameter changes
+            this.WhenAnyValue(x => x.selectedDifficultyIndex).Subscribe(x => UpdateCollections());//reload maps when the search difficulty changes
             this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetPage());//reload maps when the sort method changes
             this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetPage());//reload maps when the sort order changes
             settings.Changed.Subscribe(x => SaveSettings());//save the settings when they change
@@ -182,11 +193,39 @@ namespace NoodleManagerX.Models
 
         private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            UpdateCollections();
+        }
+
+        public void UpdateCollections()
+        {
             switch (selectedTabIndex)
             {
                 case 0:
                     maps.Clear();
-                    maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
+                    switch (selectedDifficultyIndex)
+                    {
+                        case 0:
+                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
+                            break;
+                        case 1:
+                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Easy")));
+                            break;
+                        case 2:
+                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Normal")));
+                            break;
+                        case 3:
+                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Hard")));
+                            break;
+                        case 4:
+                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Expert")));
+                            break;
+                        case 5:
+                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Master")));
+                            break;
+                        case 6:
+                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Custom")));
+                            break;
+                    }
                     break;
                 case 1:
                     playlists.Clear();
@@ -205,7 +244,6 @@ namespace NoodleManagerX.Models
 
         public void LoadLocalItems()
         {
-
             mapHandler.LoadLocalItems();
             playlistHandler.LoadLocalItems();
             stageHandler.LoadLocalItems();
@@ -249,6 +287,8 @@ namespace NoodleManagerX.Models
             {
                 searchText = lastSearchText = "";
                 currentPage = 1;
+                selectedSearchParameterIndex = 0;
+                selectedDifficultyIndex = 0;
                 selectedSortMethodIndex = 0;
                 selectedSortOrderIndex = 0;
 
