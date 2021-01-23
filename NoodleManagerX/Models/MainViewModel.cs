@@ -21,6 +21,7 @@ using System.Linq;
 using System.Collections.Specialized;
 using System.Reflection;
 using System.Collections;
+using SharpAdbClient;
 
 namespace NoodleManagerX.Models
 {
@@ -60,6 +61,8 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> getAllCommand { get; set; }
         public ReactiveCommand<Unit, Unit> getPageCommand { get; set; }
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
+
+        public ReactiveCommand<Unit, Unit> TestAdb { get; set; }
 
         public ObservableCollection<GenericItem> items { get; set; } = new ObservableCollection<GenericItem>();
 
@@ -165,6 +168,13 @@ namespace NoodleManagerX.Models
             selectDirectoryCommand = ReactiveCommand.Create((() =>
             {
                 selectDirectory();
+            }));
+
+            TestAdb = ReactiveCommand.Create((() =>
+            {
+                AdbServer server = new AdbServer();
+                var result = server.StartServer(@"platform-tools\adb.exe", restartServerIfNewer: false);
+                Console.WriteLine(result);
             }));
 
 

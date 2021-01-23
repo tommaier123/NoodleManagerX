@@ -27,7 +27,7 @@ namespace NoodleManagerX.Models
                     {
                         if (Path.GetExtension(file) == ".playlist")
                         {
-                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), ItemType.Playlist));
+                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Playlist));
                         }
                     }
                     MainViewModel.s_instance.localItems.Add(tmp);

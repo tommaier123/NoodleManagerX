@@ -27,7 +27,7 @@ namespace NoodleManagerX.Models
                     {
                         if (Path.GetExtension(file) == ".vrm")
                         {
-                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), ItemType.Avatar));
+                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Avatar));
                         }
                     }
                     MainViewModel.s_instance.localItems.Add(tmp);

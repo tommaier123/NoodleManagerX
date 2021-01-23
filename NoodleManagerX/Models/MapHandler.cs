@@ -39,6 +39,8 @@ namespace NoodleManagerX.Models
                                             using (StreamReader sr = new StreamReader(entry.Open()))
                                             {
                                                 LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
+                                                localItem.filename = Path.GetFileName(file);
+                                                localItem.modifiedTime = File.GetLastWriteTime(file);
                                                 localItem.itemType = ItemType.Map;
                                                 tmp.Add(localItem);
                                             }

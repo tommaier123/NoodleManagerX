@@ -27,7 +27,7 @@ namespace NoodleManagerX.Models
                     {
                         if (Path.GetExtension(file) == ".stage"|| Path.GetExtension(file) == ".spinstage")
                         {
-                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), ItemType.Stage));
+                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Stage));
                         }
                     }
                     MainViewModel.s_instance.localItems.Add(tmp);

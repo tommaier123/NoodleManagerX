@@ -127,9 +127,10 @@ namespace NoodleManagerX.Models
                                 }
                                 else
                                 {
-                                    if (!item.downloaded)
+                                    if (!item.downloaded || item.needsUpdate)
                                     {
                                         DownloadScheduler.queue.Add(item);
+                                        if (item.needsUpdate) { Console.WriteLine("Update"); }
                                     }
                                 }
                             }

@@ -24,14 +24,16 @@ namespace NoodleManagerX.Models
         [DataMember] public int id { get; set; }
         [DataMember] public string cover_url { get; set; }
         [DataMember] public string download_url { get; set; }
+        [DataMember] public string published_at { get; set; }
+
         [Reactive] public Bitmap cover_bmp { get; set; }
         [Reactive] public bool selected { get; set; }
         [Reactive] public bool downloading { get; set; } = false;
-        [Reactive] public bool downloaded { get; set; }
+        [Reactive] public bool downloaded { get; set; } = false;
+        [Reactive] public bool needsUpdate { get; set; } = false;
         public string filename { get; set; } = "";
+        public DateTime updatedAt { get; set; }
         public virtual string target { get; set; }
-
-        public WebClient webClient;
 
         public virtual ItemType itemType { get; set; }
 
@@ -44,6 +46,8 @@ namespace NoodleManagerX.Models
             UpdateDownloaded();
             LoadBitmap();
 
+            Task.Run(() => updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind));
+
             downloadCommand = ReactiveCommand.Create((() =>
             {
                 Download();
@@ -52,9 +56,21 @@ namespace NoodleManagerX.Models
 
         public void UpdateDownloaded()
         {
+            var tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
             _ = Dispatcher.UIThread.InvokeAsync(() =>
             {
-                downloaded = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).Count() > 0;
+                if (tmp.Count() > 0)
+                {
+                    downloaded = true;
+                    if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
+                    {
+                        needsUpdate = tmp[0].hash == ((MapItem)this).hash;
+                    }
+                    else
+                    {
+                        needsUpdate = DateTime.Compare(updatedAt, tmp[0].modifiedTime) > 0;
+                    }
+                }
             });
         }
 
@@ -72,7 +88,7 @@ namespace NoodleManagerX.Models
 
                     Console.WriteLine("Downloading " + id);
 
-                    webClient = new WebClient();
+                    WebClient webClient = new WebClient();
                     string url = "https://synthriderz.com" + download_url;
 
                     //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -144,17 +160,19 @@ namespace NoodleManagerX.Models
 
     class LocalItem
     {
-        public LocalItem(int _id, string _hash, string _filename, ItemType _itemType)
+        public LocalItem(int id, string hash, string filename, DateTime modifiedTime, ItemType itemType)
         {
-            id = _id;
-            hash = _hash;
-            filename = _filename;
-            itemType = _itemType;
+            this.id = id;
+            this.hash = hash;
+            this.filename = filename;
+            this.modifiedTime = modifiedTime;
+            this.itemType = itemType;
         }
 
         public int id = -1;
         public string hash = "";
         public string filename = "";
+        public DateTime modifiedTime = new DateTime();
         public ItemType itemType = ItemType.init;
 
         public bool CheckEquality(GenericItem item, bool checkHash = false)

@@ -159,9 +159,10 @@
 
     <!--Control Header-->
     <Grid Grid.Row="1" Height="50" Background="{StaticResource ControlHeaderColor}" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}"
-          ColumnDefinitions="auto,auto,auto,*,auto">
+          ColumnDefinitions="135, auto,auto,auto,*,auto">
+      <Button Grid.Column="0" Command="{Binding TestAdb}"/>
       <!--Search-->
-      <Grid Grid.Column="0" ColumnDefinitions="auto,auto" Margin="135,0,0,0">
+      <Grid Grid.Column="1" ColumnDefinitions="auto,auto" Margin="0,0,0,0">
         <StackPanel Grid.Column="0" VerticalAlignment="Center">
           <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff" Text="{Binding searchText}" Name="SearchBox"/>
           <Image Source="resm:NoodleManagerX.Assets.searchbar.png" Height="2" Width="200" Stretch="Fill"/>
@@ -172,7 +173,7 @@
       </Grid>
 
       <!--Filter-->
-      <Grid Grid.Column="1" ColumnDefinitions="70,70,95,50" Margin="50,0,0,0">
+      <Grid Grid.Column="2" ColumnDefinitions="70,70,95,50" Margin="50,0,0,0">
         <ComboBox Grid.Column="0" Classes="BlankBox" SelectedIndex="{Binding selectedSearchParameterIndex}" SelectedItem="{Binding Path=selectedSearchParameter, Mode=OneWayToSource}">
           <ComboBoxItem Name="all">All </ComboBoxItem>
           <ComboBoxItem Name="title" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Title</ComboBoxItem>
@@ -203,7 +204,7 @@
       </Grid>
 
       <!--Get-->
-      <Grid Grid.Column="2" ColumnDefinitions="auto,auto" Margin="40,0,0,0">
+      <Grid Grid.Column="3" ColumnDefinitions="auto,auto" Margin="40,0,0,0">
         <Button Grid.Column="0" Classes="BlankButton" Command="{Binding getAllCommand}">
           <Grid RowDefinitions="auto,auto">
             <TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Get"/>
@@ -219,7 +220,7 @@
       </Grid>
 
       <!--Pagination-->
-      <Grid Grid.Column="4" ColumnDefinitions="auto,auto,auto,auto,auto" Margin="0,0,20,0">
+      <Grid Grid.Column="5" ColumnDefinitions="auto,auto,auto,auto,auto" Margin="0,0,20,0">
         <Button Grid.Column="0" Classes="BlankButton" Command="{Binding pageDownCommand}">
           <TextBlock Text="&lt;" FontSize="30" Margin="0,-3,0,0"/>
         </Button>

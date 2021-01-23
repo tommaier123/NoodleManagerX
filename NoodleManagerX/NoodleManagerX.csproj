@@ -14,7 +14,8 @@
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.23.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="ReactiveUI.Fody" Version="13.0.38" />
+    <PackageReference Include="ReactiveUI.Fody" Version="13.1.1" />
+    <PackageReference Include="SharpAdbClient" Version="2.3.23" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\NoodleManagerLogo.png" />
