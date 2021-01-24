@@ -12,7 +12,8 @@ namespace NoodleManagerX.Models
     {
         public override ItemType itemType { get; set; } = ItemType.Playlist;
 
-        public override string searchQuery { get; set; } = "{\"$or\":[{\"name\":{\"$contL\":\"<value>\"}},{\"user.username\":{\"$contL\":\"<value>\"}}]}";
+        public override string allParameters { get; set; } = "\"name\":{\"$contL\":\"<value>\"}},{\"user.username\":{\"$contL\":\"<value>\"}";
+        public override string select { get; set; } = "id,cover_url,download_url,published_at,name,user";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/playlists";
 
         public override void LoadLocalItems()
@@ -30,7 +31,10 @@ namespace NoodleManagerX.Models
                             tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Playlist));
                         }
                     }
-                    MainViewModel.s_instance.localItems.Add(tmp);
+                    foreach (LocalItem item in tmp)
+                    {
+                        MainViewModel.s_instance.localItems.Add(item);
+                    }
                 });
             }
         }

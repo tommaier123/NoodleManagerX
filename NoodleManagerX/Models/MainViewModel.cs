@@ -24,6 +24,8 @@ using System.Collections;
 using SharpAdbClient;
 using System.Net;
 using System.IO.Compression;
+using System.Diagnostics;
+using System.Collections.Concurrent;
 
 namespace NoodleManagerX.Models
 {
@@ -55,6 +57,7 @@ namespace NoodleManagerX.Models
         public string lastSearchText = "";
 
         [Reactive] public ComboBoxItem selectedSearchParameter { get; set; }
+        [Reactive] public ComboBoxItem selectedDifficulty { get; set; }
         [Reactive] public ComboBoxItem selectedSortMethod { get; set; }
         [Reactive] public ComboBoxItem selectedSortOrder { get; set; }
         [Reactive] public int selectedSearchParameterIndex { get; set; } = 0;
@@ -84,7 +87,7 @@ namespace NoodleManagerX.Models
         public ObservableCollection<StageItem> stages { get; private set; } = new ObservableCollection<StageItem>();
         public ObservableCollection<AvatarItem> avatars { get; private set; } = new ObservableCollection<AvatarItem>();
 
-        public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
+        public ConcurrentBag<LocalItem> localItems { get; set; } = new ConcurrentBag<LocalItem>();
 
         public AdbServer adbServer = new AdbServer();
         public AdbClient adbClient = new AdbClient();
@@ -190,7 +193,7 @@ namespace NoodleManagerX.Models
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetPage());
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetPage());//reload maps when the current page changes
             this.WhenAnyValue(x => x.selectedSearchParameter).Subscribe(x => GetPage());//reload maps when the search parameter changes
-            this.WhenAnyValue(x => x.selectedDifficultyIndex).Subscribe(x => UpdateCollections());//reload maps when the search difficulty changes
+            this.WhenAnyValue(x => x.selectedDifficulty).Subscribe(x => GetPage());//reload maps when the search difficulty changes
             this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetPage());//reload maps when the sort method changes
             this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetPage());//reload maps when the sort order changes
             settings.Changed.Subscribe(x => SaveSettings());//save the settings when they change
@@ -223,30 +226,7 @@ namespace NoodleManagerX.Models
             {
                 case 0:
                     maps.Clear();
-                    switch (selectedDifficultyIndex)
-                    {
-                        case 0:
-                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
-                            break;
-                        case 1:
-                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Easy")));
-                            break;
-                        case 2:
-                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Normal")));
-                            break;
-                        case 3:
-                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Hard")));
-                            break;
-                        case 4:
-                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Expert")));
-                            break;
-                        case 5:
-                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Master")));
-                            break;
-                        case 6:
-                            maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x).Where(x => x.difficulties.Contains("Custom")));
-                            break;
-                    }
+                    maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
                     break;
                 case 1:
                     playlists.Clear();
@@ -350,7 +330,8 @@ namespace NoodleManagerX.Models
                         platform = "osx";
                     }
 
-                    string location = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                    string location = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "ADB");
+                    Console.WriteLine(location);
                     string directory = Path.Combine(location, platform);
                     string exe = Path.Combine(directory, "adb" + extension);
 
@@ -368,13 +349,16 @@ namespace NoodleManagerX.Models
                             {
                                 if (Path.GetDirectoryName(entry.FullName).StartsWith(platform) && !Path.EndsInDirectorySeparator(entry.FullName))
                                 {
-                                    Log(Path.Combine(location, entry.Name));
-                                    //entry.ExternalAttributes = entry.ExternalAttributes | (Convert.ToInt32("775", 8) << 16);
-
                                     string path = Path.Combine(location, entry.FullName);
+                                    Log(path);
                                     Directory.CreateDirectory(Path.GetDirectoryName(path));
 
                                     entry.ExtractToFile(path);
+
+                                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                                    {
+                                        Shell("chmod 755 " + exe);
+                                    }
                                 }
                             }
                         }
@@ -394,6 +378,27 @@ namespace NoodleManagerX.Models
                     MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
                 }
             });
+        }
+
+        public string Shell(string cmd)
+        {
+            var escapedArgs = cmd.Replace("\"", "\\\"");
+
+            var process = new Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/sh",
+                    Arguments = $"-c \"{escapedArgs}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+            process.Start();
+            string result = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            return result;
         }
 
         private void OnDeviceConnected(object sender, DeviceDataEventArgs e)

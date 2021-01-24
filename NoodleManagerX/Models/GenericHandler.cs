@@ -18,7 +18,8 @@ namespace NoodleManagerX.Models
         public const int pagecount = 6;
         public const int pagesize = 10;
 
-        public virtual string searchQuery { get; set; } = "";
+        public virtual string allParameters { get; set; } = "";
+        public virtual string select { get; set; } = "";
         public virtual string apiEndpoint { get; set; } = "";
 
         public virtual void LoadLocalItems() { }
@@ -38,21 +39,49 @@ namespace NoodleManagerX.Models
                         using (WebClient client = new WebClient())
                         {
                             client.Encoding = Encoding.UTF8;
+
+                            string query = allParameters;
+                            string searchbase = "\"<parameter>\":{\"$contL\":\"<value>\"}";
+                            string filter = "\"difficulties\":{\"$jsonContainsAny\":[\"<difficulty>\"]}";
+                            string convert = "\"beat_saber_convert\":{\"$ne\":true}";
                             string sortMethod = "published_at";
                             string sortOrder = "DESC";
-                            string search = "";
-                            string query = searchQuery;
-                            string searchbase = "{\"$or\":[{\"<parameter>\":{\"$contL\":\"<value>\"}}]}";
-                            if (MainViewModel.s_instance.selectedSearchParameter?.Name != null && MainViewModel.s_instance.selectedSearchParameter.Name != "all")
+
+
+                            if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSearchParameter?.Name) && MainViewModel.s_instance.selectedSearchParameter.Name != "all")
                             {
                                 query = searchbase.Replace("<parameter>", MainViewModel.s_instance.selectedSearchParameter.Name);
                             }
 
-                            if (MainViewModel.s_instance.selectedSortMethod?.Name != null) sortMethod = MainViewModel.s_instance.selectedSortMethod.Name;
-                            if (MainViewModel.s_instance.selectedSortOrder?.Name != null) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
-                            if (MainViewModel.s_instance.searchText != "") search = "&s=" + query.Replace("<value>", MainViewModel.s_instance.searchText);
+                            if (MainViewModel.s_instance.searchText != "")
+                            {
+                                query = query.Replace("<value>", MainViewModel.s_instance.searchText);
+                            }
+                            else
+                            {
+                                query = "";
+                            }
 
-                            string req = apiEndpoint + "?limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + search + "&sort=" + sortMethod + "," + sortOrder;
+                            if (MainViewModel.s_instance.selectedDifficultyIndex != 0 && !String.IsNullOrEmpty(MainViewModel.s_instance.selectedDifficulty?.Name))
+                            {
+                                filter = filter.Replace("<difficulty>", MainViewModel.s_instance.selectedDifficulty.Name);
+                            }
+                            else
+                            {
+                                filter = "";
+                            }
+
+                            if (MainViewModel.s_instance.settings.allowConverts || MainViewModel.s_instance.selectedTabIndex != 0)
+                            {
+                                convert = "";
+                            }
+
+                            string search = "{\"$and\":[{" + filter + "},{" + convert + "},{\"$or\":[{" + query + "}]}]}";
+
+                            if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortMethod?.Name)) sortMethod = MainViewModel.s_instance.selectedSortMethod.Name;
+                            if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortOrder?.Name)) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
+
+                            string req = apiEndpoint + "?select=" + select + "&limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + "&s=" + search + "&sort=" + sortMethod + "," + sortOrder;
                             var page = DeserializePage(await client.DownloadStringTaskAsync(req));
 
                             if (MainViewModel.s_instance.apiRequestCounter != requestID && !download) break;

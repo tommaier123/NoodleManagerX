@@ -13,7 +13,8 @@ namespace NoodleManagerX.Models
     {
         public override ItemType itemType { get; set; } = ItemType.Map;
 
-        public override string searchQuery { get; set; } = "{\"$or\":[{\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}}]}";
+        public override string allParameters { get; set; } = "\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}";
+        public override string select { get; set; } = "id,cover_url,download_url,published_at,title,artist,mapper,duration,difficulties,hash";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
         public override void LoadLocalItems()
@@ -55,7 +56,11 @@ namespace NoodleManagerX.Models
                             }
                         }
                     }
-                    MainViewModel.s_instance.localItems.Add(tmp);
+
+                    foreach (LocalItem item in tmp)
+                    {
+                        MainViewModel.s_instance.localItems.Add(item);
+                    }
                 });
             }
         }

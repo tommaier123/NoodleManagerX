@@ -11,5 +11,6 @@ namespace NoodleManagerX.Models
     class Settings : ReactiveObject
     {
         [Reactive] [DataMember] public string synthDirectory { get; set; } = "";
+        [Reactive] [DataMember] public bool allowConverts { get; set; } = false;
     }
 }
