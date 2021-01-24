@@ -337,12 +337,11 @@ namespace NoodleManagerX.Models
 
                     if (!File.Exists(exe))
                     {
-                        if (Directory.Exists(directory)) Directory.Delete(directory);
+                        if (Directory.Exists(directory)) Directory.Delete(directory, true);
 
                         Log("Unzipping ADB to " + directory);
 
-                        Stream file = Assembly.GetExecutingAssembly().GetManifestResourceStream("NoodleManagerX.Resources.ADB.zip");
-
+                        using (Stream file = Assembly.GetExecutingAssembly().GetManifestResourceStream("NoodleManagerX.Resources.ADB.zip"))
                         using (ZipArchive archive = new ZipArchive(file))
                         {
                             foreach (ZipArchiveEntry entry in archive.Entries)
