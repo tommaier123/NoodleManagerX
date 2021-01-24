@@ -25,7 +25,7 @@ namespace NoodleManagerX.Models
         {
             if (queue.Count > 0 && queueCountBefore == 0)
             {
-                Console.WriteLine("started queue check");
+                MainViewModel.Log("Started queue check");
                 Task.Run(async () =>
                 {
                     while (queue.Count > 0)
@@ -41,7 +41,7 @@ namespace NoodleManagerX.Models
                         }
                         await Task.Delay(500);
                     }
-                    Console.WriteLine("stopped queue check");
+                    MainViewModel.Log("Stopped queue check");
                 });
             }
             queueCountBefore = queue.Count;

@@ -6,6 +6,8 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\NoodleManagerLogo.png" />
+    <None Remove="Resources\ADB.tar.gz" />
+    <None Remove="Resources\ADB.zip" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.12" />
@@ -18,14 +20,9 @@
     <PackageReference Include="SharpAdbClient" Version="2.3.23" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Assets\NoodleManagerLogo.png" />
-    <EmbeddedResource Include="Assets\close.png" />
-    <EmbeddedResource Include="Assets\fullscreen.png" />
-    <EmbeddedResource Include="Assets\minimize.png" />
-    <EmbeddedResource Include="Assets\search.png" />
+    <EmbeddedResource Include="Assets\*.png" />
     <EmbeddedResource Include="Assets\icon-nm.ico" />
-    <EmbeddedResource Include="Assets\searchbar.png" />
-    <EmbeddedResource Include="Assets\Fonts\NotoSans-Bold.ttf" />
-    <EmbeddedResource Include="Assets\Fonts\NotoSans-Regular.ttf" />
+    <EmbeddedResource Include="Resources\ADB.zip" />
+    <EmbeddedResource Include="Assets\Fonts\*.ttf" />
   </ItemGroup>
 </Project>

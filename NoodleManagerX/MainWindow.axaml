@@ -160,7 +160,7 @@
     <!--Control Header-->
     <Grid Grid.Row="1" Height="50" Background="{StaticResource ControlHeaderColor}" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}"
           ColumnDefinitions="135, auto,auto,auto,*,auto">
-      <Button Grid.Column="0" Command="{Binding TestAdb}"/>
+
       <!--Search-->
       <Grid Grid.Column="1" ColumnDefinitions="auto,auto" Margin="0,0,0,0">
         <StackPanel Grid.Column="0" VerticalAlignment="Center">

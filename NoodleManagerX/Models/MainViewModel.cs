@@ -22,14 +22,29 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Collections;
 using SharpAdbClient;
+using System.Net;
+using System.IO.Compression;
 
 namespace NoodleManagerX.Models
 {
     class MainViewModel : ReactiveObject
     {
-        //dotnet publish -c Release -f netcoreapp3.1 -r win-x64 --self-contained true /p:PublishSingleFile=true
-        //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true
-        //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true
+        //dotnet publish -c Release -f netcoreapp3.1 -r win-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=true
+        //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=true
+        //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true  -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=true
+
+
+
+
+
+        //Todo:
+
+        //strip unnecessary ADB files
+        //use Avalonia beta
+
+
+
+
 
         public static MainViewModel s_instance;
 
@@ -62,8 +77,6 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> getPageCommand { get; set; }
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
 
-        public ReactiveCommand<Unit, Unit> TestAdb { get; set; }
-
         public ObservableCollection<GenericItem> items { get; set; } = new ObservableCollection<GenericItem>();
 
         public ObservableCollection<MapItem> maps { get; private set; } = new ObservableCollection<MapItem>();
@@ -72,6 +85,10 @@ namespace NoodleManagerX.Models
         public ObservableCollection<AvatarItem> avatars { get; private set; } = new ObservableCollection<AvatarItem>();
 
         public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
+
+        public AdbServer adbServer = new AdbServer();
+        public AdbClient adbClient = new AdbClient();
+        public DeviceMonitor deviceMonitor;
 
         public bool closing = false;
 
@@ -170,14 +187,6 @@ namespace NoodleManagerX.Models
                 selectDirectory();
             }));
 
-            TestAdb = ReactiveCommand.Create((() =>
-            {
-                AdbServer server = new AdbServer();
-                var result = server.StartServer(@"platform-tools\adb.exe", restartServerIfNewer: false);
-                Console.WriteLine(result);
-            }));
-
-
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetPage());
             this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetPage());//reload maps when the current page changes
             this.WhenAnyValue(x => x.selectedSearchParameter).Subscribe(x => GetPage());//reload maps when the search parameter changes
@@ -194,6 +203,8 @@ namespace NoodleManagerX.Models
             items.CollectionChanged += ItemsCollectionChanged;
 
             LoadLocalItems();
+
+            StartAdbServer();
 
             if (!CheckDirectory(synthDirectory))
             {
@@ -320,6 +331,97 @@ namespace NoodleManagerX.Models
             }
         }
 
+        public void StartAdbServer()
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    string platform = "linux";
+                    string extension = "";
+
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        platform = "windows";
+                        extension = ".exe";
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        platform = "osx";
+                    }
+
+                    string location = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                    string directory = Path.Combine(location, platform);
+                    string exe = Path.Combine(directory, "adb" + extension);
+
+                    if (!File.Exists(exe))
+                    {
+                        if (Directory.Exists(directory)) Directory.Delete(directory);
+
+                        Log("Unzipping ADB to " + directory);
+
+                        Stream file = Assembly.GetExecutingAssembly().GetManifestResourceStream("NoodleManagerX.Resources.ADB.zip");
+
+                        using (ZipArchive archive = new ZipArchive(file))
+                        {
+                            foreach (ZipArchiveEntry entry in archive.Entries)
+                            {
+                                if (Path.GetDirectoryName(entry.FullName).StartsWith(platform) && !Path.EndsInDirectorySeparator(entry.FullName))
+                                {
+                                    Log(Path.Combine(location, entry.Name));
+                                    //entry.ExternalAttributes = entry.ExternalAttributes | (Convert.ToInt32("775", 8) << 16);
+
+                                    string path = Path.Combine(location, entry.FullName);
+                                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+
+                                    entry.ExtractToFile(path);
+                                }
+                            }
+                        }
+                    }
+
+                    Log("Looking for adb executable at " + exe);
+                    var result = adbServer.StartServer(exe, restartServerIfNewer: false);
+                    MainViewModel.Log("Adb server " + result);
+
+                    deviceMonitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
+                    deviceMonitor.DeviceConnected += this.OnDeviceConnected;
+                    deviceMonitor.DeviceDisconnected += this.OnDevicDisconnected;
+                    deviceMonitor.Start();
+                }
+                catch (Exception e)
+                {
+                    MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+                }
+            });
+        }
+
+        private void OnDeviceConnected(object sender, DeviceDataEventArgs e)
+        {
+            Task.Run(async () =>
+            {
+                Log("Device connected");
+                await Task.Delay(100);
+                List<DeviceData> devices = adbClient.GetDevices();
+                foreach (DeviceData device in devices)
+                {
+                    if (device.Serial == e.Device.Serial)
+                    {
+                        Log(device.Product + " " + device.Model + " " + device.Name + " " + device.Serial);
+                    }
+                }
+            });
+        }
+
+        private void OnDevicDisconnected(object sender, DeviceDataEventArgs e)
+        {
+            Task.Run(() =>
+            {
+                Log("Device disconnected");
+                Log(e.Device.Serial);
+            });
+        }
+
         public void OpenErrorDialog(string text)
         {
             _ = Dispatcher.UIThread.InvokeAsync(async () =>
@@ -393,7 +495,7 @@ namespace NoodleManagerX.Models
             try
             {
                 string path = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager", "Settings.json");
-                Console.WriteLine("Loading Settings from " + path);
+                MainViewModel.Log("Loading Settings from " + path);
                 if (File.Exists(path))
                 {
                     using (StreamReader file = File.OpenText(path))
@@ -413,7 +515,7 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
-                    Console.WriteLine("Saving Settings");
+                    MainViewModel.Log("Saving Settings");
                     string output = JsonConvert.SerializeObject(settings);
 
                     string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager");
@@ -473,7 +575,12 @@ namespace NoodleManagerX.Models
 
         public static void Log(MethodBase m, Exception e)
         {
-            Console.WriteLine("Error " + m.ReflectedType.Name + " " + e.Message);
+            Log("Error " + m.ReflectedType.Name + " " + e.Message);
+        }
+
+        public static void Log(string message)
+        {
+            Console.WriteLine(message);
         }
 
         public class CustomerSorter : IComparer

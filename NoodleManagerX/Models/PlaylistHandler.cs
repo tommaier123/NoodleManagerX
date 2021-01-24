@@ -20,7 +20,7 @@ namespace NoodleManagerX.Models
             string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "Playlist");
             if (Directory.Exists(directory))
             {
-                Task.Run(async () =>
+                Task.Run(() =>
                 {
                     List<LocalItem> tmp = new List<LocalItem>();
                     foreach (string file in Directory.GetFiles(directory))

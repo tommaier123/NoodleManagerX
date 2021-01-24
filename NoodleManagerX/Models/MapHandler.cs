@@ -50,7 +50,7 @@ namespace NoodleManagerX.Models
                             }
                             catch
                             {
-                                Console.WriteLine("Deleting corrupted file " + Path.GetFileName(file));
+                                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
                                 File.Delete(file);
                             }
                         }

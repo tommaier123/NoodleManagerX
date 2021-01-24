@@ -4,6 +4,7 @@ using ImageMagick;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -56,7 +57,7 @@ namespace NoodleManagerX.Models
 
         public void UpdateDownloaded()
         {
-            var tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
+            List<LocalItem> tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
             _ = Dispatcher.UIThread.InvokeAsync(() =>
             {
                 if (tmp.Count() > 0)
@@ -86,8 +87,6 @@ namespace NoodleManagerX.Models
                         downloading = true;
                     });
 
-                    Console.WriteLine("Downloading " + id);
-
                     WebClient webClient = new WebClient();
                     string url = "https://synthriderz.com" + download_url;
 
@@ -111,7 +110,7 @@ namespace NoodleManagerX.Models
                     }
                     else
                     {
-                        Console.WriteLine("download failed " + id);
+                        MainViewModel.Log("Download failed " + id);
                         DownloadScheduler.queue.Add(this);
                     }
                 }

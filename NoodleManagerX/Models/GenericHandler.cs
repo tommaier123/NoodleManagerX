@@ -31,7 +31,7 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
-                    Console.WriteLine("Getting Page");
+                    MainViewModel.Log("Getting Page " + MainViewModel.s_instance.currentPage);
 
                     for (int i = 1; i <= pagecount; i++)
                     {
@@ -102,7 +102,7 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
-                    Console.WriteLine("Get All Started");
+                    MainViewModel.Log("Get All Started");
 
                     int pageCountAll = 1;
                     int i = 1;
@@ -117,7 +117,7 @@ namespace NoodleManagerX.Models
                             if (MainViewModel.s_instance.closing) break;
                             foreach (GenericItem item in page.data)
                             {
-                                var instances = MainViewModel.s_instance.items.Where(x => x.itemType == ItemType.Map && x.id == item.id).ToList();
+                                List<GenericItem> instances = MainViewModel.s_instance.items.Where(x => x.itemType == ItemType.Map && x.id == item.id).ToList();
                                 if (instances.Count > 0)
                                 {
                                     if (!instances[0].downloaded)
@@ -130,7 +130,7 @@ namespace NoodleManagerX.Models
                                     if (!item.downloaded || item.needsUpdate)
                                     {
                                         DownloadScheduler.queue.Add(item);
-                                        if (item.needsUpdate) { Console.WriteLine("Update"); }
+                                        if (item.needsUpdate) { MainViewModel.Log("Update"); }
                                     }
                                 }
                             }
@@ -142,7 +142,7 @@ namespace NoodleManagerX.Models
 
                 }
                 catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
-                Console.WriteLine("Get All Done");
+                MainViewModel.Log("Get All Done");
             });
         }
 
