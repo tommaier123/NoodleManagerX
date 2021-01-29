@@ -68,6 +68,7 @@ namespace NoodleManagerX.Models
         [Reactive] public bool directoryValid { get; set; }
 
         [Reactive] public Settings settings { get; set; } = new Settings();
+        [Reactive] public string questSerial { get; set; } = "";
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
@@ -196,7 +197,8 @@ namespace NoodleManagerX.Models
             this.WhenAnyValue(x => x.selectedDifficulty).Subscribe(x => GetPage());//reload maps when the search difficulty changes
             this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetPage());//reload maps when the sort method changes
             this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetPage());//reload maps when the sort order changes
-            settings.Changed.Subscribe(x => SaveSettings());//save the settings when they change
+            this.WhenAnyValue(x => x.questSerial).Subscribe(x => LoadLocalItems());//reload local when the quest status changes
+            settings.Changed.Subscribe(x => { SaveSettings(); LoadLocalItems(); });//save the settings when they change
             this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).Subscribe(x =>
             {
                 directoryValid = CheckDirectory(synthDirectory);
@@ -245,15 +247,21 @@ namespace NoodleManagerX.Models
 
         public void LoadLocalItems()
         {
-            mapHandler.LoadLocalItems();
-            playlistHandler.LoadLocalItems();
-            stageHandler.LoadLocalItems();
-            avatarHandler.LoadLocalItems();
-
-            foreach (GenericItem item in items)
+            Task.Run(() =>
             {
-                item.UpdateDownloaded();
-            }
+                Log("Loading local items");
+                localItems.Clear();
+
+                mapHandler.LoadLocalItems();
+                playlistHandler.LoadLocalItems();
+                stageHandler.LoadLocalItems();
+                avatarHandler.LoadLocalItems();
+
+                foreach (GenericItem item in items)
+                {
+                    item.UpdateDownloaded();
+                }
+            });
         }
 
         public void GetPage(bool download = false)
@@ -404,14 +412,33 @@ namespace NoodleManagerX.Models
         {
             Task.Run(async () =>
             {
-                Log("Device connected");
                 await Task.Delay(100);
                 List<DeviceData> devices = adbClient.GetDevices();
                 foreach (DeviceData device in devices)
                 {
                     if (device.Serial == e.Device.Serial)
                     {
-                        Log(device.Product + " " + device.Model + " " + device.Name + " " + device.Serial);
+                        //Log(device.Product + " " + device.Model + " " + device.Name + " " + device.Serial);
+
+                        if (device.Product == "beckham")
+                        {
+                            if (questSerial != device.Serial)
+                            {
+                                if (questSerial == "")
+                                {
+                                    questSerial = device.Serial;
+                                    Log("Quest connected " + questSerial);
+                                }
+                                else
+                                {
+                                    Log("Multiple quests connected");
+                                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                                    {
+                                        _ = MessageBox.Show(MainWindow.s_instance, "There are multiple quests connected." + Environment.NewLine + "Only one can be used at a time.", "Warning", MessageBox.MessageBoxButtons.Ok);
+                                    });
+                                }
+                            }
+                        }
                     }
                 }
             });
@@ -421,8 +448,11 @@ namespace NoodleManagerX.Models
         {
             Task.Run(() =>
             {
-                Log("Device disconnected");
-                Log(e.Device.Serial);
+                if (questSerial == e.Device.Serial)
+                {
+                    Log("Quest disconnected " + questSerial);
+                    questSerial = "";
+                }
             });
         }
 

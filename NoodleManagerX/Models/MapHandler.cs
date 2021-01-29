@@ -17,12 +17,12 @@ namespace NoodleManagerX.Models
         public override string select { get; set; } = "id,cover_url,download_url,published_at,title,artist,mapper,duration,difficulties,hash";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
-        public override void LoadLocalItems()
+        public override async void LoadLocalItems()
         {
             string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs");
             if (Directory.Exists(directory))
             {
-                Task.Run(async () =>
+                await Task.Run(async () =>
                 {
                     List<LocalItem> tmp = new List<LocalItem>();
                     foreach (string file in Directory.GetFiles(directory))
