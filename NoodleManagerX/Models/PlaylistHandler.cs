@@ -18,24 +18,27 @@ namespace NoodleManagerX.Models
 
         public override async void LoadLocalItems()
         {
-            string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "Playlist");
-            if (Directory.Exists(directory))
+            if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
-                await Task.Run(() =>
+                string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "Playlist");
+                if (Directory.Exists(directory))
                 {
-                    List<LocalItem> tmp = new List<LocalItem>();
-                    foreach (string file in Directory.GetFiles(directory))
+                    await Task.Run(() =>
                     {
-                        if (Path.GetExtension(file) == ".playlist")
+                        List<LocalItem> tmp = new List<LocalItem>();
+                        foreach (string file in Directory.GetFiles(directory))
                         {
-                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Playlist));
+                            if (Path.GetExtension(file) == ".playlist")
+                            {
+                                tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Playlist));
+                            }
                         }
-                    }
-                    foreach (LocalItem item in tmp)
-                    {
-                        MainViewModel.s_instance.localItems.Add(item);
-                    }
-                });
+                        foreach (LocalItem item in tmp)
+                        {
+                            MainViewModel.s_instance.localItems.Add(item);
+                        }
+                    });
+                }
             }
         }
 

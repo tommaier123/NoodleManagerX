@@ -19,49 +19,52 @@ namespace NoodleManagerX.Models
 
         public override async void LoadLocalItems()
         {
-            string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs");
-            if (Directory.Exists(directory))
+            if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
-                await Task.Run(async () =>
+                string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs");
+                if (Directory.Exists(directory))
                 {
-                    List<LocalItem> tmp = new List<LocalItem>();
-                    foreach (string file in Directory.GetFiles(directory))
+                    await Task.Run(async () =>
                     {
-                        if (Path.GetExtension(file) == ".synth")
+                        List<LocalItem> tmp = new List<LocalItem>();
+                        foreach (string file in Directory.GetFiles(directory))
                         {
-                            try
+                            if (Path.GetExtension(file) == ".synth")
                             {
-                                using (ZipArchive archive = ZipFile.OpenRead(file))
+                                try
                                 {
-                                    foreach (ZipArchiveEntry entry in archive.Entries)
+                                    using (ZipArchive archive = ZipFile.OpenRead(file))
                                     {
-                                        if (entry.FullName == "synthriderz.meta.json")
+                                        foreach (ZipArchiveEntry entry in archive.Entries)
                                         {
-                                            using (StreamReader sr = new StreamReader(entry.Open()))
+                                            if (entry.FullName == "synthriderz.meta.json")
                                             {
-                                                LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
-                                                localItem.filename = Path.GetFileName(file);
-                                                localItem.modifiedTime = File.GetLastWriteTime(file);
-                                                localItem.itemType = ItemType.Map;
-                                                tmp.Add(localItem);
+                                                using (StreamReader sr = new StreamReader(entry.Open()))
+                                                {
+                                                    LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
+                                                    localItem.filename = Path.GetFileName(file);
+                                                    localItem.modifiedTime = File.GetLastWriteTime(file);
+                                                    localItem.itemType = ItemType.Map;
+                                                    tmp.Add(localItem);
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
-                            catch
-                            {
-                                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
-                                File.Delete(file);
+                                catch
+                                {
+                                    MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
+                                    File.Delete(file);
+                                }
                             }
                         }
-                    }
 
-                    foreach (LocalItem item in tmp)
-                    {
-                        MainViewModel.s_instance.localItems.Add(item);
-                    }
-                });
+                        foreach (LocalItem item in tmp)
+                        {
+                            MainViewModel.s_instance.localItems.Add(item);
+                        }
+                    });
+                }
             }
         }
 

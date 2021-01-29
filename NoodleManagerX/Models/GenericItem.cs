@@ -51,7 +51,10 @@ namespace NoodleManagerX.Models
 
             downloadCommand = ReactiveCommand.Create((() =>
             {
-                Download();
+                if (MainViewModel.s_instance.CheckDirectory(MainViewModel.s_instance.settings.synthDirectory, true))
+                {
+                    Download();
+                }
             }));
         }
 
@@ -79,56 +82,59 @@ namespace NoodleManagerX.Models
 
         public void Download()
         {
-            Task.Run(async () =>
+            if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
-                try
+                Task.Run(async () =>
                 {
-                    _ = Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        downloaded = false;
-                        downloading = true;
-                    });
-
-                    WebClient webClient = new WebClient();
-                    string url = "https://synthriderz.com" + download_url;
-
-                    //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    webClient.OpenRead(url);
-                    string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
-                    filename = new ContentDisposition(header_contentDisposition).FileName;
-
-                    string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
-
-                    await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
-
-                    webClient.Dispose();
-
-                    if (File.Exists(filepath))
+                    try
                     {
                         _ = Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            downloaded = true;
+                            downloaded = false;
+                            downloading = true;
                         });
+
+                        WebClient webClient = new WebClient();
+                        string url = "https://synthriderz.com" + download_url;
+
+                        //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        webClient.OpenRead(url);
+                        string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
+                        filename = new ContentDisposition(header_contentDisposition).FileName;
+
+                        string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
+
+                        await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
+
+                        webClient.Dispose();
+
+                        if (File.Exists(filepath))
+                        {
+                            _ = Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                downloaded = true;
+                            });
+                        }
+                        else
+                        {
+                            MainViewModel.Log("Download failed " + id);
+                            DownloadScheduler.queue.Add(this);
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        MainViewModel.Log("Download failed " + id);
                         DownloadScheduler.queue.Add(this);
+                        MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
                     }
-                }
-                catch (Exception e)
-                {
-                    DownloadScheduler.queue.Add(this);
-                    MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
-                }
 
-                _ = Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    downloading = false;
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        downloading = false;
+                    });
+
+                    DownloadScheduler.downloading.Remove(this);
                 });
-
-                DownloadScheduler.downloading.Remove(this);
-            });
+            }
         }
 
         public void LoadBitmap()

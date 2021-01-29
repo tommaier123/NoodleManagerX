@@ -111,6 +111,14 @@ namespace NoodleManagerX.Models
 
             LoadSettings();
 
+            if (!CheckDirectory(settings.synthDirectory))
+            {
+                settings.synthDirectory = "";
+                GetDirectoryFromRegistry();
+            }
+
+            synthDirectory = settings.synthDirectory;
+
             minimizeCommand = ReactiveCommand.Create(() =>
             {
                 if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -210,11 +218,6 @@ namespace NoodleManagerX.Models
             LoadLocalItems();
 
             StartAdbServer();
-
-            if (!CheckDirectory(synthDirectory))
-            {
-                GetDirectoryFromRegistry();
-            }
         }
 
         private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -266,27 +269,30 @@ namespace NoodleManagerX.Models
 
         public void GetPage(bool download = false)
         {
-            if (lastSearchText != searchText)
+            if (!download || CheckDirectory(settings.synthDirectory, true))
             {
-                currentPage = 1;
-                lastSearchText = searchText;
-            }
-            apiRequestCounter++;
+                if (lastSearchText != searchText)
+                {
+                    currentPage = 1;
+                    lastSearchText = searchText;
+                }
+                apiRequestCounter++;
 
-            switch (selectedTabIndex)
-            {
-                case 0:
-                    mapHandler.GetPage(download);
-                    break;
-                case 1:
-                    playlistHandler.GetPage(download);
-                    break;
-                case 2:
-                    stageHandler.GetPage(download);
-                    break;
-                case 3:
-                    avatarHandler.GetPage(download);
-                    break;
+                switch (selectedTabIndex)
+                {
+                    case 0:
+                        mapHandler.GetPage(download);
+                        break;
+                    case 1:
+                        playlistHandler.GetPage(download);
+                        break;
+                    case 2:
+                        stageHandler.GetPage(download);
+                        break;
+                    case 3:
+                        avatarHandler.GetPage(download);
+                        break;
+                }
             }
         }
 
@@ -481,26 +487,27 @@ namespace NoodleManagerX.Models
 
         public async void selectDirectory()
         {
-            OpenFolderDialog dialog = new OpenFolderDialog();
-            dialog.Directory = synthDirectory;
-
-            string directory = await dialog.ShowAsync(MainWindow.s_instance);
-
-            if (!String.IsNullOrEmpty(directory))
+            try
             {
-                if (CheckDirectory(directory))
-                {
-                    synthDirectory = directory;
-                }
-                else
+                OpenFolderDialog dialog = new OpenFolderDialog();
+                dialog.Directory = synthDirectory;
+
+                string directory = await dialog.ShowAsync(MainWindow.s_instance);
+
+                if (!String.IsNullOrEmpty(directory))
                 {
                     string parent = Directory.GetParent(directory).FullName;
                     if (CheckDirectory(parent))
                     {
                         synthDirectory = parent;
                     }
+                    else
+                    {
+                        synthDirectory = directory;
+                    }
                 }
             }
+            catch { }
         }
 
         public void GetDirectoryFromRegistry()
@@ -537,7 +544,6 @@ namespace NoodleManagerX.Models
                         JsonSerializer serializer = new JsonSerializer();
                         settings = (Settings)serializer.Deserialize(file, typeof(Settings));
                     }
-                    synthDirectory = settings.synthDirectory;
                 }
             }
             catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
