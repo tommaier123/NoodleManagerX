@@ -116,8 +116,10 @@ namespace NoodleManagerX.Models
                 settings.synthDirectory = "";
                 GetDirectoryFromRegistry();
             }
-
-            synthDirectory = settings.synthDirectory;
+            else
+            {
+                synthDirectory = settings.synthDirectory;
+            }
 
             minimizeCommand = ReactiveCommand.Create(() =>
             {
@@ -426,7 +428,7 @@ namespace NoodleManagerX.Models
                     {
                         //Log(device.Product + " " + device.Model + " " + device.Name + " " + device.Serial);
 
-                        if (device.Product == "beckham")
+                        if (device.Product == "vr_monterey")
                         {
                             if (questSerial != device.Serial)
                             {
