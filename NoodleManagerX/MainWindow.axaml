@@ -334,15 +334,19 @@
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
         <!--Path, Quest Enabled, Auto Update Content, Disable NM Update Notification-->
-        <Grid RowDefinitions="auto,*" Margin="10,10,10,10">
+        <Grid RowDefinitions="auto,auto,*" Margin="10,10,10,10">
           <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Margin="10,10,10,10">
             <TextBlock Grid.Column="0" Text="Synth Riders Directory" VerticalAlignment="Center"/>
             <Border Grid.Column="1" Margin="20,0,0,0" BorderBrush="{Binding Path=directoryValid, Converter={StaticResource BoolColorConverter}, ConverterParameter=#aaaaaa|#ff0000}" BorderThickness="1">
-              <TextBox   Text="{Binding synthDirectory}" BorderThickness="0"/>
+              <TextBox Text="{Binding synthDirectory}" BorderThickness="0"/>
             </Border>
             <Button Grid.Column="2" Margin="16,0,0,0" Command="{Binding selectDirectoryCommand}">
               <TextBlock Text="Select"/>
             </Button>
+          </Grid>
+          <Grid Grid.Row="1" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10">
+            <TextBlock Grid.Column="0" Text="Allow Converts" VerticalAlignment="Center"/>
+            <CheckBox Grid.Column="1" Margin="16,0,0,0" IsChecked="{Binding settings.allowConverts}"/>
           </Grid>
         </Grid>
       </Grid>
