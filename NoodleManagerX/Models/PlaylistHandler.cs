@@ -16,28 +16,25 @@ namespace NoodleManagerX.Models
         public override string select { get; set; } = "id,cover_url,download_url,published_at,name,user";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/playlists";
 
-        public override async void LoadLocalItems()
+        public override void LoadLocalItems()
         {
             if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
                 string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "Playlist");
                 if (Directory.Exists(directory))
                 {
-                    await Task.Run(() =>
+                    List<LocalItem> tmp = new List<LocalItem>();
+                    foreach (string file in Directory.GetFiles(directory))
                     {
-                        List<LocalItem> tmp = new List<LocalItem>();
-                        foreach (string file in Directory.GetFiles(directory))
+                        if (Path.GetExtension(file) == ".playlist")
                         {
-                            if (Path.GetExtension(file) == ".playlist")
-                            {
-                                tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Playlist));
-                            }
+                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Playlist));
                         }
-                        foreach (LocalItem item in tmp)
-                        {
-                            MainViewModel.s_instance.localItems.Add(item);
-                        }
-                    });
+                    }
+                    foreach (LocalItem item in tmp)
+                    {
+                        MainViewModel.s_instance.localItems.Add(item);
+                    }
                 }
             }
         }

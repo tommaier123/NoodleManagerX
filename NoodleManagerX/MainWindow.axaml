@@ -4,8 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:NoodleManagerX"
-        mc:Ignorable="d" d:DesignWidth="950" d:DesignHeight="620"
-        Width="950" Height="620"
+        mc:Ignorable="d" d:DesignWidth="950" d:DesignHeight="622"
+        Width="950" Height="622"
         Background="#1a1b1f"
         x:Class="NoodleManagerX.MainWindow"
         HasSystemDecorations="False"
@@ -91,17 +91,30 @@
 
 
     <!--Grow and shrink the image-->
-    <Style Selector="ListBox.MyListBox ListBoxItem:pointerover Image">
+    <Style Selector="ListBox.MyListBoxSmall ListBoxItem:pointerover Image">
       <Setter Property="Width" Value="160"/>
       <Setter Property="Height" Value="160"/>
     </Style>
-    <Style Selector="ListBox.MyListBox ListBoxItem:selected Image">
+    <Style Selector="ListBox.MyListBoxSmall ListBoxItem:selected Image">
       <Setter Property="Width" Value="160"/>
       <Setter Property="Height" Value="160"/>
     </Style>
-    <Style Selector="ListBox.MyListBox ListBoxItem:not(:pointerover):not(:selected) Image">
+    <Style Selector="ListBox.MyListBoxSmall ListBoxItem:not(:pointerover):not(:selected) Image">
       <Setter Property="Width" Value="140"/>
       <Setter Property="Height" Value="140"/>
+    </Style>
+
+    <Style Selector="ListBox.MyListBoxBig ListBoxItem:pointerover Image">
+      <Setter Property="Width" Value="182"/>
+      <Setter Property="Height" Value="240"/>
+    </Style>
+    <Style Selector="ListBox.MyListBoxBig ListBoxItem:selected Image">
+      <Setter Property="Width" Value="182"/>
+      <Setter Property="Height" Value="240"/>
+    </Style>
+    <Style Selector="ListBox.MyListBoxBig ListBoxItem:not(:pointerover):not(:selected) Image">
+      <Setter Property="Width" Value="167"/>
+      <Setter Property="Height" Value="220"/>
     </Style>
 
     <!--Style for the difficulties-->
@@ -236,7 +249,7 @@
     <!--This is where the tab content begins-->
     <Grid Grid.Row="2">
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
-        <ListBox Items="{Binding Path=maps}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox Items="{Binding Path=maps}" Classes="MyListBox MyListBoxSmall" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid RowDefinitions="*,auto">
@@ -271,7 +284,7 @@
         </ListBox>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1}">
-        <ListBox Items="{Binding Path=playlists}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox Items="{Binding Path=playlists}" Classes="MyListBox MyListBoxSmall" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid RowDefinitions="*,auto">
@@ -290,11 +303,11 @@
         </ListBox>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=2}">
-        <ListBox Items="{Binding Path=stages}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox Items="{Binding Path=stages}" Classes="MyListBox MyListBoxBig" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid RowDefinitions="*,auto">
-                <Grid Grid.Row="0" Height="160" ColumnDefinitions="auto, auto, *, auto">
+                <Grid Grid.Row="0" Height="240" ColumnDefinitions="auto, auto, *, auto">
                   <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
                   <Grid Grid.Column="1" RowDefinitions="auto,auto,auto,*,auto" Margin="20,0,0,0">
                     <TextBlock Grid.Row="0" Text="{Binding name}" Classes="Downloaded" FontSize="35"/>
@@ -309,11 +322,11 @@
         </ListBox>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=3}">
-        <ListBox Items="{Binding Path=avatars}" Classes="MyListBox" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox Items="{Binding Path=avatars}" Classes="MyListBox MyListBoxBig" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid RowDefinitions="*,auto">
-                <Grid Grid.Row="0" Height="160" ColumnDefinitions="auto, auto, *, auto">
+                <Grid Grid.Row="0" Height="240" ColumnDefinitions="auto, auto, *, auto">
                   <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
                   <Grid Grid.Column="1" RowDefinitions="auto,auto,auto,*,auto" Margin="20,0,0,0">
                     <TextBlock Grid.Row="0" Text="{Binding name}" Classes="Downloaded" FontSize="35"/>

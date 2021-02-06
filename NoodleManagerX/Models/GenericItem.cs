@@ -62,9 +62,9 @@ namespace NoodleManagerX.Models
         {
             List<LocalItem> tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
 
-            if (tmp.Count() > 0)
+            _ = Dispatcher.UIThread.InvokeAsync(() =>
             {
-                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                if (tmp.Count() > 0)
                 {
                     downloaded = true;
                     if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
@@ -75,9 +75,13 @@ namespace NoodleManagerX.Models
                     {
                         needsUpdate = DateTime.Compare(updatedAt, tmp[0].modifiedTime) > 0;
                     }
-                });
-            }
-
+                }
+                else
+                {
+                    downloaded = false;
+                    needsUpdate = false;
+                }
+            });
         }
 
         public void Download()

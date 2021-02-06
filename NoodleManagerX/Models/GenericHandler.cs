@@ -22,7 +22,7 @@ namespace NoodleManagerX.Models
         public virtual string select { get; set; } = "";
         public virtual string apiEndpoint { get; set; } = "";
 
-        public virtual async void LoadLocalItems() { }
+        public virtual void LoadLocalItems() { }
 
         public void GetPage(bool download = false)
         {

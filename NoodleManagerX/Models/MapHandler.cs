@@ -1,10 +1,9 @@
-﻿using System;
+﻿using DynamicData;
 using Newtonsoft.Json;
-using DynamicData;
-using System.Threading.Tasks;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace NoodleManagerX.Models
@@ -19,14 +18,14 @@ namespace NoodleManagerX.Models
 
         public override async void LoadLocalItems()
         {
-            if (MainViewModel.s_instance.settings.synthDirectory != "")
+            List<LocalItem> tmp = new List<LocalItem>();
+            if (MainViewModel.s_instance.questSerial == "")
             {
-                string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs");
-                if (Directory.Exists(directory))
+                if (MainViewModel.s_instance.settings.synthDirectory != "")
                 {
-                    await Task.Run(async () =>
+                    string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs");
+                    if (Directory.Exists(directory))
                     {
-                        List<LocalItem> tmp = new List<LocalItem>();
                         foreach (string file in Directory.GetFiles(directory))
                         {
                             if (Path.GetExtension(file) == ".synth")
@@ -58,13 +57,20 @@ namespace NoodleManagerX.Models
                                 }
                             }
                         }
-
-                        foreach (LocalItem item in tmp)
-                        {
-                            MainViewModel.s_instance.localItems.Add(item);
-                        }
-                    });
+                    }
                 }
+            }
+            else
+            {
+                var files = MainViewModel.QuestDirectoryGetFiles("CustomSongs").Where(x=>x.TrimEnd().EndsWith(".synth"));
+                foreach (string file in files)
+                {
+                    tmp.Add(new LocalItem(-1, "", file, new System.DateTime(), ItemType.Map));
+                }
+            }
+            foreach (LocalItem item in tmp)
+            {
+                MainViewModel.s_instance.localItems.Add(item);
             }
         }
 

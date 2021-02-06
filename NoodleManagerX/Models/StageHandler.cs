@@ -16,28 +16,25 @@ namespace NoodleManagerX.Models
         public override string select { get; set; } = "id,cover_url,download_url,published_at,name,user";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/models/stages";
 
-        public override async void LoadLocalItems()
+        public override void LoadLocalItems()
         {
             if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
                 string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomStages");
                 if (Directory.Exists(directory))
                 {
-                    await Task.Run(() =>
+                    List<LocalItem> tmp = new List<LocalItem>();
+                    foreach (string file in Directory.GetFiles(directory))
                     {
-                        List<LocalItem> tmp = new List<LocalItem>();
-                        foreach (string file in Directory.GetFiles(directory))
+                        if (Path.GetExtension(file) == ".stage" || Path.GetExtension(file) == ".spinstage")
                         {
-                            if (Path.GetExtension(file) == ".stage" || Path.GetExtension(file) == ".spinstage")
-                            {
-                                tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Stage));
-                            }
+                            tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Stage));
                         }
-                        foreach (LocalItem item in tmp)
-                        {
-                            MainViewModel.s_instance.localItems.Add(item);
-                        }
-                    });
+                    }
+                    foreach (LocalItem item in tmp)
+                    {
+                        MainViewModel.s_instance.localItems.Add(item);
+                    }
                 }
             }
         }

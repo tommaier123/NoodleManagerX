@@ -43,7 +43,8 @@ namespace NoodleManagerX.Models
 
         //strip unnecessary ADB files
         //use Avalonia beta
-
+        //check update function for maps
+        //update downloaded incorrect when coming back from page -> add downloaded files to local
 
 
 
@@ -88,7 +89,7 @@ namespace NoodleManagerX.Models
         public ObservableCollection<StageItem> stages { get; private set; } = new ObservableCollection<StageItem>();
         public ObservableCollection<AvatarItem> avatars { get; private set; } = new ObservableCollection<AvatarItem>();
 
-        public ConcurrentBag<LocalItem> localItems { get; set; } = new ConcurrentBag<LocalItem>();
+        public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
         public AdbServer adbServer = new AdbServer();
         public AdbClient adbClient = new AdbClient();
@@ -531,6 +532,43 @@ namespace NoodleManagerX.Models
                 }
             }
             catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+        }
+
+        public static List<string> QuestDirectoryGetFiles(string path)
+        {
+            List<string> ret = new List<string>();
+            if (QuestPathExists(path))
+            {
+
+                var quests = MainViewModel.s_instance.adbClient.GetDevices().Where(x => x.Serial == MainViewModel.s_instance.questSerial);
+                if (quests.Count() > 0)
+                {
+                    DeviceData device = quests.First();
+
+                    var receiver = new ConsoleOutputReceiver();
+
+                    MainViewModel.s_instance.adbClient.ExecuteRemoteCommand("ls sdcard/Android/data/com.kluge.SynthRiders/files/" + path, device, receiver);
+                    ret.Add(receiver.ToString().Split(new char[] { '\n' }));
+                }
+            }
+            return ret;
+        }
+
+        public static bool QuestPathExists(string path)
+        {
+            List<string> ret = new List<string>();
+            var quests = MainViewModel.s_instance.adbClient.GetDevices().Where(x => x.Serial == MainViewModel.s_instance.questSerial);
+            if (quests.Count() > 0)
+            {
+                DeviceData device = quests.First();
+
+                var receiver = new ConsoleOutputReceiver();
+
+                MainViewModel.s_instance.adbClient.ExecuteRemoteCommand("ls sdcard/Android/data/com.kluge.SynthRiders/files", device, receiver);
+
+                return receiver.ToString().Contains(path);
+            }
+            return false;
         }
 
         public void LoadSettings()
