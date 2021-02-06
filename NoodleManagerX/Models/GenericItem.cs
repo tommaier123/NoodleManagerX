@@ -32,7 +32,7 @@ namespace NoodleManagerX.Models
         [Reactive] public bool downloading { get; set; } = false;
         [Reactive] public bool downloaded { get; set; } = false;
         [Reactive] public bool needsUpdate { get; set; } = false;
-        public string filename { get; set; } = "";
+        public string download_filename { get; set; } = "";
         public DateTime updatedAt { get; set; }
         public virtual string target { get; set; }
 
@@ -102,11 +102,14 @@ namespace NoodleManagerX.Models
                         string url = "https://synthriderz.com" + download_url;
 
                         //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        webClient.OpenRead(url);
-                        string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
-                        filename = new ContentDisposition(header_contentDisposition).FileName;
+                        if (String.IsNullOrEmpty(download_filename))
+                        {
+                            webClient.OpenRead(url);
+                            string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
+                            download_filename = new ContentDisposition(header_contentDisposition).FileName;
+                        }
 
-                        string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
+                        string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, download_filename);
 
                         await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
 
@@ -114,6 +117,9 @@ namespace NoodleManagerX.Models
 
                         if (File.Exists(filepath))
                         {
+                            LocalItem localItem = new LocalItem(id, "", Path.GetFileName(filepath), DateTime.Now, this.itemType);
+                            MainViewModel.s_instance.localItems.Add(localItem);
+
                             _ = Dispatcher.UIThread.InvokeAsync(() =>
                             {
                                 downloaded = true;
@@ -196,7 +202,7 @@ namespace NoodleManagerX.Models
                 }
                 else
                 {
-                    return filename == item.filename;
+                    return filename == item.download_filename;
                 }
             }
             return false;
