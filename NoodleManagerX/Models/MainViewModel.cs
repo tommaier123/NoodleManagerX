@@ -44,7 +44,6 @@ namespace NoodleManagerX.Models
         //strip unnecessary ADB files
         //use Avalonia beta
         //check update function for maps
-        //update downloaded incorrect when coming back from page -> add downloaded files to local
         //use api filename instead of content dispositon
 
 

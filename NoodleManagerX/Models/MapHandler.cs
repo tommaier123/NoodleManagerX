@@ -13,7 +13,7 @@ namespace NoodleManagerX.Models
         public override ItemType itemType { get; set; } = ItemType.Map;
 
         public override string allParameters { get; set; } = "\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}";
-        public override string select { get; set; } = "id,cover_url,download_url,published_at,title,artist,mapper,duration,difficulties,hash";
+        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
         public override async void LoadLocalItems()
@@ -62,7 +62,7 @@ namespace NoodleManagerX.Models
             }
             else
             {
-                var files = MainViewModel.QuestDirectoryGetFiles("CustomSongs").Where(x=>x.TrimEnd().EndsWith(".synth"));
+                var files = MainViewModel.QuestDirectoryGetFiles("CustomSongs").Where(x => x.TrimEnd().EndsWith(".synth"));
                 foreach (string file in files)
                 {
                     tmp.Add(new LocalItem(-1, "", file, new System.DateTime(), ItemType.Map));

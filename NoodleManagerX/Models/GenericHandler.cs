@@ -20,6 +20,7 @@ namespace NoodleManagerX.Models
 
         public virtual string allParameters { get; set; } = "";
         public virtual string select { get; set; } = "";
+        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,";
         public virtual string apiEndpoint { get; set; } = "";
 
         public virtual void LoadLocalItems() { }
@@ -81,7 +82,7 @@ namespace NoodleManagerX.Models
                             if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortMethod?.Name)) sortMethod = MainViewModel.s_instance.selectedSortMethod.Name;
                             if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortOrder?.Name)) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
 
-                            string req = apiEndpoint + "?select=" + select + "&limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + "&s=" + search + "&sort=" + sortMethod + "," + sortOrder;
+                            string req = apiEndpoint + "?select=" + selectAll + select + "&limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + "&s=" + search + "&sort=" + sortMethod + "," + sortOrder;
                             var page = DeserializePage(await client.DownloadStringTaskAsync(req));
 
                             if (MainViewModel.s_instance.apiRequestCounter != requestID && !download) break;

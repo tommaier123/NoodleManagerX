@@ -13,7 +13,7 @@ namespace NoodleManagerX.Models
         public override ItemType itemType { get; set; } = ItemType.Stage;
 
         public override string allParameters { get; set; } = "\"name\":{\"$contL\":\"<value>\"}},{\"user.username\":{\"$contL\":\"<value>\"}";
-        public override string select { get; set; } = "id,cover_url,download_url,published_at,name,user";
+        public override string select { get; set; } = "name,user";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/models/stages";
 
         public override void LoadLocalItems()
