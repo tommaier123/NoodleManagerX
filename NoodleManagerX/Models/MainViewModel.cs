@@ -45,6 +45,8 @@ namespace NoodleManagerX.Models
         //use Avalonia beta
         //check update function for maps
         //use api filename instead of content dispositon
+        //playlist number of songs
+        //context menu for description
 
 
 

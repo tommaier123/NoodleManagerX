@@ -130,6 +130,13 @@
       <Setter Property="Foreground" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=#888888|#ffffff}"/>
     </Style>
 
+    <!--Make terxt overlap the next grid-->
+    <Style Selector="TextBlock.DynamicText">
+      <Setter Property="ClipToBounds" Value="false"/>
+      <Setter Property="Width" Value="0"/>
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
   </Window.Styles>
 
 
@@ -252,40 +259,56 @@
         <ListBox Items="{Binding Path=maps}" Classes="MyListBox MyListBoxSmall" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
           <ListBox.ItemTemplate>
             <DataTemplate>
+              <!--v content, separator v-->
               <Grid RowDefinitions="*,auto">
-                <Grid Grid.Row="0" Height="160" ColumnDefinitions="auto, auto, *, auto">
+                <!--< cover, content >-->
+                <Grid ColumnDefinitions="auto,*" Grid.Row="0" Height="160" >
                   <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
-                  <Grid Grid.Column="1" RowDefinitions="auto,*,auto" Margin="20,0,0,0">
+                  <!--v title, content v-->
+                  <Grid RowDefinitions="auto,*" Grid.Column="1" Margin="20,0,0,0">
                     <TextBlock Grid.Row="0" Text="{Binding title}" Classes="Downloaded" FontSize="35"/>
-                    <Grid ColumnDefinitions="auto,*,auto,auto,auto,auto,auto,auto" Grid.Row="1">
-                      <Grid RowDefinitions="auto,auto,*" Grid.Column="0">
-                        <TextBlock Grid.Row="0" Text="{Binding artist}" Classes="Downloaded" FontSize="20"/>
-                        <TextBlock Grid.Row="1" Text="{Binding mapper}" Classes="Downloaded" FontSize="20"/>
+                    <!--< artist/mapper/duration, content, buttons >-->
+                    <Grid ColumnDefinitions="auto,*,auto" Grid.Row="1">
+                      <Grid RowDefinitions="auto,auto,*,auto" Grid.Column="0">
+                        <TextBlock Grid.Row="0" Text="{Binding artist}" Classes="Downloaded DynamicText" FontSize="20"/>
+                        <TextBlock Grid.Row="1" Text="{Binding mapper}" Classes="Downloaded DynamicText" FontSize="20"/>
+                        <TextBlock Grid.Row="3" Text="{Binding duration}" Classes="Downloaded" FontSize="30" FontWeight="SemiBold" Height="40" Margin="0,0,0,5"/>
                       </Grid>
-                      <TextBlock Grid.Column="2" Text="{Binding upvote_count}" Classes="Downloaded" Margin="20,0,0,0" Width="50" FontSize="30" VerticalAlignment="Center" TextAlignment="Right"/>
-                      <TextBlock Grid.Column="3" Text="Upvotes" Classes="Downloaded" FontSize="10" VerticalAlignment="Center"/>
-                      <TextBlock Grid.Column="4" Text="{Binding downvote_count}" Classes="Downloaded" Margin="20,0,0,0" Width="50" FontSize="30"  VerticalAlignment="Center" TextAlignment="Right"/>
-                      <TextBlock Grid.Column="5" Text="Downvotes" Classes="Downloaded" FontSize="10" VerticalAlignment="Center"/>
-                      <TextBlock Grid.Column="6" Text="{Binding download_count}" Classes="Downloaded" Margin="20,0,0,0" Width="50" FontSize="30" VerticalAlignment="Center" TextAlignment="Right"/>
-                      <TextBlock Grid.Column="7" Text="Downloads" Classes="Downloaded" FontSize="10" VerticalAlignment="Center"/>
-                    </Grid>
-                    <Grid Grid.Row="2" ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,*" Margin="0,0,0,5">
-                      <TextBlock Grid.Column="0" Text="{Binding duration}" Classes="Downloaded" FontSize="30" FontWeight="SemiBold" Width="100"/>
-                      <TextBlock Grid.Column="1" Text="EASY" Classes="Difficulty"
-                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=0}"/>
-                      <TextBlock Grid.Column="2" Text="NORMAL" Classes="Difficulty"
-                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=1}"/>
-                      <TextBlock Grid.Column="3" Text="HARD" Classes="Difficulty"
-                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=2}"/>
-                      <TextBlock Grid.Column="4" Text="EXPERT" Classes="Difficulty"
-                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=3}"/>
-                      <TextBlock Grid.Column="5" Text="MASTER" Classes="Difficulty"
-                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=4}"/>
-                      <TextBlock Grid.Column="6" Text="CUSTOM" Classes="Difficulty"
-                                 Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=5}"/>
+                      <!--< content >-->
+                      <Grid ColumnDefinitions="auto" Grid.Column="1" HorizontalAlignment="Center">
+                        <!--v stats, difficulties v-->
+                        <Grid RowDefinitions="*,auto" Grid.Column="0">
+                          <Grid ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" Grid.Row="0" Margin="0,40,0,0">
+                            <TextBlock Grid.Column="1" Text="123456" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20" VerticalAlignment="Center" TextAlignment="Right"/>
+                            <TextBlock Grid.Column="2" Text="Upvotes" Classes="Downloaded" FontSize="10" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="3" Text="{Binding downvote_count}" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20"  VerticalAlignment="Center" TextAlignment="Right"/>
+                            <TextBlock Grid.Column="4" Text="Downvotes" Classes="Downloaded" FontSize="10" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="5" Text="{Binding download_count}" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20" VerticalAlignment="Center" TextAlignment="Right"/>
+                            <TextBlock Grid.Column="6" Text="Downloads" Classes="Downloaded" FontSize="10" VerticalAlignment="Center"/>
+                          </Grid>
+                          <Grid Grid.Row="1" ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" Height="40" Margin="0,0,0,5">
+                            <TextBlock Grid.Column="1" Text="EASY" Classes="Difficulty"
+                                       Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=0}"/>
+                            <TextBlock Grid.Column="2" Text="NORMAL" Classes="Difficulty"
+                                       Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=1}"/>
+                            <TextBlock Grid.Column="3" Text="HARD" Classes="Difficulty"
+                                       Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=2}"/>
+                            <TextBlock Grid.Column="4" Text="EXPERT" Classes="Difficulty"
+                                       Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=3}"/>
+                            <TextBlock Grid.Column="5" Text="MASTER" Classes="Difficulty"
+                                       Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=4}"/>
+                            <TextBlock Grid.Column="6" Text="CUSTOM" Classes="Difficulty"
+                                       Foreground="{Binding Path=difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=5}"/>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                      <Grid Grid.Column="2" RowDefinitions="auto,auto,auto,*">
+                        <Button Grid.Row="0">Button1</Button>
+                        <Button Grid.Row="1">Button2</Button>
+                        <Button Grid.Row="2">Button3</Button>
+                      </Grid>
                     </Grid>
                   </Grid>
-                  <Button Grid.Column="3" Command="{Binding downloadCommand}" Height="50"/>
                 </Grid>
                 <Grid Grid.Row="1" Background="#999999" Height="2"/>
               </Grid>
