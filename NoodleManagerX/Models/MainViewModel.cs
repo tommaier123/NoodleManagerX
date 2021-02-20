@@ -42,12 +42,11 @@ namespace NoodleManagerX.Models
         //Todo:
 
         //strip unnecessary ADB files
-        //use Avalonia beta
+
         //check update function for maps
         //use api filename instead of content dispositon
         //playlist number of songs
         //context menu for description
-
 
 
 
@@ -105,6 +104,8 @@ namespace NoodleManagerX.Models
         public PlaylistHandler playlistHandler = new PlaylistHandler();
         public StageHandler stageHandler = new StageHandler();
         public AvatarHandler avatarHandler = new AvatarHandler();
+
+        public object itemsLock = new object();
 
         public MainViewModel()
         {
@@ -232,25 +233,28 @@ namespace NoodleManagerX.Models
 
         public void UpdateCollections()
         {
-            switch (selectedTabIndex)
+            _ = Dispatcher.UIThread.InvokeAsync(() =>
             {
-                case 0:
-                    maps.Clear();
-                    maps.Add(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
-                    break;
-                case 1:
-                    playlists.Clear();
-                    playlists.Add(items.Where(x => x.itemType == ItemType.Playlist).Select(x => (PlaylistItem)x));
-                    break;
-                case 2:
-                    stages.Clear();
-                    stages.Add(items.Where(x => x.itemType == ItemType.Stage).Select(x => (StageItem)x));
-                    break;
-                case 3:
-                    avatars.Clear();
-                    avatars.Add(items.Where(x => x.itemType == ItemType.Avatar).Select(x => (AvatarItem)x));
-                    break;
-            }
+                switch (selectedTabIndex)
+                {
+                    case 0:
+                        maps.Clear();
+                        maps.AddRange(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
+                        break;
+                    case 1:
+                        playlists.Clear();
+                        playlists.AddRange(items.Where(x => x.itemType == ItemType.Playlist).Select(x => (PlaylistItem)x));
+                        break;
+                    case 2:
+                        stages.Clear();
+                        stages.AddRange(items.Where(x => x.itemType == ItemType.Stage).Select(x => (StageItem)x));
+                        break;
+                    case 3:
+                        avatars.Clear();
+                        avatars.AddRange(items.Where(x => x.itemType == ItemType.Avatar).Select(x => (AvatarItem)x));
+                        break;
+                }
+            });
         }
 
         public void LoadLocalItems()
@@ -550,7 +554,7 @@ namespace NoodleManagerX.Models
                     var receiver = new ConsoleOutputReceiver();
 
                     MainViewModel.s_instance.adbClient.ExecuteRemoteCommand("ls sdcard/Android/data/com.kluge.SynthRiders/files/" + path, device, receiver);
-                    ret.Add(receiver.ToString().Split(new char[] { '\n' }));
+                    ret.AddRange(receiver.ToString().Split(new char[] { '\n' }));
                 }
             }
             return ret;
@@ -663,14 +667,6 @@ namespace NoodleManagerX.Models
         public static void Log(string message)
         {
             Console.WriteLine(message);
-        }
-
-        public class CustomerSorter : IComparer
-        {
-            public int Compare(object x, object y)
-            {
-                return ((int)x) - ((int)y);
-            }
         }
     }
 }

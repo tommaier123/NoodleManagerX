@@ -63,6 +63,27 @@
     </Style>
 
     <!--Style for listbox-->
+    <Style Selector="ListBox.MyListBox">
+      <Setter Property="Margin" Value="10,10,10,10"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox">
+      <Setter Property="SelectionMode" Value="Single"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox">
+      <Setter Property="AutoScrollToSelectedItem" Value="True"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox">
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ListBox.MyListBox ScrollViewer">
+      <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+    </Style>
     <Style Selector="ListBox.MyListBox RepeatButton">
       <Setter Property="IsVisible" Value="False"/>
     </Style>
@@ -89,8 +110,7 @@
       <Setter Property="FocusAdorner" Value="{x:Null}"/>
     </Style>
 
-
-    <!--Grow and shrink the image-->
+    <!--Different List Boxes-->
     <Style Selector="ListBox.MyListBoxSmall ListBoxItem:pointerover Image">
       <Setter Property="Width" Value="160"/>
       <Setter Property="Height" Value="160"/>
@@ -256,7 +276,12 @@
     <!--This is where the tab content begins-->
     <Grid Grid.Row="2">
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
-        <ListBox Items="{Binding Path=maps}" Classes="MyListBox MyListBoxSmall" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox Items="{Binding Path=maps}" Classes="MyListBox MyListBoxSmall">
+          <ListBox.ContextMenu>
+            <ContextMenu>
+              <MenuItem Header="Context Menu"/>
+            </ContextMenu>
+          </ListBox.ContextMenu>
           <ListBox.ItemTemplate>
             <DataTemplate>
               <!--v content, separator v-->
@@ -317,7 +342,7 @@
         </ListBox>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1}">
-        <ListBox Items="{Binding Path=playlists}" Classes="MyListBox MyListBoxSmall" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox Items="{Binding Path=playlists}" Classes="MyListBox MyListBoxSmall">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid RowDefinitions="*,auto">
@@ -336,7 +361,7 @@
         </ListBox>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=2}">
-        <ListBox Items="{Binding Path=stages}" Classes="MyListBox MyListBoxBig" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox Items="{Binding Path=stages}" Classes="MyListBox MyListBoxBig">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid RowDefinitions="*,auto">
@@ -355,7 +380,7 @@
         </ListBox>
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=3}">
-        <ListBox Items="{Binding Path=avatars}" Classes="MyListBox MyListBoxBig" Margin="10,10,10,10" SelectionMode="Single" AutoScrollToSelectedItem="True" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox Items="{Binding Path=avatars}" Classes="MyListBox MyListBoxBig">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid RowDefinitions="*,auto">

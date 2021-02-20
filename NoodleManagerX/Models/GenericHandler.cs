@@ -96,27 +96,17 @@ namespace NoodleManagerX.Models
                                 });
                             }
 
-                            List<GenericItem> tmp = new List<GenericItem>();
+                            List<GenericItem> tmp = new List<GenericItem>(page.data);
 
-                            foreach (GenericItem item in page.data)
-                            {
-                                tmp.Add(item);
-                            }
 
                             _ = Dispatcher.UIThread.InvokeAsync(() =>
                             {
-                                MainViewModel.s_instance.items.Add(tmp);
+                                MainViewModel.s_instance.items.AddRange(tmp);
                             });
 
                             if (download)
                             {
-                                foreach (GenericItem item in page.data)
-                                {
-                                    if (!item.downloaded)
-                                    {
-                                        DownloadScheduler.queue.Add(item);
-                                    }
-                                }
+                                DownloadScheduler.queue.AddRange(tmp.Where(x => !x.downloaded));
                             }
                         }
                     }
@@ -184,7 +174,7 @@ namespace NoodleManagerX.Models
         {
             var tmp = MainViewModel.s_instance.items.Where(x => x.itemType != itemType);
             MainViewModel.s_instance.items.Clear();
-            MainViewModel.s_instance.items.Add(tmp);
+            MainViewModel.s_instance.items.AddRange(tmp);
         }
     }
 }
