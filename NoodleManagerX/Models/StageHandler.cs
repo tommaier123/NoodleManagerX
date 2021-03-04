@@ -31,10 +31,7 @@ namespace NoodleManagerX.Models
                             tmp.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), ItemType.Stage));
                         }
                     }
-                    foreach (LocalItem item in tmp)
-                    {
-                        MainViewModel.s_instance.localItems.Add(item);
-                    }
+                    MainViewModel.s_instance.localItems.AddRange(tmp);
                 }
             }
         }

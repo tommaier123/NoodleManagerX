@@ -68,10 +68,7 @@ namespace NoodleManagerX.Models
                     tmp.Add(new LocalItem(-1, "", file, new System.DateTime(), ItemType.Map));
                 }
             }
-            foreach (LocalItem item in tmp)
-            {
-                MainViewModel.s_instance.localItems.Add(item);
-            }
+            MainViewModel.s_instance.localItems.AddRange(tmp);
         }
 
         public override dynamic DeserializePage(string json)

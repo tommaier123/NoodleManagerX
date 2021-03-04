@@ -105,7 +105,7 @@ namespace NoodleManagerX.Models
         public StageHandler stageHandler = new StageHandler();
         public AvatarHandler avatarHandler = new AvatarHandler();
 
-        public object itemsLock = new object();
+        private bool updatingLocalItems = false;
 
         public MainViewModel()
         {
@@ -261,6 +261,11 @@ namespace NoodleManagerX.Models
         {
             Task.Run(() =>
             {
+                if (updatingLocalItems)
+                {
+                    return;
+                }
+                updatingLocalItems = true;
                 Log("Loading local items");
                 localItems.Clear();
 
@@ -273,6 +278,7 @@ namespace NoodleManagerX.Models
                 {
                     item.UpdateDownloaded();
                 }
+                updatingLocalItems = false;
             });
         }
 
