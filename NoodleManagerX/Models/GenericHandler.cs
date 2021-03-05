@@ -20,7 +20,7 @@ namespace NoodleManagerX.Models
 
         public virtual string allParameters { get; set; } = "";
         public virtual string select { get; set; } = "";
-        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,";
+        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,description,";
         public virtual string apiEndpoint { get; set; } = "";
 
         public virtual void LoadLocalItems() { }

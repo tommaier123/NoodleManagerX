@@ -29,6 +29,7 @@ namespace NoodleManagerX.Models
         [DataMember] public int download_count { get; set; }
         [DataMember] public int upvote_count { get; set; }
         [DataMember] public int downvote_count { get; set; }
+        [DataMember] public string description { get; set; }
 
         [Reactive] public Bitmap cover_bmp { get; set; }
         [Reactive] public bool selected { get; set; }
