@@ -331,7 +331,7 @@
                         </Grid>
                       </Grid>
                       <Grid Grid.Column="2" RowDefinitions="auto,auto,auto,*">
-                        <Button Grid.Row="0">Button1</Button>
+                        <Button Grid.Row="0" Command="{Binding openPreviewCommand}">Button1</Button>
                         <Button Grid.Row="1">Button2</Button>
                         <Button Grid.Row="2">Button3</Button>
                       </Grid>
@@ -404,7 +404,7 @@
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=4}">
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
-        <TextBlock Text="These are the tools (Sync to Quest, Sync to PC, Download Songs from Playlist, Setup Twitch Integration)"/>
+        <!--<TextBlock Text="These are the tools (Sync to Quest, Sync to PC, Download Songs from Playlist, Setup Twitch Integration)"/>-->
       </Grid>
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
         <!--Path, Quest Enabled, Auto Update Content, Disable NM Update Notification-->

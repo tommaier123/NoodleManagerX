@@ -13,7 +13,7 @@ namespace NoodleManagerX.Models
         public override ItemType itemType { get; set; } = ItemType.Map;
 
         public override string allParameters { get; set; } = "\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}";
-        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash";
+        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,video_url";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
         public override async void LoadLocalItems()
@@ -87,6 +87,8 @@ namespace NoodleManagerX.Models
         [DataMember] public string duration { get; set; }
         [DataMember] public string[] difficulties { get; set; }
         [DataMember] public string hash { get; set; }
+        [DataMember] public string youtube_url { get; set; }
+        [DataMember] public string video_url { get; set; }
         public override string target { get; set; } = "CustomSongs";
         public override ItemType itemType { get; set; } = ItemType.Map;
     }

@@ -11,8 +11,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using Xilium.CefGlue;
 
 namespace NoodleManagerX
 {
@@ -31,7 +33,7 @@ namespace NoodleManagerX
         public static Brush difficultyInactiveBrush;
 
         private Grid blackBar;
-        private MouseDevice mouse;
+        public MouseDevice mouse;
         private bool lastleftclick = false;
         private bool lastHandled = false;
         private Point lastclickposition;
@@ -45,6 +47,19 @@ namespace NoodleManagerX
             difficultyActiveBrush = (Brush)brushConverter.ConvertFromString(difficultyActiveColor);
             difficultyInactiveBrush = (Brush)brushConverter.ConvertFromString(difficultyInactiveColor);
 
+            //initialize Cef for webview
+
+            CefRuntime.Load();
+
+            var cefSettings = new CefSettings();
+            cefSettings.MultiThreadedMessageLoop = CefRuntime.Platform == CefRuntimePlatform.Windows;
+
+            var mainArgs = new CefMainArgs(new string[] { });
+            var app = new MyCefApp();
+
+            CefRuntime.ExecuteProcess(mainArgs, app, IntPtr.Zero);
+            CefRuntime.Initialize(mainArgs, cefSettings, app, IntPtr.Zero);
+
             InitializeComponent();
 
             this.DataContext = new MainViewModel();
@@ -57,7 +72,6 @@ namespace NoodleManagerX
             this.AttachDevTools();
 #endif
 
-
             Application.Current.InputManager.Process.Subscribe(x =>
             {
                 if (mouse == null)
@@ -67,29 +81,27 @@ namespace NoodleManagerX
                 if (x is RawPointerEventArgs rawpointerevent)
                 {
                     bool leftclick = rawpointerevent.InputModifiers == RawInputModifiers.LeftMouseButton;
-                    if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                    {
-                        Point mouseonclient = desktop.MainWindow.PointToClient(mouse.Position);
 
-                        if (!lastleftclick && leftclick && blackBar.IsPointerOver)//rising edge
+                    Point mouseonclient = this.PointToClient(mouse.Position);
+
+                    if (!lastleftclick && leftclick && blackBar.IsPointerOver)//rising edge
+                    {
+                        lastleftclick = true;
+                        lastclickposition = mouseonclient;
+                        lastHandled = x.Handled;
+                    }
+                    else if (lastleftclick && leftclick && lastclickposition != null)//hold
+                    {
+                        if (!lastHandled)
                         {
-                            lastleftclick = true;
-                            lastclickposition = mouseonclient;
-                            lastHandled = x.Handled;
+                            PixelPoint p = new PixelPoint(mouse.Position.X - (int)lastclickposition.X, mouse.Position.Y - (int)lastclickposition.Y);
+                            this.Position = p;
                         }
-                        else if (lastleftclick && leftclick && lastclickposition != null)//hold
-                        {
-                            if (!lastHandled)
-                            {
-                                PixelPoint p = new PixelPoint(mouse.Position.X - (int)lastclickposition.X, mouse.Position.Y - (int)lastclickposition.Y);
-                                desktop.MainWindow.Position = p;
-                            }
-                        }
-                        else//falling edge
-                        {
-                            lastleftclick = false;
-                            lastHandled = false;
-                        }
+                    }
+                    else//falling edge
+                    {
+                        lastleftclick = false;
+                        lastHandled = false;
                     }
                 }
             });
@@ -225,6 +237,19 @@ namespace NoodleManagerX
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    internal sealed class MyCefApp : CefApp
+    {
+        protected override void OnBeforeCommandLineProcessing(string processType, CefCommandLine commandLine)
+        {
+            Debug.Print("OnBeforeCommandLineProcessing: {0} {1}", processType, commandLine);
+
+            if (string.IsNullOrEmpty(processType)) // browser (main) process
+            {
+                commandLine.AppendSwitch("autoplay-policy", "no-user-gesture-required");
+            }
         }
     }
 }

@@ -43,6 +43,7 @@ namespace NoodleManagerX.Models
         public virtual ItemType itemType { get; set; }
 
         public ReactiveCommand<Unit, Unit> downloadCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> openPreviewCommand { get; set; }
 
 
         [OnDeserialized]
@@ -58,6 +59,14 @@ namespace NoodleManagerX.Models
                 if (MainViewModel.s_instance.CheckDirectory(MainViewModel.s_instance.settings.synthDirectory, true))
                 {
                     Download();
+                }
+            }));
+
+            openPreviewCommand = ReactiveCommand.Create((() =>
+            {
+                if (itemType == ItemType.Map && !String.IsNullOrEmpty(((MapItem)this).youtube_url))
+                {
+                    PreviewWindow.ShowPreview(MainWindow.s_instance, "https://synthriderz.com" + ((MapItem)this).video_url);
                 }
             }));
         }

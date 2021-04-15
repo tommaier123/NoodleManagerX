@@ -26,6 +26,7 @@ using System.Net;
 using System.IO.Compression;
 using System.Diagnostics;
 using System.Collections.Concurrent;
+using Xilium.CefGlue;
 
 namespace NoodleManagerX.Models
 {
@@ -634,6 +635,7 @@ namespace NoodleManagerX.Models
                     e.Cancel = true;
                     ShowClosingDialog(DownloadScheduler.downloading.Count);
                 }
+                CefRuntime.Shutdown();
             }
         }
 
