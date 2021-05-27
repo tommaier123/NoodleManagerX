@@ -194,13 +194,13 @@
       <!--Minimize, maximize and close-->
       <Grid Grid.Column="9" ColumnDefinitions="auto,auto,auto" Margin="0,5,6,0">
         <Button Grid.Column="0" Classes="BlankButton WControls" Command="{Binding minimizeCommand}">
-          <Image Source="resm:NoodleManagerX.Assets.minimize.png"/>
+          <Svg Path="resm:NoodleManagerX.Assets.icons.minimize.svg"/>
         </Button>
         <Button Grid.Column="1" Classes="BlankButton WControls" Command="{Binding toggleFullscreenCommand}">
-          <Image Source="resm:NoodleManagerX.Assets.fullscreen.png"/>
+          <Svg Path="resm:NoodleManagerX.Assets.icons.maximize.svg"/>
         </Button>
         <Button Grid.Column="2" Classes="BlankButton WControls" Command="{Binding closeCommand}">
-          <Image Source="resm:NoodleManagerX.Assets.close.png"/>
+          <Svg Path="resm:NoodleManagerX.Assets.icons.close.svg"/>
         </Button>
       </Grid>
     </Grid>
@@ -216,7 +216,7 @@
           <Image Source="resm:NoodleManagerX.Assets.searchbar.png" Height="2" Width="200" Stretch="Fill"/>
         </StackPanel>
         <Button Grid.Column="1" Classes="BlankButton" Height="22" Padding="0" Command="{Binding searchCommand}">
-          <Image Source="resm:NoodleManagerX.Assets.search.png"/>
+          <Svg Path="resm:NoodleManagerX.Assets.icons.search.svg"/>
         </Button>
       </Grid>
 
@@ -270,13 +270,21 @@
       <!--Pagination-->
       <Grid Grid.Column="5" ColumnDefinitions="auto,auto,auto,auto,auto" Margin="0,0,20,0">
         <Button Grid.Column="0" Classes="BlankButton" Command="{Binding pageDownCommand}">
-          <TextBlock Text="&lt;" FontSize="30" Margin="0,-3,0,0"/>
+          <Svg Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Height="10">
+            <Svg.RenderTransform>
+              <RotateTransform Angle="-90"/>
+            </Svg.RenderTransform>
+          </Svg>
         </Button>
         <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding currentPage}"/>
         <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="/"/>
         <TextBlock Grid.Column="3" VerticalAlignment="Center" Text="{Binding numberOfPages}"/>
         <Button Grid.Column="4" Classes="BlankButton" Command="{Binding pageUpCommand}">
-          <TextBlock Text="&gt;" FontSize="30" Margin="0,-3,0,0"/>
+          <Svg Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Height="10">
+            <Svg.RenderTransform>
+              <RotateTransform Angle="90"/>
+            </Svg.RenderTransform>
+          </Svg>
         </Button>
       </Grid>
     </Grid>
@@ -307,12 +315,18 @@
                         <!--v stats, difficulties v-->
                         <Grid RowDefinitions="*,auto" Grid.Column="0">
                           <Grid ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" Grid.Row="0" Margin="0,40,0,0">
-                            <TextBlock Grid.Column="1" Text="123456" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20" VerticalAlignment="Center" TextAlignment="Right"/>
-                            <TextBlock Grid.Column="2" Text="Upvotes" Classes="Downloaded" FontSize="10" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding upvote_count}" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20" VerticalAlignment="Center" TextAlignment="Right"/>
+                            <Svg Grid.Column="2" Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Height="10" Margin="10,0,10,0"/>
                             <TextBlock Grid.Column="3" Text="{Binding downvote_count}" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20"  VerticalAlignment="Center" TextAlignment="Right"/>
-                            <TextBlock Grid.Column="4" Text="Downvotes" Classes="Downloaded" FontSize="10" VerticalAlignment="Center"/>
+                            <Svg Grid.Column="4" Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Height="10" Margin="10,0,10,0">
+                              <Svg.RenderTransform>
+                                <RotateTransform Angle="180"/>
+                              </Svg.RenderTransform>
+                            </Svg>
                             <TextBlock Grid.Column="5" Text="{Binding download_count}" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20" VerticalAlignment="Center" TextAlignment="Right"/>
-                            <TextBlock Grid.Column="6" Text="Downloads" Classes="Downloaded" FontSize="10" VerticalAlignment="Center"/>
+                            <Button Grid.Column="6" Classes="BlankButton" Height="30" Margin="10,0,10,0" Padding="0" Command="{Binding downloadCommand}">
+                              <Svg Path="resm:NoodleManagerX.Assets.icons.download.svg"/>
+                            </Button>
                           </Grid>
                           <Grid Grid.Row="1" ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" Height="40" Margin="0,0,0,5">
                             <TextBlock Grid.Column="1" Text="EASY" Classes="Difficulty"

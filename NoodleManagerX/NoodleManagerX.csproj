@@ -10,19 +10,21 @@
     <None Remove="Resources\ADB.zip" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.0" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.0" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0" />
-    <PackageReference Include="CefGlue.Avalonia" Version="85.4183.55607" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.23.3" />
+    <PackageReference Include="Avalonia" Version="0.10.5" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.5" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.5" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.5" />
+    <PackageReference Include="Avalonia.Svg" Version="0.10.5.1" />
+    <PackageReference Include="CefGlue.Avalonia" Version="85.4183.60025" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.24.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="ReactiveUI.Fody" Version="13.2.18" />
+    <PackageReference Include="ReactiveUI.Fody" Version="13.3.2" />
     <PackageReference Include="SharpAdbClient" Version="2.3.23" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\*.png" />
+    <EmbeddedResource Include="Assets\icons\*.svg" />
     <EmbeddedResource Include="Assets\icon-nm.ico" />
     <EmbeddedResource Include="Resources\ADB.zip" />
     <EmbeddedResource Include="Assets\Fonts\*.ttf" />
