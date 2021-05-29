@@ -165,8 +165,9 @@ namespace NoodleManagerX
         {
             if (value == null)
             {
-                throw new ArgumentNullException(nameof(value));
+                return false;
             }
+            
             int index = Int32.Parse(parameter.ToString());
             string[] difficulties = (string[])value;
             bool present = false;
@@ -232,6 +233,19 @@ namespace NoodleManagerX
                 throw new ArgumentNullException(nameof(value));
             }
             return ((bool)value) ? (Brush)MainWindow.brushConverter.ConvertFromString(par[0]) : (Brush)MainWindow.brushConverter.ConvertFromString(par[1]);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class NullToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value != null;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -89,6 +89,18 @@ namespace NoodleManagerX.Models
         [DataMember] public string hash { get; set; }
         [DataMember] public string youtube_url { get; set; }
         [DataMember] public string video_url { get; set; }
+        public override string display_title
+        {
+            get { return title; }
+        }
+        public override string display_creator
+        {
+            get { return mapper; }
+        }
+        public override string[] display_difficulties
+        {
+            get { return difficulties; }
+        }
         public override string target { get; set; } = "CustomSongs";
         public override ItemType itemType { get; set; } = ItemType.Map;
     }

@@ -36,6 +36,9 @@ namespace NoodleManagerX.Models
         [Reactive] public bool downloading { get; set; } = false;
         [Reactive] public bool downloaded { get; set; } = false;
         [Reactive] public bool needsUpdate { get; set; } = false;
+        public virtual string display_title { get; }
+        public virtual string display_creator { get; }
+        public virtual string[] display_difficulties { get; }
         public string download_filename { get; set; } = "";
         public DateTime updatedAt { get; set; }
         public virtual string target { get; set; }

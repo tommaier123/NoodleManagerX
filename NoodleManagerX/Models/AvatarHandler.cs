@@ -49,6 +49,18 @@ namespace NoodleManagerX.Models
     {
         [DataMember] public string name { get; set; }
         [DataMember] public User user { get; set; }
+        public override string display_title
+        {
+            get { return name; }
+        }
+        public override string display_creator
+        {
+            get { return user.username; }
+        }
+        public override string[] display_difficulties
+        {
+            get { return null; }
+        }
         public override string target { get; set; } = "Avatars";
         public override ItemType itemType { get; set; } = ItemType.Avatar;
     }
