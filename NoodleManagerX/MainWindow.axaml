@@ -239,7 +239,7 @@
     <Grid Grid.Row="0" Height="70" Background="Black" Name="BlackBar"
           ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,auto,*,auto">
 
-      <Image Source="resm:NoodleManagerX.Assets.NoodleManagerLogo.png" Grid.Column="0" Margin="12,12,20,12"/>
+      <Svg Path="resm:NoodleManagerX.Assets.icons.NoodleManagerLogo.svg" Grid.Column="0" Margin="12,12,20,12"/>
 
       <!--Tab header buttons-->
       <Button Grid.Column="1" Classes="BlankButton Tab" Content="MAPS" Command="{Binding tabSelectCommand}" CommandParameter="0"
@@ -280,7 +280,7 @@
       <Grid Grid.Column="1" ColumnDefinitions="auto,auto" Margin="0,0,0,0">
         <StackPanel Grid.Column="0" VerticalAlignment="Center">
           <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff" Text="{Binding searchText}" Name="SearchBox"/>
-          <Image Source="resm:NoodleManagerX.Assets.searchbar.png" Height="2" Width="200" Stretch="Fill"/>
+          <Svg Path="resm:NoodleManagerX.Assets.icons.searchbar.svg" Height="2" Width="200" Stretch="Fill"/>
         </StackPanel>
         <Button Grid.Column="1" Classes="BlankButton" Height="22" Padding="0" Command="{Binding searchCommand}">
           <Svg Path="resm:NoodleManagerX.Assets.icons.search.svg"/>
