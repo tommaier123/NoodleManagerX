@@ -160,11 +160,17 @@
       <Setter Property="Foreground" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=#888888|#ffffff}"/>
     </Style>
 
-    <!--Make terxt overlap the next grid-->
+    <!--Make text overlap the next grid-->
     <Style Selector="TextBlock.DynamicText">
       <Setter Property="ClipToBounds" Value="false"/>
       <Setter Property="Width" Value="1"/>
       <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+    <!--Some general settings for the SVGs-->
+    <Style Selector="Svg">
+      <Setter Property="EnableCache" Value="True"/>
+      <Setter Property="UseLayoutRounding" Value="True"/>
     </Style>
 
     <!--Template for listbox items of maps, playlists, stages and avatars-->
@@ -283,7 +289,7 @@
       <Grid Grid.Column="1" ColumnDefinitions="auto,auto" Margin="0,0,0,0">
         <StackPanel Grid.Column="0" VerticalAlignment="Center">
           <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff" Text="{Binding searchText}" Name="SearchBox"/>
-          <Svg Path="resm:NoodleManagerX.Assets.icons.searchbar.svg" Height="2" Width="200" Stretch="Fill" Name="SearchIcon"/>
+          <Svg Path="resm:NoodleManagerX.Assets.icons.searchbar.svg" Height="2" Width="200" Stretch="Fill"/>
         </StackPanel>
         <Button Grid.Column="1" Classes="BlankButton" Height="22" Padding="0" Command="{Binding searchCommand}">
           <Svg Path="resm:NoodleManagerX.Assets.icons.search.svg"/>

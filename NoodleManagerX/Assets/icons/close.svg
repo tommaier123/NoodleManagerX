@@ -13,11 +13,11 @@
    height="13.229167mm"
    viewBox="0 0 13.229162 13.229167"
    version="1.1"
-   id="svg2628"
+   id="svg1742"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="colse.svg">
+   sodipodi:docname="close.svg">
   <defs
-     id="defs2622" />
+     id="defs1736" />
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.35"
-     inkscape:cx="-353.57144"
-     inkscape:cy="-180.71429"
+     inkscape:zoom="0.24748737"
+     inkscape:cx="195.66941"
+     inkscape:cy="-385.17247"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -41,7 +41,7 @@
      inkscape:window-y="-8"
      inkscape:window-maximized="1" />
   <metadata
-     id="metadata2625">
+     id="metadata1739">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
@@ -56,11 +56,11 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-76.540181,-87.790179)">
+     transform="translate(-34.04132,-60.494252)">
     <g
        id="g4653"
        style="stroke:#ffffff;stroke-width:2.21461272;stroke-miterlimit:4;stroke-dasharray:none"
-       transform="matrix(0.95575996,0,0,0.95575996,-26.639516,40.861867)">
+       transform="matrix(0.95575996,0,0,0.95575996,-69.138377,13.56594)">
       <path
          inkscape:connector-curvature="0"
          id="path4643"
