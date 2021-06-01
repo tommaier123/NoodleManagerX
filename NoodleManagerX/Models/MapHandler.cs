@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace NoodleManagerX.Models
 {
@@ -13,7 +14,7 @@ namespace NoodleManagerX.Models
         public override ItemType itemType { get; set; } = ItemType.Map;
 
         public override string allParameters { get; set; } = "\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}";
-        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,video_url";
+        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,video_url,beat_saber_convert";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
         public override async void LoadLocalItems()
@@ -30,31 +31,7 @@ namespace NoodleManagerX.Models
                         {
                             if (Path.GetExtension(file) == ".synth")
                             {
-                                try
-                                {
-                                    using (ZipArchive archive = ZipFile.OpenRead(file))
-                                    {
-                                        foreach (ZipArchiveEntry entry in archive.Entries)
-                                        {
-                                            if (entry.FullName == "synthriderz.meta.json")
-                                            {
-                                                using (StreamReader sr = new StreamReader(entry.Open()))
-                                                {
-                                                    LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
-                                                    localItem.filename = Path.GetFileName(file);
-                                                    localItem.modifiedTime = File.GetLastWriteTime(file);
-                                                    localItem.itemType = ItemType.Map;
-                                                    tmp.Add(localItem);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                catch
-                                {
-                                    MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
-                                    File.Delete(file);
-                                }
+                                await GetLocalItem(file, tmp);
                             }
                         }
                     }
@@ -71,11 +48,39 @@ namespace NoodleManagerX.Models
             MainViewModel.s_instance.localItems.AddRange(tmp);
         }
 
+        public override async Task GetLocalItem(string file, List<LocalItem> list)
+        {
+            try
+            {
+                using (ZipArchive archive = ZipFile.OpenRead(file))
+                {
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        if (entry.FullName == "synthriderz.meta.json")
+                        {
+                            using (StreamReader sr = new StreamReader(entry.Open()))
+                            {
+                                LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
+                                localItem.filename = Path.GetFileName(file);
+                                localItem.modifiedTime = File.GetLastWriteTime(file);
+                                localItem.itemType = ItemType.Map;
+                                list.Add(localItem);
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
+                File.Delete(file);
+            }
+        }
+
         public override dynamic DeserializePage(string json)
         {
             return JsonConvert.DeserializeObject<MapPage>(json);
         }
-
     }
 
     [DataContract]
@@ -109,7 +114,5 @@ namespace NoodleManagerX.Models
     class MapPage : GenericPage
     {
         public List<MapItem> data;
-
-        public override ItemType itemType { get; set; } = ItemType.Map;
     }
 }

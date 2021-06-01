@@ -90,7 +90,6 @@ namespace NoodleManagerX.Models
         public ObservableCollection<PlaylistItem> playlists { get; private set; } = new ObservableCollection<PlaylistItem>();
         public ObservableCollection<StageItem> stages { get; private set; } = new ObservableCollection<StageItem>();
         public ObservableCollection<AvatarItem> avatars { get; private set; } = new ObservableCollection<AvatarItem>();
-
         public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
         public AdbServer adbServer = new AdbServer();
@@ -106,7 +105,7 @@ namespace NoodleManagerX.Models
         public StageHandler stageHandler = new StageHandler();
         public AvatarHandler avatarHandler = new AvatarHandler();
 
-        private bool updatingLocalItems = false;
+        public bool updatingLocalItems = false;
 
         public MainViewModel()
         {
@@ -222,8 +221,6 @@ namespace NoodleManagerX.Models
 
             items.CollectionChanged += ItemsCollectionChanged;
 
-            LoadLocalItems();
-
             StartAdbServer();
         }
 
@@ -260,12 +257,13 @@ namespace NoodleManagerX.Models
 
         public void LoadLocalItems()
         {
+            if (updatingLocalItems)
+            {
+                return;//prevent issues with multithreading
+            }
+
             Task.Run(() =>
             {
-                if (updatingLocalItems)
-                {
-                    return;
-                }
                 updatingLocalItems = true;
                 Log("Loading local items");
                 localItems.Clear();
@@ -285,14 +283,14 @@ namespace NoodleManagerX.Models
 
         public void GetPage(bool download = false)
         {
-            if (!download || CheckDirectory(settings.synthDirectory, true))
+            if (!download || CheckDirectory(settings.synthDirectory, true))//if download is true a valid path must be set
             {
                 if (lastSearchText != searchText)
                 {
                     currentPage = 1;
                     lastSearchText = searchText;
                 }
-                apiRequestCounter++;
+                apiRequestCounter++;//invalidate all running requests
 
                 switch (selectedTabIndex)
                 {

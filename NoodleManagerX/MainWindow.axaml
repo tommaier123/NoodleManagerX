@@ -309,7 +309,8 @@
         <ComboBox Grid.Column="2" Classes="BlankBox" SelectedIndex="{Binding selectedSortMethodIndex}" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
           <ComboBoxItem Name="published_at">Upload Date</ComboBoxItem>
           <ComboBoxItem Name="score">Hypefactor</ComboBoxItem>
-          <ComboBoxItem Name="rating">Vote</ComboBoxItem>
+          <ComboBoxItem Name="rating">Rating</ComboBoxItem>
+          <ComboBoxItem Name="vote_diff">Vote</ComboBoxItem>
           <ComboBoxItem Name="download_count">Downloads</ComboBoxItem>
         </ComboBox>
         <ComboBox Grid.Column="3" Classes="BlankBox" SelectedIndex="{Binding selectedSortOrderIndex}" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">

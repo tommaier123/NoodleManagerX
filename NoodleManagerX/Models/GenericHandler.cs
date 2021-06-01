@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -18,12 +19,38 @@ namespace NoodleManagerX.Models
         public const int pagecount = 6;
         public const int pagesize = 10;
 
-        public virtual string allParameters { get; set; } = "";
-        public virtual string select { get; set; } = "";
-        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,description,";
+        public virtual string allParameters { get; set; } = "\"name\":{\"$contL\":\"<value>\"}},{\"user.username\":{\"$contL\":\"<value>\"}";
+        public virtual string select { get; set; } = "name,user";
+        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,description,score,rating,vote_diff,";
         public virtual string apiEndpoint { get; set; } = "";
+        public virtual string folder { get; set; } = "";
+        public virtual string[] extensions { get; set; } = { };
 
-        public virtual void LoadLocalItems() { }
+        public virtual async void LoadLocalItems()
+        {
+            if (MainViewModel.s_instance.settings.synthDirectory != "")
+            {
+                string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, folder);
+                if (Directory.Exists(directory))
+                {
+                    List<LocalItem> tmp = new List<LocalItem>();
+                    foreach (string file in Directory.GetFiles(directory))
+                    {
+                        if (extensions.Contains(Path.GetExtension(file)))
+                        {
+                            await GetLocalItem(file, tmp);
+                        }
+                    }
+                    MainViewModel.s_instance.localItems.AddRange(tmp);
+                }
+            }
+        }
+
+        public virtual Task GetLocalItem(string file, List<LocalItem> list)
+        {
+            list.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), itemType));
+            return Task.CompletedTask;
+        }
 
         public void GetPage(bool download = false)
         {
@@ -84,7 +111,6 @@ namespace NoodleManagerX.Models
 
                             string req = apiEndpoint + "?select=" + selectAll + select + "&limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + "&s=" + search + "&sort=" + sortMethod + "," + sortOrder;
                             var page = DeserializePage(await client.DownloadStringTaskAsync(req));
-
                             if (MainViewModel.s_instance.apiRequestCounter != requestID && !download) break;
 
                             if (i == 1)
@@ -98,15 +124,18 @@ namespace NoodleManagerX.Models
 
                             List<GenericItem> tmp = new List<GenericItem>(page.data);
 
-
                             _ = Dispatcher.UIThread.InvokeAsync(() =>
                             {
                                 MainViewModel.s_instance.items.AddRange(tmp);
+                                foreach (GenericItem item in MainViewModel.s_instance.items)
+                                {
+                                    item.UpdateDownloaded();
+                                }
                             });
 
                             if (download)
                             {
-                                DownloadScheduler.queue.AddRange(tmp.Where(x => !x.downloaded));
+                                DownloadScheduler.queue.AddRange(tmp.Where(x => !x.downloaded || x.needsUpdate));
                             }
                         }
                     }
@@ -150,7 +179,7 @@ namespace NoodleManagerX.Models
                                     if (!item.downloaded || item.needsUpdate)
                                     {
                                         DownloadScheduler.queue.Add(item);
-                                        if (item.needsUpdate) { MainViewModel.Log("Update"); }
+                                        if (item.needsUpdate) { MainViewModel.Log("Updating " + item.display_title); }
                                     }
                                 }
                             }

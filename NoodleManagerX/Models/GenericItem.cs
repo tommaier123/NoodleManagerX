@@ -38,7 +38,7 @@ namespace NoodleManagerX.Models
         [Reactive] public bool needsUpdate { get; set; } = false;
         public virtual string display_title { get; }
         public virtual string display_creator { get; }
-        public virtual string[] display_difficulties { get; }
+        public virtual string[] display_difficulties { get { return null; } }
         public string download_filename { get; set; } = "";
         public DateTime updatedAt { get; set; }
         public virtual string target { get; set; }
@@ -52,7 +52,6 @@ namespace NoodleManagerX.Models
         [OnDeserialized]
         internal void OnDeserializedMethod(StreamingContext context)
         {
-            UpdateDownloaded();
             LoadBitmap();
 
             Task.Run(() => updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind));
@@ -76,27 +75,31 @@ namespace NoodleManagerX.Models
 
         public void UpdateDownloaded()
         {
-            List<LocalItem> tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
-
-            _ = Dispatcher.UIThread.InvokeAsync(() =>
+            Task.Run(() =>
             {
-                if (tmp.Count() > 0)
+                List<LocalItem> tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    downloaded = true;
-                    if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
+                    if (tmp.Count() > 0)
                     {
-                        needsUpdate = tmp[0].hash == ((MapItem)this).hash;
+                        downloaded = true;
+                        if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
+                        {
+                            needsUpdate = tmp[0].hash != ((MapItem)this).hash;
+                            if (needsUpdate) Console.WriteLine("Hash difference detected for " + this.display_title);
+                        }
+                        else
+                        {
+                            needsUpdate = DateTime.Compare(updatedAt, tmp[0].modifiedTime) > 0;
+                            if (needsUpdate) Console.WriteLine("Date difference detected for " + this.display_title);
+                        }
                     }
                     else
                     {
-                        needsUpdate = DateTime.Compare(updatedAt, tmp[0].modifiedTime) > 0;
+                        downloaded = false;
+                        needsUpdate = false;
                     }
-                }
-                else
-                {
-                    downloaded = false;
-                    needsUpdate = false;
-                }
+                });
             });
         }
 
@@ -231,8 +234,6 @@ namespace NoodleManagerX.Models
         public int total = -1;
         public int page = -1;
         public int pagecount = -1;
-
-        public virtual ItemType itemType { get; set; }
     }
 
     [DataContract]
