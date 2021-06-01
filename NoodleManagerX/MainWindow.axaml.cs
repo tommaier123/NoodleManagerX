@@ -202,6 +202,31 @@ namespace NoodleManagerX
         }
     }
 
+    public class DifficultyPathConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null||parameter==null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            string[] paths = ((string)parameter).Split("|");
+            if (paths.Length > 1)
+            {
+                return ((bool)value) ? paths[0] : paths[1];
+            }
+            else
+            {
+                return parameter;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class StringToBoolConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

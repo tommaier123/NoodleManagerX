@@ -16,6 +16,7 @@
     <local:EqualsConverter x:Key="EqualsConverter"/>
     <local:TabHilightConverter x:Key="TabHilightConverter"/>
     <local:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
+    <local:DifficultyPathConverter x:Key="DifficultyPathConverter"/>
     <local:BoolColorConverter x:Key="BoolColorConverter"/>
     <local:StringToBoolConverter x:Key="StringToBoolConverter"/>
     <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
@@ -191,16 +192,18 @@
                     <Grid RowDefinitions="*,auto" Grid.Column="0">
                       <Grid ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" Grid.Row="0" Margin="0,40,0,0">
                         <TextBlock Grid.Column="1" Text="{Binding upvote_count}" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20" VerticalAlignment="Center" TextAlignment="Right"/>
-                        <Svg Grid.Column="2" Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Height="10" Margin="10,0,10,0"/>
+                        <Svg Grid.Column="2" Height="10" Margin="10,0,10,0"
+                             Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket_g.svg|resm:NoodleManagerX.Assets.icons.bracket.svg}"/>
                         <TextBlock Grid.Column="3" Text="{Binding downvote_count}" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20"  VerticalAlignment="Center" TextAlignment="Right"/>
-                        <Svg Grid.Column="4" Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Height="10" Margin="10,0,10,0">
+                        <Svg Grid.Column="4" Height="10" Margin="10,0,10,0"
+                             Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket_g.svg|resm:NoodleManagerX.Assets.icons.bracket.svg}">
                           <Svg.RenderTransform>
                             <RotateTransform Angle="180"/>
                           </Svg.RenderTransform>
                         </Svg>
                         <TextBlock Grid.Column="5" Text="{Binding download_count}" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20" VerticalAlignment="Center" TextAlignment="Right"/>
                         <Button Grid.Column="6" Classes="BlankButton" Height="30" Margin="10,0,10,0" Padding="0" Command="{Binding downloadCommand}">
-                          <Svg Path="resm:NoodleManagerX.Assets.icons.download.svg"/>
+                          <Svg Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.download_g.svg|resm:NoodleManagerX.Assets.icons.download.svg}"/>
                         </Button>
                       </Grid>
                       <Grid Grid.Row="1" ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" Height="40" Margin="0,0,0,5" IsVisible="{Binding Path=display_difficulties, Converter={StaticResource NullToBoolConverter}}">
@@ -280,7 +283,7 @@
       <Grid Grid.Column="1" ColumnDefinitions="auto,auto" Margin="0,0,0,0">
         <StackPanel Grid.Column="0" VerticalAlignment="Center">
           <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff" Text="{Binding searchText}" Name="SearchBox"/>
-          <Svg Path="resm:NoodleManagerX.Assets.icons.searchbar.svg" Height="2" Width="200" Stretch="Fill"/>
+          <Svg Path="resm:NoodleManagerX.Assets.icons.searchbar.svg" Height="2" Width="200" Stretch="Fill" Name="SearchIcon"/>
         </StackPanel>
         <Button Grid.Column="1" Classes="BlankButton" Height="22" Padding="0" Command="{Binding searchCommand}">
           <Svg Path="resm:NoodleManagerX.Assets.icons.search.svg"/>

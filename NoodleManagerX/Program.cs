@@ -16,14 +16,17 @@ namespace NoodleManagerX
 
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp() {
+#if DEBUG
             //so the designer doesn't break
             GC.KeepAlive(typeof(SvgImageExtension).Assembly);
-            GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly); 
+            GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
+#endif
+
 
             return AppBuilder.Configure<App>()
                 .UseReactiveUI()
                 .UsePlatformDetect()
-                .LogToDebug();
+                .LogToTrace();
         }
     }
 }
