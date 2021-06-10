@@ -20,21 +20,20 @@ using static System.Environment;
 using System.Linq;
 using System.Collections.Specialized;
 using System.Reflection;
-using System.Collections;
 using SharpAdbClient;
 using System.Net;
 using System.IO.Compression;
 using System.Diagnostics;
-using System.Collections.Concurrent;
 using Xilium.CefGlue;
+using MediaDevices;
 
 namespace NoodleManagerX.Models
 {
     class MainViewModel : ReactiveObject
     {
-        //dotnet publish -c Release -f netcoreapp3.1 -r win-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=true
-        //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=true
-        //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true  -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=true
+        //dotnet publish -c Release -f netcoreapp3.1 -r win-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=false
+        //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=false
+        //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true  -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=false
 
 
 
@@ -224,7 +223,33 @@ namespace NoodleManagerX.Models
             items.CollectionChanged += ItemsCollectionChanged;
             blacklist.CollectionChanged += BlacklistCollectionChanged;
 
-            StartAdbServer();
+            //StartAdbServer();
+
+
+
+
+
+
+
+            var devices = MediaDevice.GetDevices();
+            Console.WriteLine(devices.Count() + " devices connected");
+            foreach (MediaDevice device in devices)
+            {
+                try
+                {
+                    device.Connect();
+                    var directories = device.GetDirectories(@"\");
+                    foreach(string directory in directories)
+                    {
+                        Console.WriteLine(directory);
+                    }
+                    device.Disconnect();
+                }
+                catch
+                {
+                    // If it can't be read, don't worry.
+                }
+            }
         }
 
         private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

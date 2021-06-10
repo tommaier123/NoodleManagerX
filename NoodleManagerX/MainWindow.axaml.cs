@@ -11,8 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Xilium.CefGlue;
 
@@ -53,6 +53,8 @@ namespace NoodleManagerX
 
             var cefSettings = new CefSettings();
             cefSettings.MultiThreadedMessageLoop = CefRuntime.Platform == CefRuntimePlatform.Windows;
+            cefSettings.CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CefSharp\\Cache");
+            cefSettings.BrowserSubprocessPath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
 
             var mainArgs = new CefMainArgs(new string[] { });
             var app = new MyCefApp();
@@ -321,8 +323,6 @@ namespace NoodleManagerX
     {
         protected override void OnBeforeCommandLineProcessing(string processType, CefCommandLine commandLine)
         {
-            Debug.Print("OnBeforeCommandLineProcessing: {0} {1}", processType, commandLine);
-
             if (string.IsNullOrEmpty(processType)) // browser (main) process
             {
                 commandLine.AppendSwitch("autoplay-policy", "no-user-gesture-required");
