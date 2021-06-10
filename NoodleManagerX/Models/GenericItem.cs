@@ -45,11 +45,10 @@ namespace NoodleManagerX.Models
 
         public ReactiveCommand<Unit, Unit> downloadCommand { get; set; }
         public ReactiveCommand<Unit, Unit> deleteCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> openPreviewCommand { get; set; }
 
 
         [OnDeserialized]
-        internal void OnDeserializedMethod(StreamingContext context)
+        private void OnDeserializedMethod(StreamingContext context)
         {
             LoadBitmap();
 
@@ -87,14 +86,6 @@ namespace NoodleManagerX.Models
                     {
                         MainViewModel.s_instance.blacklist.Remove(download_filename);
                     }
-                }
-            }));
-
-            openPreviewCommand = ReactiveCommand.Create((() =>
-            {
-                if (itemType == ItemType.Map && !String.IsNullOrEmpty(((MapItem)this).youtube_url))
-                {
-                    PreviewWindow.ShowPreview(MainWindow.s_instance, "https://synthriderz.com" + ((MapItem)this).video_url);
                 }
             }));
         }

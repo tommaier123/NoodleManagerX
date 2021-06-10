@@ -241,7 +241,7 @@
                   </Grid>
                   <Grid Grid.Column="2" RowDefinitions="auto,auto,auto,*">
                     <Button Grid.Row="0" Command="{Binding openPreviewCommand}">Button1</Button>
-                    <Button Grid.Row="1">Button2</Button>
+                    <Button Grid.Row="1" IsVisible="{Binding playing}">Playing</Button>
                     <Button Grid.Row="2">Button3</Button>
                   </Grid>
                 </Grid>

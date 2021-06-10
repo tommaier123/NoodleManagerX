@@ -24,7 +24,6 @@ using SharpAdbClient;
 using System.Net;
 using System.IO.Compression;
 using System.Diagnostics;
-using Xilium.CefGlue;
 using MediaDevices;
 
 namespace NoodleManagerX.Models
@@ -225,12 +224,6 @@ namespace NoodleManagerX.Models
 
             //StartAdbServer();
 
-
-
-
-
-
-
             var devices = MediaDevice.GetDevices();
             Console.WriteLine(devices.Count() + " devices connected");
             foreach (MediaDevice device in devices)
@@ -239,7 +232,7 @@ namespace NoodleManagerX.Models
                 {
                     device.Connect();
                     var directories = device.GetDirectories(@"\");
-                    foreach(string directory in directories)
+                    foreach (string directory in directories)
                     {
                         Console.WriteLine(directory);
                     }
@@ -713,7 +706,6 @@ namespace NoodleManagerX.Models
                     e.Cancel = true;
                     ShowClosingDialog(DownloadScheduler.downloading.Count);
                 }
-                CefRuntime.Shutdown();
             }
         }
 

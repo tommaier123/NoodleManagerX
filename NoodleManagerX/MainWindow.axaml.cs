@@ -14,7 +14,6 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Xilium.CefGlue;
 
 namespace NoodleManagerX
 {
@@ -48,19 +47,6 @@ namespace NoodleManagerX
             difficultyInactiveBrush = (Brush)brushConverter.ConvertFromString(difficultyInactiveColor);
 
             //initialize Cef for webview
-
-            CefRuntime.Load();
-
-            var cefSettings = new CefSettings();
-            cefSettings.MultiThreadedMessageLoop = CefRuntime.Platform == CefRuntimePlatform.Windows;
-            cefSettings.CachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CefSharp\\Cache");
-            cefSettings.BrowserSubprocessPath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-
-            var mainArgs = new CefMainArgs(new string[] { });
-            var app = new MyCefApp();
-
-            CefRuntime.ExecuteProcess(mainArgs, app, IntPtr.Zero);
-            CefRuntime.Initialize(mainArgs, cefSettings, app, IntPtr.Zero);
 
             InitializeComponent();
 
@@ -316,17 +302,6 @@ namespace NoodleManagerX
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
-        }
-    }
-
-    internal sealed class MyCefApp : CefApp
-    {
-        protected override void OnBeforeCommandLineProcessing(string processType, CefCommandLine commandLine)
-        {
-            if (string.IsNullOrEmpty(processType)) // browser (main) process
-            {
-                commandLine.AppendSwitch("autoplay-policy", "no-user-gesture-required");
-            }
         }
     }
 }

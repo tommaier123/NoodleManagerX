@@ -1,11 +1,13 @@
-﻿using DynamicData;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using ReactiveUI;
+using System.Reactive;
+using ReactiveUI.Fody.Helpers;
 
 namespace NoodleManagerX.Models
 {
@@ -94,6 +96,9 @@ namespace NoodleManagerX.Models
         [DataMember] public string hash { get; set; }
         [DataMember] public string youtube_url { get; set; }
         [DataMember] public string video_url { get; set; }
+        [Reactive] public bool playing { get; set; } = false;
+        public ReactiveCommand<Unit, Unit> openPreviewCommand { get; set; }
+
         public override string display_title
         {
             get { return title; }
@@ -108,6 +113,15 @@ namespace NoodleManagerX.Models
         }
         public override string target { get; set; } = "CustomSongs";
         public override ItemType itemType { get; set; } = ItemType.Map;
+
+        [OnDeserialized]
+        private void OnDeserializedMethod(StreamingContext context)
+        {
+            openPreviewCommand = ReactiveCommand.Create((() =>
+            {
+                PlaybackHandler.Play(this);
+            }));
+        }
     }
 
 
