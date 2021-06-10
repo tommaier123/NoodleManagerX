@@ -167,7 +167,7 @@ namespace NoodleManagerX
             {
                 return false;
             }
-            
+
             int index = Int32.Parse(parameter.ToString());
             string[] difficulties = (string[])value;
             bool present = false;
@@ -206,7 +206,7 @@ namespace NoodleManagerX
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null||parameter==null)
+            if (value == null || parameter == null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
@@ -222,6 +222,44 @@ namespace NoodleManagerX
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class DeleteBlacklistPathConverter : IMultiValueConverter
+    {
+        public object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Count != 2)
+            {
+                throw new ArgumentOutOfRangeException(nameof(values));
+            }
+
+            if (values[0].GetType() == typeof(Avalonia.UnsetValueType)|| values[1].GetType() == typeof(Avalonia.UnsetValueType)) 
+            {
+                return "resm:NoodleManagerX.Assets.icons.delete.svg";
+            }
+
+            if ((bool)values[1])//blacklisted
+            {
+                if ((bool)values[0])//downloaded
+                {
+                    return "resm:NoodleManagerX.Assets.icons.blacklist_g.svg";
+                }
+                else
+                {
+                    return "resm:NoodleManagerX.Assets.icons.blacklist.svg";
+                }
+            }
+            if ((bool)values[0])//downloaded
+            {
+                return "resm:NoodleManagerX.Assets.icons.delete_g.svg";
+            }
+            return "resm:NoodleManagerX.Assets.icons.delete.svg";
+        }
+
+        public object ConvertBack(IList<object> values, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

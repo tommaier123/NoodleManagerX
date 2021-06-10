@@ -30,22 +30,23 @@ namespace NoodleManagerX.Models
         [DataMember] public int upvote_count { get; set; }
         [DataMember] public int downvote_count { get; set; }
         [DataMember] public string description { get; set; }
-
+        [DataMember] public string download_filename { get; set; } = "";
         [Reactive] public Bitmap cover_bmp { get; set; }
         [Reactive] public bool selected { get; set; }
         [Reactive] public bool downloading { get; set; } = false;
         [Reactive] public bool downloaded { get; set; } = false;
+        [Reactive] public bool blacklisted { get; set; } = false;
         [Reactive] public bool needsUpdate { get; set; } = false;
         public virtual string display_title { get; }
         public virtual string display_creator { get; }
         public virtual string[] display_difficulties { get { return null; } }
-        public string download_filename { get; set; } = "";
         public DateTime updatedAt { get; set; }
         public virtual string target { get; set; }
 
         public virtual ItemType itemType { get; set; }
 
         public ReactiveCommand<Unit, Unit> downloadCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> deleteCommand { get; set; }
         public ReactiveCommand<Unit, Unit> openPreviewCommand { get; set; }
 
 
@@ -54,13 +55,40 @@ namespace NoodleManagerX.Models
         {
             LoadBitmap();
 
-            Task.Run(() => updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind));
+            UpdateBlacklisted();
+
+            Task.Run(() =>
+            {
+                updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
+            });
 
             downloadCommand = ReactiveCommand.Create((() =>
             {
                 if (MainViewModel.s_instance.CheckDirectory(MainViewModel.s_instance.settings.synthDirectory, true))
                 {
+                    blacklisted = false;
                     Download();
+                }
+            }));
+
+            deleteCommand = ReactiveCommand.Create((() =>
+            {
+                if (downloaded)
+                {
+                    Delete();
+                }
+                else
+                {
+                    blacklisted = !blacklisted;
+
+                    if (blacklisted)
+                    {
+                        MainViewModel.s_instance.blacklist.Add(download_filename);
+                    }
+                    else
+                    {
+                        MainViewModel.s_instance.blacklist.Remove(download_filename);
+                    }
                 }
             }));
 
@@ -83,6 +111,7 @@ namespace NoodleManagerX.Models
                     if (tmp.Count() > 0)
                     {
                         downloaded = true;
+                        download_filename = tmp[0].filename;
                         if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
                         {
                             needsUpdate = tmp[0].hash != ((MapItem)this).hash;
@@ -103,9 +132,23 @@ namespace NoodleManagerX.Models
             });
         }
 
+        public void UpdateBlacklisted()
+        {
+            Task.Run(() =>
+            {
+                if (!String.IsNullOrEmpty(download_filename) && MainViewModel.s_instance.blacklist.Contains(download_filename))
+                {
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        blacklisted = true;
+                    });
+                }
+            });
+        }
+
         public void Download()
         {
-            if (MainViewModel.s_instance.settings.synthDirectory != "")
+            if (MainViewModel.s_instance.settings.synthDirectory != "" && !blacklisted)
             {
                 Task.Run(async () =>
                 {
@@ -146,7 +189,8 @@ namespace NoodleManagerX.Models
                         }
                         else
                         {
-                            MainViewModel.Log("Download failed " + id);
+                            //implement timeout!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            MainViewModel.Log("Download failed. Requeueing " + display_title);
                             DownloadScheduler.queue.Add(this);
                         }
                     }
@@ -164,6 +208,39 @@ namespace NoodleManagerX.Models
                     DownloadScheduler.downloading.Remove(this);
                 });
             }
+        }
+
+        public void Delete()
+        {
+            Task.Run(async () =>
+            {
+                if (!String.IsNullOrEmpty(download_filename))
+                {
+                    string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, download_filename);
+
+                    if (File.Exists(filepath))
+                    {
+                        try
+                        {
+                            File.Delete(filepath);
+                        }
+                        catch (IOException e)
+                        {
+                            //implement timeout!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            MainViewModel.Log(e.Message);
+                            await Task.Delay(100);
+                            Delete();
+                        }
+
+                        MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && !x.CheckEquality(this)).ToList();
+
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            downloaded = false;
+                        });
+                    }
+                }
+            });
         }
 
         public void LoadBitmap()
@@ -213,9 +290,9 @@ namespace NoodleManagerX.Models
 
         public bool CheckEquality(GenericItem item, bool checkHash = false)
         {
-            if (item != null)
+            if (item != null && itemType == item.itemType)
             {
-                if (itemType == item.itemType && (itemType == ItemType.Map))
+                if (itemType == ItemType.Map && id != -1)
                 {
                     return this.id == item.id && (!checkHash || hash == ((MapItem)item).hash);
                 }

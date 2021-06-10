@@ -17,6 +17,7 @@
     <local:TabHilightConverter x:Key="TabHilightConverter"/>
     <local:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
     <local:DifficultyPathConverter x:Key="DifficultyPathConverter"/>
+    <local:DeleteBlacklistPathConverter x:Key="DeleteBlacklistPathConverter"/>
     <local:BoolColorConverter x:Key="BoolColorConverter"/>
     <local:StringToBoolConverter x:Key="StringToBoolConverter"/>
     <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
@@ -196,7 +197,7 @@
                   <Grid ColumnDefinitions="auto" Grid.Column="1" HorizontalAlignment="Center">
                     <!--v stats, difficulties v-->
                     <Grid RowDefinitions="*,auto" Grid.Column="0">
-                      <Grid ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" Grid.Row="0" Margin="0,40,0,0">
+                      <Grid ColumnDefinitions="*,auto,auto,auto,auto,auto,auto,auto" Grid.Row="0" Margin="0,40,0,0">
                         <TextBlock Grid.Column="1" Text="{Binding upvote_count}" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20" VerticalAlignment="Center" TextAlignment="Right"/>
                         <Svg Grid.Column="2" Height="10" Margin="10,0,10,0"
                              Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket_g.svg|resm:NoodleManagerX.Assets.icons.bracket.svg}"/>
@@ -210,6 +211,16 @@
                         <TextBlock Grid.Column="5" Text="{Binding download_count}" Classes="Downloaded" Margin="20,0,0,0" Width="45" FontSize="20" VerticalAlignment="Center" TextAlignment="Right"/>
                         <Button Grid.Column="6" Classes="BlankButton" Height="30" Margin="10,0,10,0" Padding="0" Command="{Binding downloadCommand}">
                           <Svg Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.download_g.svg|resm:NoodleManagerX.Assets.icons.download.svg}"/>
+                        </Button>
+                        <Button Grid.Column="7" Classes="BlankButton" Height="30" Width="30" Margin="10,0,10,0" Padding="0" Command="{Binding deleteCommand}">
+                          <Svg>
+                            <Svg.Path>
+                              <MultiBinding Converter="{StaticResource DeleteBlacklistPathConverter}">
+                                <Binding Path="downloaded"/>
+                                <Binding Path="blacklisted"/>
+                              </MultiBinding>
+                            </Svg.Path>
+                          </Svg>
                         </Button>
                       </Grid>
                       <Grid Grid.Row="1" ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" Height="40" Margin="0,0,0,5" IsVisible="{Binding Path=display_difficulties, Converter={StaticResource NullToBoolConverter}}">

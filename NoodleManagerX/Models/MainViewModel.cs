@@ -67,7 +67,7 @@ namespace NoodleManagerX.Models
         [Reactive] public int selectedDifficultyIndex { get; set; } = 0;
         [Reactive] public int selectedSortMethodIndex { get; set; } = 0;
         [Reactive] public int selectedSortOrderIndex { get; set; } = 0;
-        [Reactive] public string synthDirectory { get; set; }
+        [Reactive] private string synthDirectory { get; set; }
         [Reactive] public bool directoryValid { get; set; }
 
         [Reactive] public Settings settings { get; set; } = new Settings();
@@ -85,6 +85,7 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
 
         public ObservableCollection<GenericItem> items { get; set; } = new ObservableCollection<GenericItem>();
+        public ObservableCollection<string> blacklist { get; set; } = new ObservableCollection<string>();
 
         public ObservableCollection<MapItem> maps { get; private set; } = new ObservableCollection<MapItem>();
         public ObservableCollection<PlaylistItem> playlists { get; private set; } = new ObservableCollection<PlaylistItem>();
@@ -114,6 +115,7 @@ namespace NoodleManagerX.Models
             MainWindow.s_instance.Closing += ClosingEvent;
 
             LoadSettings();
+            LoadBlacklist();
 
             if (!CheckDirectory(settings.synthDirectory))
             {
@@ -212,7 +214,7 @@ namespace NoodleManagerX.Models
             this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetPage());//reload maps when the sort method changes
             this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetPage());//reload maps when the sort order changes
             this.WhenAnyValue(x => x.questSerial).Subscribe(x => LoadLocalItems());//reload local when the quest status changes
-            settings.Changed.Subscribe(x => { SaveSettings(); LoadLocalItems(); });//save the settings when they change
+            settings.Changed.Subscribe(x => { SaveSettings(); LoadLocalItems(); LoadBlacklist(); });//save the settings when they change
             this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).Subscribe(x =>
             {
                 directoryValid = CheckDirectory(synthDirectory);
@@ -220,6 +222,7 @@ namespace NoodleManagerX.Models
             });
 
             items.CollectionChanged += ItemsCollectionChanged;
+            blacklist.CollectionChanged += BlacklistCollectionChanged;
 
             StartAdbServer();
         }
@@ -227,6 +230,11 @@ namespace NoodleManagerX.Models
         private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateCollections();
+        }
+
+        private void BlacklistCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            SaveBlacklist();
         }
 
         public void UpdateCollections()
@@ -618,6 +626,53 @@ namespace NoodleManagerX.Models
                     using (StreamWriter sw = new StreamWriter(Path.Combine(directory, "Settings.json")))
                     {
                         await sw.WriteAsync(output);
+                    }
+                }
+                catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+            });
+        }
+
+        public void LoadBlacklist()
+        {
+            try
+            {
+                blacklist.Clear();
+                if (CheckDirectory(settings.synthDirectory))
+                {
+                    string path = Path.Combine(settings.synthDirectory, "NmBlacklist.json");
+                    MainViewModel.Log("Loading Blacklist from " + path);
+                    if (File.Exists(path))
+                    {
+                        using (StreamReader file = File.OpenText(path))
+                        {
+                            JsonSerializer serializer = new JsonSerializer();
+                            blacklist.AddRange((List<string>)serializer.Deserialize(file, typeof(List<string>)));
+                        }
+                    }
+                }
+                foreach (GenericItem item in items)
+                {
+                    item.UpdateBlacklisted();
+                }
+            }
+            catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+        }
+
+        public void SaveBlacklist()
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    if (CheckDirectory(settings.synthDirectory))
+                    {
+                        MainViewModel.Log("Saving Blacklist");
+                        string output = JsonConvert.SerializeObject(blacklist.ToList());
+
+                        using (StreamWriter sw = new StreamWriter(Path.Combine(settings.synthDirectory, "NmBlacklist.json")))
+                        {
+                            await sw.WriteAsync(output);
+                        }
                     }
                 }
                 catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
