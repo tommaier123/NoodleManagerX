@@ -52,7 +52,7 @@ namespace NoodleManagerX.Models
             return Task.CompletedTask;
         }
 
-        public void GetPage(bool download = false)
+        public void GetPage()
         {
             int requestID = MainViewModel.s_instance.apiRequestCounter;
             Clear();
@@ -60,8 +60,6 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
-                    MainViewModel.Log("Getting Page " + MainViewModel.s_instance.currentPage);
-
                     for (int i = 1; i <= pagecount; i++)
                     {
                         using (WebClient client = new WebClient())
@@ -111,7 +109,7 @@ namespace NoodleManagerX.Models
 
                             string req = apiEndpoint + "?select=" + selectAll + select + "&limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + "&s=" + search + "&sort=" + sortMethod + "," + sortOrder;
                             var page = DeserializePage(await client.DownloadStringTaskAsync(req));
-                            if (MainViewModel.s_instance.apiRequestCounter != requestID && !download) break;
+                            if (MainViewModel.s_instance.apiRequestCounter != requestID) break;
 
                             if (i == 1)
                             {
@@ -129,14 +127,9 @@ namespace NoodleManagerX.Models
                                 MainViewModel.s_instance.items.AddRange(tmp);
                                 foreach (GenericItem item in MainViewModel.s_instance.items)
                                 {
-                                    item.UpdateDownloaded();
+                                    item.UpdateDownloaded(MainViewModel.s_instance.downloadPage);
                                 }
                             });
-
-                            if (download)
-                            {
-                                DownloadScheduler.queue.AddRange(tmp.Where(x => !x.downloaded || x.needsUpdate));
-                            }
                         }
                     }
                 }
@@ -169,13 +162,14 @@ namespace NoodleManagerX.Models
                                 List<GenericItem> instances = MainViewModel.s_instance.items.Where(x => x.itemType == ItemType.Map && x.id == item.id).ToList();
                                 if (instances.Count > 0)
                                 {
-                                    if (!instances[0].downloaded)
+                                    if (!instances[0].downloaded || instances[0].needsUpdate)
                                     {
                                         DownloadScheduler.queue.Add(instances[0]);
                                     }
                                 }
                                 else
                                 {
+                                    await item.UpdateDownloaded();
                                     if (!item.downloaded || item.needsUpdate)
                                     {
                                         DownloadScheduler.queue.Add(item);

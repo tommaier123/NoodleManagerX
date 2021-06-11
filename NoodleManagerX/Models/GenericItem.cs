@@ -65,7 +65,7 @@ namespace NoodleManagerX.Models
                 if (MainViewModel.s_instance.CheckDirectory(MainViewModel.s_instance.settings.synthDirectory, true))
                 {
                     blacklisted = false;
-                    Download();
+                    DownloadScheduler.queue.Add(this);
                 }
             }));
 
@@ -91,12 +91,12 @@ namespace NoodleManagerX.Models
             }));
         }
 
-        public void UpdateDownloaded()
+        public Task UpdateDownloaded(bool forceUpdate=false)
         {
-            Task.Run(() =>
+           return Task.Run(async () =>
             {
                 List<LocalItem> tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
-                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     if (tmp.Count() > 0)
                     {
@@ -117,6 +117,10 @@ namespace NoodleManagerX.Models
                     {
                         downloaded = false;
                         needsUpdate = false;
+                    }
+                    if (needsUpdate || forceUpdate)
+                    {
+                        DownloadScheduler.queue.Add(this);
                     }
                 });
             });
@@ -144,6 +148,11 @@ namespace NoodleManagerX.Models
                 {
                     try
                     {
+                        if (downloaded)
+                        {
+                            MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this) == false).ToList();
+                        }
+
                         _ = Dispatcher.UIThread.InvokeAsync(() =>
                         {
                             downloaded = false;
@@ -170,6 +179,10 @@ namespace NoodleManagerX.Models
                         if (File.Exists(filepath))
                         {
                             LocalItem localItem = new LocalItem(id, "", Path.GetFileName(filepath), DateTime.Now, this.itemType);
+                            if (itemType == ItemType.Map)
+                            {
+                                localItem.hash = ((MapItem)this).hash;
+                            }
                             MainViewModel.s_instance.localItems.Add(localItem);
 
                             _ = Dispatcher.UIThread.InvokeAsync(() =>

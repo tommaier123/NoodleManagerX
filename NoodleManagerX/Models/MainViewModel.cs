@@ -42,10 +42,10 @@ namespace NoodleManagerX.Models
 
         //strip unnecessary ADB files
 
-        //check update function for maps
         //use api filename instead of content dispositon
         //playlist number of songs
         //context menu for description
+        //fix pause right after play
 
 
 
@@ -96,6 +96,7 @@ namespace NoodleManagerX.Models
         public DeviceMonitor deviceMonitor;
 
         public bool closing = false;
+        public bool downloadPage = false;
 
         public int apiRequestCounter = 0;
 
@@ -197,7 +198,11 @@ namespace NoodleManagerX.Models
 
             getPageCommand = ReactiveCommand.Create((() =>
             {
-                GetPage(true);
+                downloadPage = true;
+                foreach (GenericItem item in items.Where(x => !x.downloaded && !x.downloading))
+                {
+                    DownloadScheduler.queue.Add(item);
+                }
             }));
 
             selectDirectoryCommand = ReactiveCommand.Create((() =>
@@ -307,32 +312,30 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public void GetPage(bool download = false)
+        public void GetPage()
         {
-            if (!download || CheckDirectory(settings.synthDirectory, true))//if download is true a valid path must be set
+            if (lastSearchText != searchText)
             {
-                if (lastSearchText != searchText)
-                {
-                    currentPage = 1;
-                    lastSearchText = searchText;
-                }
-                apiRequestCounter++;//invalidate all running requests
+                currentPage = 1;
+                lastSearchText = searchText;
+            }
+            apiRequestCounter++;//invalidate all running requests
+            downloadPage = false;
 
-                switch (selectedTabIndex)
-                {
-                    case 0:
-                        mapHandler.GetPage(download);
-                        break;
-                    case 1:
-                        playlistHandler.GetPage(download);
-                        break;
-                    case 2:
-                        stageHandler.GetPage(download);
-                        break;
-                    case 3:
-                        avatarHandler.GetPage(download);
-                        break;
-                }
+            switch (selectedTabIndex)
+            {
+                case 0:
+                    mapHandler.GetPage();
+                    break;
+                case 1:
+                    playlistHandler.GetPage();
+                    break;
+                case 2:
+                    stageHandler.GetPage();
+                    break;
+                case 3:
+                    avatarHandler.GetPage();
+                    break;
             }
         }
 
