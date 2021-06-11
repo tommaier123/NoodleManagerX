@@ -215,36 +215,48 @@ namespace NoodleManagerX
         }
     }
 
-    public class DeleteBlacklistPathConverter : IMultiValueConverter
+    public class TwoParameterPathConverter : IMultiValueConverter
     {
         public object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture)
         {
+            if (parameter == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             if (values == null || values.Count != 2)
             {
                 throw new ArgumentOutOfRangeException(nameof(values));
             }
 
-            if (values[0].GetType() == typeof(Avalonia.UnsetValueType)|| values[1].GetType() == typeof(Avalonia.UnsetValueType)) 
+            string[] paths = ((string)parameter).Split("|");
+
+            if (paths.Count() > 4)
             {
-                return "resm:NoodleManagerX.Assets.icons.delete.svg";
+                return parameter;
+            }
+
+            if (values[0].GetType() == typeof(Avalonia.UnsetValueType) || values[1].GetType() == typeof(Avalonia.UnsetValueType))
+            {
+                return paths[1];
             }
 
             if ((bool)values[1])//blacklisted
             {
                 if ((bool)values[0])//downloaded
                 {
-                    return "resm:NoodleManagerX.Assets.icons.blacklist_g.svg";
+                    return paths[3];
                 }
                 else
                 {
-                    return "resm:NoodleManagerX.Assets.icons.blacklist.svg";
+                    return paths[2];
                 }
             }
             if ((bool)values[0])//downloaded
             {
-                return "resm:NoodleManagerX.Assets.icons.delete_g.svg";
+                return paths[1];
             }
-            return "resm:NoodleManagerX.Assets.icons.delete.svg";
+            return paths[0];
         }
 
         public object ConvertBack(IList<object> values, Type targetType, object parameter, CultureInfo culture)

@@ -29,7 +29,6 @@ namespace NoodleManagerX.Models
                 }
 
                 string url = item.youtube_url;
-                url = @"https://www.youtube.com/watch?v=Bj_n7Lkbdpk";
                 if (!String.IsNullOrEmpty(url))
                 {
                     GroupCollection matches = Regex.Match(url, regex).Groups;

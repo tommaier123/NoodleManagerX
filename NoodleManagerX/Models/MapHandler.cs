@@ -16,7 +16,7 @@ namespace NoodleManagerX.Models
         public override ItemType itemType { get; set; } = ItemType.Map;
 
         public override string allParameters { get; set; } = "\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}";
-        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,video_url,beat_saber_convert";
+        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,beat_saber_convert";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
         public override async void LoadLocalItems()
@@ -95,9 +95,8 @@ namespace NoodleManagerX.Models
         [DataMember] public string[] difficulties { get; set; }
         [DataMember] public string hash { get; set; }
         [DataMember] public string youtube_url { get; set; }
-        [DataMember] public string video_url { get; set; }
         [Reactive] public bool playing { get; set; } = false;
-        public ReactiveCommand<Unit, Unit> openPreviewCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> playPreviewCommand { get; set; }
 
         public override string display_title
         {
@@ -106,6 +105,10 @@ namespace NoodleManagerX.Models
         public override string display_creator
         {
             get { return mapper; }
+        }
+        public override string display_preview
+        {
+            get { return youtube_url; }
         }
         public override string[] display_difficulties
         {
@@ -117,7 +120,7 @@ namespace NoodleManagerX.Models
         [OnDeserialized]
         private void OnDeserializedMethod(StreamingContext context)
         {
-            openPreviewCommand = ReactiveCommand.Create((() =>
+            playPreviewCommand = ReactiveCommand.Create((() =>
             {
                 PlaybackHandler.Play(this);
             }));

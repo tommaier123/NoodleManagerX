@@ -37,6 +37,7 @@ namespace NoodleManagerX.Models
         [Reactive] public bool needsUpdate { get; set; } = false;
         public virtual string display_title { get; }
         public virtual string display_creator { get; }
+        public virtual string display_preview { get { return null; } }
         public virtual string[] display_difficulties { get { return null; } }
         public DateTime updatedAt { get; set; }
         public virtual string target { get; set; }
