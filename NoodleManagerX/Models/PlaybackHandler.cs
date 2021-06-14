@@ -1,4 +1,4 @@
-﻿using NAudio.Wave;
+﻿//using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,10 +16,11 @@ namespace NoodleManagerX.Models
         public static MapItem currentlyPlaying;
         private static YoutubeClient youtubeClient = new YoutubeClient();
         private const string regex = @"^.*((youtu\.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*";
-        private static WaveOut waveOut;
+       // private static WaveOut waveOut;
 
         public static void Play(MapItem item)
         {
+            /*
             Task.Run(async () =>
             {
                 if (currentlyPlaying == item)
@@ -83,11 +84,12 @@ namespace NoodleManagerX.Models
                     }
 
                 }
-            });
+            });*/
         }
 
         public static void Stop()
         {
+            /*
             if (waveOut != null)
             {
                 try
@@ -100,7 +102,7 @@ namespace NoodleManagerX.Models
                 }
             }
             if (currentlyPlaying != null) currentlyPlaying.playing = false;
-            currentlyPlaying = null;
+            currentlyPlaying = null;*/
         }
     }
 }

@@ -227,8 +227,8 @@ namespace NoodleManagerX.Models
             items.CollectionChanged += ItemsCollectionChanged;
             blacklist.CollectionChanged += BlacklistCollectionChanged;
 
-            //StartAdbServer();
-
+            StartAdbServer();
+            /*
             var devices = MediaDevice.GetDevices();
             Console.WriteLine(devices.Count() + " devices connected");
             foreach (MediaDevice device in devices)
@@ -247,7 +247,7 @@ namespace NoodleManagerX.Models
                 {
                     // If it can't be read, don't worry.
                 }
-            }
+            }*/
         }
 
         private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -370,7 +370,7 @@ namespace NoodleManagerX.Models
 
         public void StartAdbServer()
         {
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 try
                 {
@@ -388,35 +388,32 @@ namespace NoodleManagerX.Models
                     }
 
                     string location = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "ADB");
-                    Console.WriteLine(location);
-                    string directory = Path.Combine(location, platform);
-                    string exe = Path.Combine(directory, "adb" + extension);
+                    string exe = Path.Combine(location, "adb" + extension);
 
                     if (!File.Exists(exe))
                     {
-                        if (Directory.Exists(directory)) Directory.Delete(directory, true);
+                        if (Directory.Exists(location)) Directory.Delete(location, true);
 
-                        Log("Unzipping ADB to " + directory);
-
-                        using (Stream file = Assembly.GetExecutingAssembly().GetManifestResourceStream("NoodleManagerX.Resources.ADB.zip"))
+                        Log("Unzipping ADB to " + location);
+                        Console.WriteLine("NoodleManagerX.Resources.ADB." + platform + ".zip");
+                        using (Stream file = Assembly.GetExecutingAssembly().GetManifestResourceStream("NoodleManagerX.Resources.ADB." + platform + ".zip"))
                         using (ZipArchive archive = new ZipArchive(file))
                         {
                             foreach (ZipArchiveEntry entry in archive.Entries)
                             {
-                                if (Path.GetDirectoryName(entry.FullName).StartsWith(platform) && !Path.EndsInDirectorySeparator(entry.FullName))
+                                if (!Path.EndsInDirectorySeparator(entry.FullName))
                                 {
-                                    string path = Path.Combine(location, entry.FullName);
+                                    string path = Path.GetFullPath(Path.Combine(location, entry.FullName));
+                                    string directory = Path.GetDirectoryName(path);
                                     Log(path);
-                                    Directory.CreateDirectory(Path.GetDirectoryName(path));
-
+                                    Directory.CreateDirectory(directory);
                                     entry.ExtractToFile(path);
-
-                                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                                    {
-                                        Shell("chmod 755 " + exe);
-                                    }
                                 }
                             }
+                        }
+                        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        {
+                            Shell("chmod 755 " + exe);
                         }
                     }
 
