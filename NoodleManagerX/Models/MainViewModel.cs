@@ -227,7 +227,7 @@ namespace NoodleManagerX.Models
             items.CollectionChanged += ItemsCollectionChanged;
             blacklist.CollectionChanged += BlacklistCollectionChanged;
 
-            StartAdbServer();
+            ExtractResources();
             /*
             var devices = MediaDevice.GetDevices();
             Console.WriteLine(devices.Count() + " devices connected");
@@ -368,9 +368,9 @@ namespace NoodleManagerX.Models
             }
         }
 
-        public void StartAdbServer()
+        public void ExtractResources()
         {
-            Task.Run(async () =>
+            Task.Run(() =>
             {
                 try
                 {
@@ -387,38 +387,94 @@ namespace NoodleManagerX.Models
                         platform = "osx";
                     }
 
-                    string location = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "ADB");
-                    string exe = Path.Combine(location, "adb" + extension);
+                    string location = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                    string resources = Path.Combine(location, "Resources");
+                    string adbExe = Path.Combine(resources, "ADB", "adb" + extension);
 
-                    if (!File.Exists(exe))
+                    using (Stream resourceFile = Assembly.GetExecutingAssembly().GetManifestResourceStream("NoodleManagerX.Resources." + platform + ".zip"))
+                    using (ZipArchive archive = new ZipArchive(resourceFile))
                     {
-                        if (Directory.Exists(location)) Directory.Delete(location, true);
+                        string newVersion = "";
+                        string oldVersion = "";
+                        ZipArchiveEntry versionEntry = archive.GetEntry(@"Resources/version.txt");
 
-                        Log("Unzipping ADB to " + location);
-                        Console.WriteLine("NoodleManagerX.Resources.ADB." + platform + ".zip");
-                        using (Stream file = Assembly.GetExecutingAssembly().GetManifestResourceStream("NoodleManagerX.Resources.ADB." + platform + ".zip"))
-                        using (ZipArchive archive = new ZipArchive(file))
+                        if (versionEntry != null)
                         {
-                            foreach (ZipArchiveEntry entry in archive.Entries)
+                            using (StreamReader sr = new StreamReader(versionEntry.Open()))
                             {
-                                if (!Path.EndsInDirectorySeparator(entry.FullName))
+                                newVersion = sr.ReadToEnd();
+                            }
+                        }
+                        string versionFile = Path.Combine(resources, "version.txt");
+                        if (File.Exists(versionFile))
+                        {
+                            using (StreamReader sr = new StreamReader(versionFile))
+                            {
+                                oldVersion = sr.ReadToEnd();
+                            }
+                        }
+
+                        bool update = oldVersion != newVersion && newVersion != "";
+
+                        if (update)
+                        {
+                            Log("Updating resources from version " + oldVersion + " to " + newVersion + " at " + location);
+                            bool writeable = true;
+                            if (Directory.Exists(resources))
+                            {
+                                try//check if all files can be opened
                                 {
-                                    string path = Path.GetFullPath(Path.Combine(location, entry.FullName));
-                                    string directory = Path.GetDirectoryName(path);
-                                    Log(path);
-                                    Directory.CreateDirectory(directory);
-                                    entry.ExtractToFile(path);
+                                    foreach (string file in Directory.GetFiles(resources, "*", SearchOption.AllDirectories))
+                                    {
+                                        using (FileStream stream = File.Open(file, FileMode.Open, FileAccess.ReadWrite))
+                                        {
+                                            stream.Close();
+                                        }
+                                    }
+                                    Directory.Delete(resources, true); 
+                                }
+                                catch (Exception e)
+                                {
+                                    writeable = false;
+                                    MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+                                }
+                            }
+                            if (writeable)
+                            {
+                                foreach (ZipArchiveEntry entry in archive.Entries)
+                                {
+                                    if (!Path.EndsInDirectorySeparator(entry.FullName))
+                                    {
+                                        string path = Path.GetFullPath(Path.Combine(location, entry.FullName));
+                                        string directory = Path.GetDirectoryName(path);
+                                        Directory.CreateDirectory(directory);
+                                        entry.ExtractToFile(path, true);
+                                    }
                                 }
                             }
                         }
                         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
-                            Shell("chmod 755 " + exe);
+                            Shell("chmod 755 " + adbExe);
                         }
                     }
+                    StartAdbServer(adbExe);
+                }
+                catch (Exception e)
+                {
+                    MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+                }
+            });
+        }
 
-                    Log("Looking for adb executable at " + exe);
-                    var result = adbServer.StartServer(exe, restartServerIfNewer: false);
+        public void StartAdbServer(string path)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    Log("Looking for adb executable at " + path);
+                    var result = adbServer.StartServer(path, restartServerIfNewer: false);
                     MainViewModel.Log("Adb server " + result);
 
                     deviceMonitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
@@ -706,6 +762,10 @@ namespace NoodleManagerX.Models
                     e.Cancel = true;
                     ShowClosingDialog(DownloadScheduler.downloading.Count);
                 }
+            }
+            if (!e.Cancel == true)
+            {
+                //cleanup
             }
         }
 

@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <ApplicationIcon>icon-nm.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
   <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
@@ -27,7 +28,13 @@
     <EmbeddedResource Include="Assets\icon-nm.ico" />
     <EmbeddedResource Include="Assets\Fonts\*.ttf" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\ADB\windows.zip" Condition="'$(Configuration)'=='DEBUG'" />
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='win-x64'or'$(Configuration)'=='DEBUG'" >
+    <EmbeddedResource Include="Resources\windows.zip" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='linux-x64'" >
+    <EmbeddedResource Include="Resources\linux.zip" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='osx-x64'" >
+    <EmbeddedResource Include="Resources\osx.zip" />
   </ItemGroup>
 </Project>
