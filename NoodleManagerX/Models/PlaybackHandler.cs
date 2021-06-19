@@ -1,4 +1,5 @@
 ﻿//using NAudio.Wave;
+using ManagedBass;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,65 +17,60 @@ namespace NoodleManagerX.Models
         public static MapItem currentlyPlaying;
         private static YoutubeClient youtubeClient = new YoutubeClient();
         private const string regex = @"^.*((youtu\.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*";
-       // private static WaveOut waveOut;
+        private static Int32 channel = -1;
+        public static int requestCounter = 0;
 
         public static void Play(MapItem item)
         {
-            /*
             Task.Run(async () =>
             {
                 if (currentlyPlaying == item)
                 {
+                    Console.WriteLine("already playing");
                     Stop();
                     return;
                 }
-
+                Console.WriteLine("carry on");
                 string url = item.youtube_url;
                 if (!String.IsNullOrEmpty(url))
                 {
                     GroupCollection matches = Regex.Match(url, regex).Groups;
-                    string id = matches[matches.Count - 1].Value;
+                    string id = "RGCdPICdwko";//matches[matches.Count - 1].Value;
 
                     if (currentlyPlaying != null) Stop();
                     currentlyPlaying = item;
                     item.playing = true;
+                    MapItem playing = currentlyPlaying;
 
                     try
                     {
-                        var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(id);
+                        requestCounter++;
+                        int requestID = requestCounter;
+                        var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(id); ;
                         var streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
                         using (Stream youtubeStream = await youtubeClient.Videos.Streams.GetAsync(streamInfo))
-                        using (Stream ms = new MemoryStream())
                         {
-                            byte[] buffer = new byte[32768];
-                            int read;
-                            while ((read = youtubeStream.Read(buffer, 0, buffer.Length)) > 0)
+                            if (requestID == requestCounter)
                             {
-                                ms.Write(buffer, 0, read);
-                            }
+                                byte[] b;
 
-                            ms.Position = 0;
-                            using (WaveStream blockAlignedStream =
-                                new BlockAlignReductionStream(
-                                    WaveFormatConversionStream.CreatePcmStream(
-                                        new StreamMediaFoundationReader(ms))))
-                            {
-                                using (WaveOut audioOut = new WaveOut(WaveCallbackInfo.FunctionCallback()))
+                                using (BinaryReader br = new BinaryReader(youtubeStream))
                                 {
-                                    waveOut = audioOut;
-                                    audioOut.Init(blockAlignedStream);
-                                    audioOut.PlaybackStopped += (sender, e) =>
-                                    {
-                                        Stop();
-                                    };
+                                    b = br.ReadBytes((int)youtubeStream.Length);
+                                }
 
-                                    audioOut.Play();
-                                    while (audioOut.PlaybackState == PlaybackState.Playing)
-                                    {
-                                        await Task.Delay(100);
-                                    }
+                                Bass.Init();
+
+                                channel = Bass.CreateStream(b, 0, b.Length, BassFlags.Default);
+
+                                Bass.ChannelPlay(channel);
+                                long length = Bass.ChannelGetLength(channel);
+                                while (Bass.ChannelIsActive(channel) == PlaybackState.Playing)
+                                {
+                                    await Task.Delay(100);
                                 }
                             }
+                            StopPlaying(playing);
                         }
                     }
                     catch (Exception e)
@@ -82,27 +78,35 @@ namespace NoodleManagerX.Models
                         MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
                         Stop();
                     }
-
                 }
-            });*/
+            });
         }
 
         public static void Stop()
         {
-            /*
-            if (waveOut != null)
+            Console.WriteLine("stop");
+            if (channel != -1)
             {
                 try
                 {
-                    waveOut.Stop();
+                    Bass.ChannelPause(channel);
                 }
                 catch (Exception e)
                 {
                     MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
                 }
             }
-            if (currentlyPlaying != null) currentlyPlaying.playing = false;
-            currentlyPlaying = null;*/
+            StopPlaying(currentlyPlaying);
+        }
+
+        private static void StopPlaying(MapItem playing)
+        {
+            if (playing != null) playing.playing = false;
+            if (currentlyPlaying == playing)
+            {
+                currentlyPlaying = null;
+                requestCounter++;
+            }
         }
     }
 }

@@ -25,6 +25,7 @@ using System.Net;
 using System.IO.Compression;
 using System.Diagnostics;
 using MediaDevices;
+using ManagedBass;
 
 namespace NoodleManagerX.Models
 {
@@ -766,6 +767,7 @@ namespace NoodleManagerX.Models
             if (!e.Cancel == true)
             {
                 //cleanup
+                Bass.Free();
             }
         }
 

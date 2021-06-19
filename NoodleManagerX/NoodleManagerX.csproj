@@ -15,10 +15,11 @@
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.6" />
     <PackageReference Include="Avalonia.Svg.Skia" Version="0.10.6.1" />
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.24.1" />
+    <PackageReference Include="ManagedBass" Version="3.0.0" />
     <PackageReference Include="MediaDevices" Version="1.8.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="ReactiveUI.Fody" Version="13.3.2" />
+    <PackageReference Include="ReactiveUI.Fody" Version="14.1.1" />
     <PackageReference Include="SharpAdbClient" Version="2.3.23" />
     <PackageReference Include="YoutubeExplode" Version="6.0.2" />
   </ItemGroup>
@@ -28,13 +29,13 @@
     <EmbeddedResource Include="Assets\icon-nm.ico" />
     <EmbeddedResource Include="Assets\Fonts\*.ttf" />
   </ItemGroup>
-  <ItemGroup Condition="'$(RuntimeIdentifier)'=='win-x64'or'$(Configuration)'=='DEBUG'" >
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='win-x64'or'$(Configuration)'=='DEBUG'">
     <EmbeddedResource Include="Resources\windows.zip" />
   </ItemGroup>
-  <ItemGroup Condition="'$(RuntimeIdentifier)'=='linux-x64'" >
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='linux-x64'">
     <EmbeddedResource Include="Resources\linux.zip" />
   </ItemGroup>
-  <ItemGroup Condition="'$(RuntimeIdentifier)'=='osx-x64'" >
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='osx-x64'">
     <EmbeddedResource Include="Resources\osx.zip" />
   </ItemGroup>
 </Project>
