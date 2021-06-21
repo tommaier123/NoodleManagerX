@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -20,17 +21,25 @@ namespace NoodleManagerX.Models
         private static Int32 channel = -1;
         public static int requestCounter = 0;
 
+        static PlaybackHandler()
+        {
+            Bass.Init();
+            string plugin = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "libbass_aac.so");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Bass.PluginLoad(plugin);
+            }
+        }
+
         public static void Play(MapItem item)
         {
             Task.Run(async () =>
             {
                 if (currentlyPlaying == item)
                 {
-                    Console.WriteLine("already playing");
                     Stop();
                     return;
                 }
-                Console.WriteLine("carry on");
                 string url = item.youtube_url;
                 if (!String.IsNullOrEmpty(url))
                 {
@@ -53,16 +62,15 @@ namespace NoodleManagerX.Models
                             if (requestID == requestCounter)
                             {
                                 byte[] b;
-
                                 using (BinaryReader br = new BinaryReader(youtubeStream))
                                 {
                                     b = br.ReadBytes((int)youtubeStream.Length);
                                 }
-
-                                Bass.Init();
-
                                 channel = Bass.CreateStream(b, 0, b.Length, BassFlags.Default);
-
+                                if (channel == 0)
+                                {
+                                    Console.WriteLine("Failed to create channel: " + Bass.LastError);
+                                }
                                 Bass.ChannelPlay(channel);
                                 long length = Bass.ChannelGetLength(channel);
                                 while (Bass.ChannelIsActive(channel) == PlaybackState.Playing)
@@ -84,7 +92,6 @@ namespace NoodleManagerX.Models
 
         public static void Stop()
         {
-            Console.WriteLine("stop");
             if (channel != -1)
             {
                 try

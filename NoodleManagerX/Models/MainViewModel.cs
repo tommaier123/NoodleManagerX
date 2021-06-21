@@ -432,7 +432,7 @@ namespace NoodleManagerX.Models
                                             stream.Close();
                                         }
                                     }
-                                    Directory.Delete(resources, true); 
+                                    Directory.Delete(resources, true);
                                 }
                                 catch (Exception e)
                                 {
@@ -807,6 +807,7 @@ namespace NoodleManagerX.Models
         public static void Log(string message)
         {
             Console.WriteLine(message);
+            File.AppendAllText("log.txt", message + Environment.NewLine);
         }
     }
 }
