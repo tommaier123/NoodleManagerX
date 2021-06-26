@@ -27,6 +27,8 @@ namespace NoodleManagerX.Models
     {
         [DataMember] public string name { get; set; }
         [DataMember] public User user { get; set; }
+        [DataMember] public List<PlaylistEntryItem> items { get; set; }
+        public string duration { get { return items.Count().ToString(); } }
         public override string display_title
         {
             get { return name; }
@@ -40,6 +42,11 @@ namespace NoodleManagerX.Models
         public override ItemType itemType { get; set; } = ItemType.Playlist;
     }
 
+    [DataContract]
+    class PlaylistEntryItem
+    {
+        [DataMember] public int id { get; set; }
+    }
 
     class PlaylistPage : GenericPage
     {

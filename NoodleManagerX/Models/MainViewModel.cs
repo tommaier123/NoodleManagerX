@@ -44,9 +44,7 @@ namespace NoodleManagerX.Models
         //strip unnecessary ADB files
 
         //use api filename instead of content dispositon
-        //playlist number of songs
         //context menu for description
-        //fix pause right after play
 
 
 
