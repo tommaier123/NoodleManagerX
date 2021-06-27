@@ -103,10 +103,8 @@
       <Setter Property="FocusAdorner" Value="{x:Null}"/>
       <Setter Property="ContextMenu">
         <Setter.Value>
-          <ContextMenu Background="#1a1b1f">
-            <MenuItem Header="Description" Background="#1a1b1f" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}">
-              <TextBlock Text="{Binding description}" MaxWidth="600" TextWrapping="Wrap"/>
-            </MenuItem>
+          <ContextMenu Background="#1a1b1f" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}">
+            <TextBlock Text="{Binding description}" TextWrapping="Wrap" Width="{Binding Source.Width}"/>
           </ContextMenu>
         </Setter.Value>
       </Setter>
@@ -179,7 +177,7 @@
       <Setter Property="ItemTemplate">
         <DataTemplate>
           <!--v content, separator v-->
-          <Grid RowDefinitions="*,auto">
+          <Grid RowDefinitions="*,auto,auto" Height="163">
             <!--< cover, content >-->
             <Grid ColumnDefinitions="auto,*" Grid.Row="0" Height="160" >
               <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
@@ -253,7 +251,10 @@
                 </Grid>
               </Grid>
             </Grid>
-            <Grid Grid.Row="1" Background="#999999" Height="2"/>
+            <Canvas Grid.Row="1" >
+            <TextBlock Text="{Binding description}" TextWrapping="Wrap" Width="{Binding Source.Width}" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}"/>
+            </Canvas>
+            <Grid Grid.Row="2" Background="#999999" Height="2"/>
           </Grid>
         </DataTemplate>
       </Setter>
@@ -323,7 +324,7 @@
           <ComboBoxItem Name="mapper" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Mapper</ComboBoxItem>
           <ComboBoxItem Name="user.username" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Creator</ComboBoxItem>
         </ComboBox>
-        <ComboBox Grid.Column="1" Classes="BlankBox" SelectedIndex="{Binding selectedDifficultyIndex}" SelectedItem="{Binding Path=selectedDifficulty, Mode=OneWayToSource}" 
+        <ComboBox Grid.Column="1" Classes="BlankBox" SelectedIndex="{Binding selectedDifficultyIndex}" SelectedItem="{Binding Path=selectedDifficulty, Mode=OneWayToSource}"
                   IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
           <ComboBoxItem Name="All">All</ComboBoxItem>
           <ComboBoxItem Name="Easy">Easy</ComboBoxItem>
