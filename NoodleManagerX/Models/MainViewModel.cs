@@ -31,21 +31,22 @@ namespace NoodleManagerX.Models
 {
     class MainViewModel : ReactiveObject
     {
-        //dotnet publish -c Release -f netcoreapp3.1 -r win-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=false
-        //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=false
-        //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true  -p:PublishTrimmed=True -p:TrimMode=CopyUsed -p:PublishReadyToRun=false
+        //dotnet publish -c Release -f netcoreapp3.1 -r win-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=Link -p:PublishReadyToRun=false
+        //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=Link -p:PublishReadyToRun=false
+        //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true  -p:PublishTrimmed=True -p:TrimMode=Link -p:PublishReadyToRun=false
 
 
 
 
 
         //Todo:
-
+        //why is it getting multiple pages with search?
         //strip unnecessary ADB files
         //use api filename instead of content dispositon
-
+        //1px gap under cover
         //context menu for description
-
+        //new full text search
+        //multiple files/versioning
 
 
         public static MainViewModel s_instance;

@@ -24,9 +24,11 @@ namespace NoodleManagerX.Models
         static PlaybackHandler()
         {
             Bass.Init();
-            string plugin = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "libbass_aacatrting description.so");
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                string plugin = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "libbass_aac.so");
+                Console.WriteLine(plugin);
                 Bass.PluginLoad(plugin);
             }
         }
