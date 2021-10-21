@@ -1,25 +1,26 @@
 ﻿//using NAudio.Wave;
 using ManagedBass;
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Mime;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoutubeExplode;
-using YoutubeExplode.Videos.Streams;
 
 namespace NoodleManagerX.Models
 {
     static class PlaybackHandler
     {
-        public static MapItem currentlyPlaying;
+        private static MapItem currentlyPlaying;
         private static YoutubeClient youtubeClient = new YoutubeClient();
         private const string regex = @"^.*((youtu\.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*";
         private static Int32 channel = -1;
-        public static int requestCounter = 0;
+        private static int requestCounter = 0;
+        private static string[] plugins = new string[] { };
 
         static PlaybackHandler()
         {
@@ -27,9 +28,23 @@ namespace NoodleManagerX.Models
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                string plugin = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "libbass_aac.so");
-                Console.WriteLine(plugin);
-                Bass.PluginLoad(plugin);
+                foreach (string plugin in plugins)
+                {
+                    string location = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), plugin);
+                    Console.WriteLine("Loading Plugin from: " + location);
+                    int res = Bass.PluginLoad(location);
+                    if (res == 0)
+                    {
+                        Console.WriteLine("Error loading Plugin: " + Bass.LastError);
+                    }
+                    else
+                    {
+                        foreach (var format in Bass.PluginGetInfo(res).Formats)
+                        {
+                            Console.Write(format.ChannelType + " " + format.Name);
+                        }
+                    }
+                }
             }
         }
 
@@ -46,7 +61,7 @@ namespace NoodleManagerX.Models
                 if (!String.IsNullOrEmpty(url))
                 {
                     GroupCollection matches = Regex.Match(url, regex).Groups;
-                    string id = "RGCdPICdwko";//matches[matches.Count - 1].Value;
+                    string id = matches[matches.Count - 1].Value;
 
                     if (currentlyPlaying != null) Stop();
                     currentlyPlaying = item;
@@ -57,31 +72,28 @@ namespace NoodleManagerX.Models
                     {
                         requestCounter++;
                         int requestID = requestCounter;
-                        var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(id); ;
-                        var streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
-                        using (Stream youtubeStream = await youtubeClient.Videos.Streams.GetAsync(streamInfo))
+
+                        var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(id);
+
+                        var streamInfo = streamManifest.GetAudioOnlyStreams().OrderBy(x => x.Bitrate).FirstOrDefault();
+
+                        //This makes no fcking sense but it doesn't work without it. Thanks Bass
+                        DownloadProcedure Procedure = (IntPtr a, int b, IntPtr c) => { };
+
+                        channel = Bass.CreateStream(streamInfo.Url, 0, BassFlags.Default, Procedure);
+
+                        if (channel == 0)
                         {
-                            if (requestID == requestCounter)
-                            {
-                                byte[] b;
-                                using (BinaryReader br = new BinaryReader(youtubeStream))
-                                {
-                                    b = br.ReadBytes((int)youtubeStream.Length);
-                                }
-                                channel = Bass.CreateStream(b, 0, b.Length, BassFlags.Default);
-                                if (channel == 0)
-                                {
-                                    Console.WriteLine("Failed to create channel: " + Bass.LastError);
-                                }
-                                Bass.ChannelPlay(channel);
-                                long length = Bass.ChannelGetLength(channel);
-                                while (Bass.ChannelIsActive(channel) == PlaybackState.Playing)
-                                {
-                                    await Task.Delay(100);
-                                }
-                            }
-                            StopPlaying(playing);
+                            Console.WriteLine("Failed to create channel: " + Bass.LastError);
                         }
+
+                        Bass.ChannelPlay(channel);
+
+                        while (Bass.ChannelIsActive(channel) == PlaybackState.Playing)
+                        {
+                            await Task.Delay(100);
+                        }
+                        StopPlaying(playing);
                     }
                     catch (Exception e)
                     {

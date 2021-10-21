@@ -82,9 +82,6 @@
     <Style Selector="ListBox.MyListBox">
       <Setter Property="Background" Value="Transparent"/>
     </Style>
-    <Style Selector="ListBox.MyListBox">
-      <Setter Property="Background" Value="Transparent"/>
-    </Style>
     <Style Selector="ListBox.MyListBox ScrollViewer">
       <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
     </Style>
@@ -120,6 +117,9 @@
     </Style>
 
     <!--Different List Boxes-->
+    <Style Selector="ListBox.MyListBoxSmall ListBoxItem">
+      <Setter Property="Height" Value="162"/>
+    </Style>
     <Style Selector="ListBox.MyListBoxSmall ListBoxItem:pointerover Image">
       <Setter Property="Width" Value="160"/>
       <Setter Property="Height" Value="160"/>
@@ -133,6 +133,9 @@
       <Setter Property="Height" Value="140"/>
     </Style>
 
+    <Style Selector="ListBox.MyListBoxBig ListBoxItem">
+      <Setter Property="Height" Value="242"/>
+    </Style>
     <Style Selector="ListBox.MyListBoxBig ListBoxItem:pointerover Image">
       <Setter Property="Width" Value="182"/>
       <Setter Property="Height" Value="240"/>
@@ -177,9 +180,9 @@
       <Setter Property="ItemTemplate">
         <DataTemplate>
           <!--v content, separator v-->
-          <Grid RowDefinitions="*,auto,auto" Height="163">
+          <Grid RowDefinitions="*,auto,auto">
             <!--< cover, content >-->
-            <Grid ColumnDefinitions="auto,*" Grid.Row="0" Height="160" >
+            <Grid ColumnDefinitions="auto,*" Grid.Row="0">
               <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
               <!--< info, stats, buttons >-->
               <Grid ColumnDefinitions="*,auto,auto" Grid.Column="1" Margin="20,0,10,5">

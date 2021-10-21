@@ -113,6 +113,7 @@ namespace NoodleManagerX.Models
 
             MainWindow.s_instance.Closing += ClosingEvent;
 
+            ExtractResources();
             LoadSettings();
             LoadBlacklist();
 
@@ -226,28 +227,6 @@ namespace NoodleManagerX.Models
 
             items.CollectionChanged += ItemsCollectionChanged;
             blacklist.CollectionChanged += BlacklistCollectionChanged;
-
-            ExtractResources();
-            /*
-            var devices = MediaDevice.GetDevices();
-            Console.WriteLine(devices.Count() + " devices connected");
-            foreach (MediaDevice device in devices)
-            {
-                try
-                {
-                    device.Connect();
-                    var directories = device.GetDirectories(@"\");
-                    foreach (string directory in directories)
-                    {
-                        Console.WriteLine(directory);
-                    }
-                    device.Disconnect();
-                }
-                catch
-                {
-                    // If it can't be read, don't worry.
-                }
-            }*/
         }
 
         private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -395,7 +374,7 @@ namespace NoodleManagerX.Models
                     using (ZipArchive archive = new ZipArchive(resourceFile))
                     {
                         string newVersion = "";
-                        string oldVersion = "";
+                        string oldVersion = "0";
                         ZipArchiveEntry versionEntry = archive.GetEntry(@"Resources/version.txt");
 
                         if (versionEntry != null)

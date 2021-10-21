@@ -14,7 +14,7 @@ namespace NoodleManagerX.Models
         public override ItemType itemType { get; set; } = ItemType.Playlist;
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/playlists";
         public override string folder { get; set; } = "Playlist";
-        public override string[] extensions { get; set; } = {".playlist" };
+        public override string[] extensions { get; set; } = { ".playlist" };
 
         public override dynamic DeserializePage(string json)
         {
@@ -28,7 +28,7 @@ namespace NoodleManagerX.Models
         [DataMember] public string name { get; set; }
         [DataMember] public User user { get; set; }
         [DataMember] public List<PlaylistEntryItem> items { get; set; }
-        public string duration { get { return items.Count().ToString(); } }
+        public string duration { get { return items != null ? items.Count().ToString() : "0"; } }
         public override string display_title
         {
             get { return name; }
