@@ -24,7 +24,6 @@ using SharpAdbClient;
 using System.Net;
 using System.IO.Compression;
 using System.Diagnostics;
-using MediaDevices;
 using ManagedBass;
 
 namespace NoodleManagerX.Models

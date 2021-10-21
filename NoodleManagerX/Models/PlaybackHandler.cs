@@ -20,7 +20,7 @@ namespace NoodleManagerX.Models
         private const string regex = @"^.*((youtu\.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*";
         private static Int32 channel = -1;
         private static int requestCounter = 0;
-        private static string[] plugins = new string[] { };
+        private static string[] plugins = new string[] { "libbass_aac.so"};
 
         static PlaybackHandler()
         {
