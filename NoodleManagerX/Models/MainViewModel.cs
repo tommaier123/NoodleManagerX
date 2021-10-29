@@ -222,7 +222,13 @@ namespace NoodleManagerX.Models
             this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
             {
                 directoryValid = CheckDirectory(synthDirectory);
-                if (directoryValid) settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
+                if (directoryValid)
+                {
+                    Log("Directory changed to " + synthDirectory);
+                    settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
+                    LoadBlacklist();
+                    LoadLocalItems();
+                }
             });
 
             items.CollectionChanged += ItemsCollectionChanged;
