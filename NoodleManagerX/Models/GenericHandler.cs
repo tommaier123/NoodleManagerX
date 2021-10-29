@@ -23,6 +23,7 @@ namespace NoodleManagerX.Models
 
         public virtual Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "name", "$contL" }, { "user.username", "$contL" } };
         public virtual string select { get; set; } = "name";
+        public virtual string join { get; set; } = "";
         private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,description,score,rating,vote_diff,user,";
         public virtual string apiEndpoint { get; set; } = "";
         public virtual string folder { get; set; } = "";
@@ -147,7 +148,7 @@ namespace NoodleManagerX.Models
                             if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortMethod?.Name)) sortMethod = MainViewModel.s_instance.selectedSortMethod.Name;
                             if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortOrder?.Name)) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
 
-                            string req = apiEndpoint + "?select=" + selectAll + select + "&limit=" + pageChunkSize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pageChunkCount + i) + "&s=" + search.ToString(Formatting.None) + "&sort=" + sortMethod + "," + sortOrder;
+                            string req = apiEndpoint + "?select=" + selectAll + select + "&limit=" + pageChunkSize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pageChunkCount + i) + "&s=" + search.ToString(Formatting.None) + "&join=" + join + "&sort=" + sortMethod + "," + sortOrder;
                             Console.WriteLine(req);
                             Console.WriteLine();
                             var page = DeserializePage(await client.DownloadStringTaskAsync(req));
