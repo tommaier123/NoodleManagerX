@@ -17,8 +17,9 @@ namespace NoodleManagerX.Models
     {
         public virtual ItemType itemType { get; set; }
 
-        public const int pagecount = 6;
-        public const int pagesize = 10;
+        public const int pageChunkCount = 6;
+        public const int pageChunkSize = 10;
+        public int chunkCount = 1;
 
         public virtual Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "name", "$contL" }, { "user.username", "$contL" } };
         public virtual string select { get; set; } = "name";
@@ -57,11 +58,12 @@ namespace NoodleManagerX.Models
         {
             int requestID = MainViewModel.s_instance.apiRequestCounter;
             Clear();
+            chunkCount = 1;
             Task.Run(async () =>
             {
                 try
                 {
-                    for (int i = 1; i <= pagecount; i++)
+                    for (int i = 1; i <= Math.Min(pageChunkCount, chunkCount); i++)
                     {
                         using (WebClient client = new WebClient())
                         {
@@ -145,7 +147,7 @@ namespace NoodleManagerX.Models
                             if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortMethod?.Name)) sortMethod = MainViewModel.s_instance.selectedSortMethod.Name;
                             if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortOrder?.Name)) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
 
-                            string req = apiEndpoint + "?select=" + selectAll + select + "&limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + "&s=" + search.ToString(Formatting.None) + "&sort=" + sortMethod + "," + sortOrder;
+                            string req = apiEndpoint + "?select=" + selectAll + select + "&limit=" + pageChunkSize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pageChunkCount + i) + "&s=" + search.ToString(Formatting.None) + "&sort=" + sortMethod + "," + sortOrder;
                             Console.WriteLine(req);
                             Console.WriteLine();
                             var page = DeserializePage(await client.DownloadStringTaskAsync(req));
@@ -153,10 +155,11 @@ namespace NoodleManagerX.Models
 
                             if (i == 1)
                             {
+                                chunkCount = page.pagecount;
                                 //dont wait by discarding result with _ variable
                                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                                 {
-                                    MainViewModel.s_instance.numberOfPages = (int)Math.Ceiling((double)page.pagecount / pagecount);
+                                    MainViewModel.s_instance.numberOfPages = (int)Math.Ceiling((double)page.pagecount / pageChunkCount);
                                 });
                             }
 
@@ -193,7 +196,7 @@ namespace NoodleManagerX.Models
                     {
                         using (WebClient client = new WebClient())
                         {
-                            string req = apiEndpoint + "?limit=" + pagesize + "&page=" + i;
+                            string req = apiEndpoint + "?limit=" + pageChunkSize + "&page=" + i;
                             var page = DeserializePage(await client.DownloadStringTaskAsync(req));
 
                             if (MainViewModel.s_instance.closing) break;
