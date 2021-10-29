@@ -25,6 +25,7 @@ using System.Net;
 using System.IO.Compression;
 using System.Diagnostics;
 using ManagedBass;
+using System.Reactive.Linq;
 
 namespace NoodleManagerX.Models
 {
@@ -39,12 +40,9 @@ namespace NoodleManagerX.Models
 
 
         //Todo:
-        //why is it getting multiple pages with search?
         //strip unnecessary ADB files
         //use api filename instead of content dispositon
-        //1px gap under cover
         //context menu for description
-        //new full text search
         //multiple files/versioning
 
 
@@ -95,7 +93,8 @@ namespace NoodleManagerX.Models
         public DeviceMonitor deviceMonitor;
 
         public bool closing = false;
-        public bool downloadPage = false;
+        public bool downloadPage = false;//so that loading pages get downloaded when using get page
+        public bool updatingLocalItems = false;
 
         public int apiRequestCounter = 0;
 
@@ -103,8 +102,6 @@ namespace NoodleManagerX.Models
         public PlaylistHandler playlistHandler = new PlaylistHandler();
         public StageHandler stageHandler = new StageHandler();
         public AvatarHandler avatarHandler = new AvatarHandler();
-
-        public bool updatingLocalItems = false;
 
         public MainViewModel()
         {
@@ -210,15 +207,19 @@ namespace NoodleManagerX.Models
                 selectDirectory();
             }));
 
-            this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetPage());
-            this.WhenAnyValue(x => x.currentPage).Subscribe(x => GetPage());//reload maps when the current page changes
-            this.WhenAnyValue(x => x.selectedSearchParameter).Subscribe(x => GetPage());//reload maps when the search parameter changes
-            this.WhenAnyValue(x => x.selectedDifficulty).Subscribe(x => GetPage());//reload maps when the search difficulty changes
-            this.WhenAnyValue(x => x.selectedSortMethod).Subscribe(x => GetPage());//reload maps when the sort method changes
-            this.WhenAnyValue(x => x.selectedSortOrder).Subscribe(x => GetPage());//reload maps when the sort order changes
-            this.WhenAnyValue(x => x.questSerial).Subscribe(x => LoadLocalItems());//reload local when the quest status changes
+            //the correct number of events needs to be skipped in ordere to avoid duplication
+            //1 for properties that get initialized
+            //2 for properties that get declared and are initialized via bindings
+
+            this.WhenAnyValue(x => x.currentPage).Skip(1).Subscribe(x => GetPage());//reload maps when the current page changes
+            this.WhenAnyValue(x => x.selectedSearchParameter).Skip(2).Subscribe(x => GetPage());//reload maps when the search parameter changes
+            this.WhenAnyValue(x => x.selectedDifficulty).Skip(2).Subscribe(x => GetPage());//reload maps when the search difficulty changes
+            this.WhenAnyValue(x => x.selectedSortMethod).Skip(2).Subscribe(x => GetPage());//reload maps when the sort method changes
+            this.WhenAnyValue(x => x.selectedSortOrder).Skip(2).Subscribe(x => GetPage());//reload maps when the sort order changes
+
+            this.WhenAnyValue(x => x.questSerial).Skip(1).Subscribe(x => LoadLocalItems());//reload local when the quest status changes
             settings.Changed.Subscribe(x => { SaveSettings(); LoadLocalItems(); LoadBlacklist(); });//save the settings when they change
-            this.WhenAny(x => x.synthDirectory, x => x != null && CheckDirectory(x.GetValue())).Subscribe(x =>
+            this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
             {
                 directoryValid = CheckDirectory(synthDirectory);
                 if (directoryValid) settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
@@ -226,6 +227,9 @@ namespace NoodleManagerX.Models
 
             items.CollectionChanged += ItemsCollectionChanged;
             blacklist.CollectionChanged += BlacklistCollectionChanged;
+
+            LoadLocalItems();
+            GetPage();
         }
 
         private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -327,6 +331,7 @@ namespace NoodleManagerX.Models
                 selectedDifficultyIndex = 0;
                 selectedSortMethodIndex = 0;
                 selectedSortOrderIndex = 0;
+                GetPage();
 
                 switch (selectedTabIndex)
                 {
