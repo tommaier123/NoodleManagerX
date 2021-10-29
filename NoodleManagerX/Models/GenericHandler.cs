@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using DynamicData;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace NoodleManagerX.Models
 {
@@ -19,9 +20,9 @@ namespace NoodleManagerX.Models
         public const int pagecount = 6;
         public const int pagesize = 10;
 
-        public virtual string allParameters { get; set; } = "\"name\":{\"$contL\":\"<value>\"}},{\"user.username\":{\"$contL\":\"<value>\"}";
-        public virtual string select { get; set; } = "name,user";
-        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,description,score,rating,vote_diff,";
+        public virtual Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "name", "$contL" }, { "user.username", "$contL" } };
+        public virtual string select { get; set; } = "name";
+        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,description,score,rating,vote_diff,user,";
         public virtual string apiEndpoint { get; set; } = "";
         public virtual string folder { get; set; } = "";
         public virtual string[] extensions { get; set; } = { };
@@ -66,48 +67,87 @@ namespace NoodleManagerX.Models
                         {
                             client.Encoding = Encoding.UTF8;
 
-                            string query = allParameters;
-                            string searchbase = "\"<parameter>\":{\"$contL\":\"<value>\"}";
-                            string filter = "\"difficulties\":{\"$jsonContainsAny\":[\"<difficulty>\"]}";
-                            string convert = "\"beat_saber_convert\":{\"$ne\":true}";
                             string sortMethod = "published_at";
                             string sortOrder = "DESC";
 
-
-                            if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSearchParameter?.Name) && MainViewModel.s_instance.selectedSearchParameter.Name != "all")
-                            {
-                                query = searchbase.Replace("<parameter>", MainViewModel.s_instance.selectedSearchParameter.Name);
-                            }
+                            JArray searchParameters = new JArray();
+                            JObject query = new JObject();
+                            JObject filter = new JObject();
+                            JObject convert = new JObject();
 
                             if (MainViewModel.s_instance.searchText != "")
                             {
-                                query = query.Replace("<value>", MainViewModel.s_instance.searchText);
-                            }
-                            else
-                            {
-                                query = "";
+                                Dictionary<string, string> queries = queryFields;
+
+                                if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSearchParameter?.Name) && MainViewModel.s_instance.selectedSearchParameter.Name != "all")
+                                {
+                                    queries = new Dictionary<string, string>() { { MainViewModel.s_instance.selectedSearchParameter.Name, "$contL" } };
+                                }
+
+                                query =
+                                new JObject(
+                                    new JProperty("$or",
+                                        new JArray(
+                                            from q in queries
+                                            select new JObject(
+                                                new JProperty(q.Key,
+                                                new JObject(
+                                                    new JProperty(q.Value,
+                                                    new JValue(MainViewModel.s_instance.searchText)
+                                                    )
+                                                )
+                                                )
+                                            )
+                                        )
+                                        )
+                                   );
                             }
 
                             if (MainViewModel.s_instance.selectedDifficultyIndex != 0 && !String.IsNullOrEmpty(MainViewModel.s_instance.selectedDifficulty?.Name))
                             {
-                                filter = filter.Replace("<difficulty>", MainViewModel.s_instance.selectedDifficulty.Name);
-                            }
-                            else
-                            {
-                                filter = "";
+                                filter =
+                                new JObject(
+                                        new JProperty("difficulties",
+                                        new JObject(
+                                            new JProperty("$jsonContainsAny",
+                                            new JArray(
+                                                new JValue(MainViewModel.s_instance.selectedDifficulty.Name)
+                                            )
+                                            )
+                                        )
+                                        )
+                                    );
                             }
 
-                            if (MainViewModel.s_instance.settings.allowConverts || MainViewModel.s_instance.selectedTabIndex != 0)
+                            if (!MainViewModel.s_instance.settings.allowConverts && MainViewModel.s_instance.selectedTabIndex == 0)
                             {
-                                convert = "";
+                                convert =
+                                new JObject(
+                                        new JProperty("beat_saber_convert",
+                                        new JObject(
+                                            new JProperty("$ne",
+                                                new JValue(true)
+                                            )
+                                        )
+                                        )
+                                    );
                             }
 
-                            string search = "{\"$and\":[{" + filter + "},{" + convert + "},{\"$or\":[{" + query + "}]}]}";
+                            searchParameters.Add(query);
+                            searchParameters.Add(filter);
+                            searchParameters.Add(convert);
+
+                            JObject search = new JObject(
+                                new JProperty("$and", searchParameters)
+                                );
+
 
                             if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortMethod?.Name)) sortMethod = MainViewModel.s_instance.selectedSortMethod.Name;
                             if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortOrder?.Name)) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
 
-                            string req = apiEndpoint + "?select=" + selectAll + select + "&limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + "&s=" + search + "&sort=" + sortMethod + "," + sortOrder;
+                            string req = apiEndpoint + "?select=" + selectAll + select + "&limit=" + pagesize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pagecount + i) + "&s=" + search.ToString(Formatting.None) + "&sort=" + sortMethod + "," + sortOrder;
+                            Console.WriteLine(req);
+                            Console.WriteLine();
                             var page = DeserializePage(await client.DownloadStringTaskAsync(req));
                             if (MainViewModel.s_instance.apiRequestCounter != requestID) break;
 

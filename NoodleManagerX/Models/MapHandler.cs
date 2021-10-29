@@ -14,8 +14,7 @@ namespace NoodleManagerX.Models
     class MapHandler : GenericHandler
     {
         public override ItemType itemType { get; set; } = ItemType.Map;
-
-        public override string allParameters { get; set; } = "\"title\":{\"$contL\":\"<value>\"}},{\"artist\":{\"$contL\":\"<value>\"}},{\"mapper\":{\"$contL\":\"<value>\"}";
+        public override Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "text_search", "$tsQuery" }, { "user.username", "$contL" } };
         public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,beat_saber_convert";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
