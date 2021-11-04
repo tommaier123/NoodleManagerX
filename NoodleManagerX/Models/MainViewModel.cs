@@ -96,6 +96,8 @@ namespace NoodleManagerX.Models
         public bool downloadPage = false;//so that loading pages get downloaded when using get page
         public bool updatingLocalItems = false;
 
+        public bool getAllRunning = false;
+
         public int apiRequestCounter = 0;
 
         public MapHandler mapHandler = new MapHandler();
@@ -744,12 +746,17 @@ namespace NoodleManagerX.Models
 
         private void ClosingEvent(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (DownloadScheduler.downloading.Count > 0)
+            if (!closing)
             {
-                if (!closing)
+                if (getAllRunning)
                 {
                     e.Cancel = true;
-                    ShowClosingDialog(DownloadScheduler.downloading.Count);
+                    ShowClosingDialog("Get All is still running." + Environment.NewLine + "Abort?");
+                }
+                else if (DownloadScheduler.downloading.Count > 0)
+                {
+                    e.Cancel = true;
+                    ShowClosingDialog("There are still " + DownloadScheduler.downloading.Count + " running downloads." + Environment.NewLine + "Abort?");
                 }
             }
             if (!e.Cancel == true)
@@ -759,9 +766,9 @@ namespace NoodleManagerX.Models
             }
         }
 
-        private async void ShowClosingDialog(int num)
+        private async void ShowClosingDialog(string message)
         {
-            MessageBox.MessageBoxResult res = await MessageBox.Show(MainWindow.s_instance, "There are still " + num + " running downloads." + Environment.NewLine + "Abort?", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+            MessageBox.MessageBoxResult res = await MessageBox.Show(MainWindow.s_instance, message, "Warning", MessageBox.MessageBoxButtons.OkCancel);
 
             if (res == MessageBox.MessageBoxResult.Ok)
             {

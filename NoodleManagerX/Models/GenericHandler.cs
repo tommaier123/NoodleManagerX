@@ -19,6 +19,7 @@ namespace NoodleManagerX.Models
 
         public const int pageChunkCount = 6;
         public const int pageChunkSize = 10;
+        public const int getAllPageSize = 100;
         public int chunkCount = 1;
 
         public virtual Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "name", "$contL" }, { "user.username", "$contL" } };
@@ -184,53 +185,60 @@ namespace NoodleManagerX.Models
 
         public void GetAll()
         {
-            Task.Run(async () =>
+            if (!MainViewModel.s_instance.getAllRunning)
             {
-                try
+                MainViewModel.s_instance.getAllRunning = true;
+
+                Task.Run(async () =>
                 {
-                    MainViewModel.Log("Get All Started");
-
-                    int pageCountAll = 1;
-                    int i = 1;
-
-                    do
+                    try
                     {
-                        using (WebClient client = new WebClient())
+                        MainViewModel.Log("Get All Started");
+
+                        int pageCountAll = 1;
+                        int i = 1;
+
+                        do
                         {
-                            string req = apiEndpoint + "?limit=" + pageChunkSize + "&page=" + i;
-                            var page = DeserializePage(await client.DownloadStringTaskAsync(req));
-
-                            if (MainViewModel.s_instance.closing) break;
-                            foreach (GenericItem item in page.data)
+                            using (WebClient client = new WebClient())
                             {
-                                List<GenericItem> instances = MainViewModel.s_instance.items.Where(x => x.itemType == ItemType.Map && x.id == item.id).ToList();
-                                if (instances.Count > 0)
-                                {
-                                    if (!instances[0].downloaded || instances[0].needsUpdate)
-                                    {
-                                        DownloadScheduler.queue.Add(instances[0]);
-                                    }
-                                }
-                                else
-                                {
-                                    await item.UpdateDownloaded();
-                                    if (!item.downloaded || item.needsUpdate)
-                                    {
-                                        DownloadScheduler.queue.Add(item);
-                                        if (item.needsUpdate) { MainViewModel.Log("Updating " + item.display_title); }
-                                    }
-                                }
-                            }
-                            pageCountAll = page.pagecount;
-                            i++;
-                        }
-                    }
-                    while (i <= pageCountAll);
+                                string req = apiEndpoint + "?limit=" + getAllPageSize + "&page=" + i;
+                                var page = DeserializePage(await client.DownloadStringTaskAsync(req));
 
-                }
-                catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
-                MainViewModel.Log("Get All Done");
-            });
+                                if (MainViewModel.s_instance.closing) break;
+                                foreach (GenericItem item in page.data)
+                                {
+                                    List<GenericItem> instances = MainViewModel.s_instance.items.Where(x => x.itemType == ItemType.Map && x.id == item.id).ToList();
+                                    if (instances.Count > 0)
+                                    {
+                                        if (!instances[0].downloaded || instances[0].needsUpdate)
+                                        {
+                                            DownloadScheduler.queue.Add(instances[0]);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        await item.UpdateDownloaded();
+                                        if (!item.downloaded || item.needsUpdate)
+                                        {
+                                            DownloadScheduler.queue.Add(item);
+                                            if (item.needsUpdate) { MainViewModel.Log("Updating " + item.display_title); }
+                                        }
+                                    }
+                                }
+                                pageCountAll = page.pagecount;
+                                i++;
+                            }
+                        }
+                        while (i <= pageCountAll);
+
+                    }
+                    catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+                    MainViewModel.Log("Get All Done");
+
+                    MainViewModel.s_instance.getAllRunning = false;
+                });
+            }
         }
 
 
