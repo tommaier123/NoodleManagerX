@@ -40,6 +40,8 @@ namespace NoodleManagerX.Models
 
 
         //Todo:
+        //check which dispatchers should be awaited
+        //possibly remove functions with switch parameters
         //strip unnecessary ADB files
         //use api filename instead of content dispositon
         //context menu for description
