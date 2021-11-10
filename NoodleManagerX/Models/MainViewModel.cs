@@ -46,6 +46,8 @@ namespace NoodleManagerX.Models
         //use api filename instead of content dispositon
         //context menu for description
         //multiple files/versioning
+        //implement download timeout/retry counter
+        //fix settings path dispaly
 
 
         public static MainViewModel s_instance;
@@ -295,6 +297,8 @@ namespace NoodleManagerX.Models
                 playlistHandler.LoadLocalItems();
                 stageHandler.LoadLocalItems();
                 avatarHandler.LoadLocalItems();
+
+                Log("Done loading local items");
 
                 foreach (GenericItem item in items)
                 {

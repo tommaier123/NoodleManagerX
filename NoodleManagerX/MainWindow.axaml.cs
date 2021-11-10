@@ -78,7 +78,7 @@ namespace NoodleManagerX
                         lastclickposition = mouseonclient;
                         lastHandled = x.Handled;
                     }
-                    else if (lastleftclick && leftclick && lastclickposition != null)//hold
+                    else if (lastleftclick && leftclick)//hold
                     {
                         if (!lastHandled)
                         {

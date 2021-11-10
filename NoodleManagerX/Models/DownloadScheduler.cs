@@ -14,7 +14,7 @@ namespace NoodleManagerX.Models
 
         public const int downloadTasks = 4;
 
-        private static int queueCountBefore = 0;
+        private static bool running = false;
 
         static DownloadScheduler()
         {
@@ -23,28 +23,32 @@ namespace NoodleManagerX.Models
 
         private static void QueueChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (queue.Count > 0 && queueCountBefore == 0)
+            if (queue.Count > 0 && !running)
             {
+                running = true;
                 MainViewModel.Log("Started queue check");
                 Task.Run(async () =>
                 {
                     while (queue.Count > 0)
                     {
-                        if (queue.Count > 0 && downloading.Count < downloadTasks)
+                        if (downloading.Count < downloadTasks)
                         {
-                            if (queue[0] != null && !queue[0].downloaded && !queue[0].downloading)
+                            if (queue[0] != null && !queue[0].downloading)
                             {
                                 queue[0].Download();
                                 downloading.Add(queue[0]);
                             }
                             queue.Remove(queue[0]);
                         }
-                        await Task.Delay(500);
+                        else
+                        {
+                            await Task.Delay(500);
+                        }
                     }
+                    running = false;
                     MainViewModel.Log("Stopped queue check");
                 });
             }
-            queueCountBefore = queue.Count;
         }
     }
 }

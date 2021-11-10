@@ -19,7 +19,7 @@ namespace NoodleManagerX.Models
 
         public const int pageChunkCount = 6;
         public const int pageChunkSize = 10;
-        public const int getAllPageSize = 100;
+        public const int getAllPageSize = 24;
         public int chunkCount = 1;
 
         public virtual Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "name", "$contL" }, { "user.username", "$contL" } };
@@ -50,10 +50,10 @@ namespace NoodleManagerX.Models
             }
         }
 
-        public virtual Task GetLocalItem(string file, List<LocalItem> list)
+        public virtual Task<bool> GetLocalItem(string file, List<LocalItem> list)
         {
             list.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), itemType));
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
         public void GetPage()
@@ -150,8 +150,7 @@ namespace NoodleManagerX.Models
                             if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSortOrder?.Name)) sortOrder = MainViewModel.s_instance.selectedSortOrder.Name;
 
                             string req = apiEndpoint + "?select=" + selectAll + select + "&limit=" + pageChunkSize + "&page=" + ((MainViewModel.s_instance.currentPage - 1) * pageChunkCount + i) + "&s=" + search.ToString(Formatting.None) + "&join=" + join + "&sort=" + sortMethod + "," + sortOrder;
-                            Console.WriteLine(req);
-                            Console.WriteLine();
+
                             var page = DeserializePage(await client.DownloadStringTaskAsync(req));
                             if (MainViewModel.s_instance.apiRequestCounter != requestID) break;
 
@@ -202,7 +201,23 @@ namespace NoodleManagerX.Models
                         {
                             using (WebClient client = new WebClient())
                             {
-                                string req = apiEndpoint + "?limit=" + getAllPageSize + "&page=" + i;
+                                JObject convert = new JObject();
+                                if (!MainViewModel.s_instance.settings.allowConverts && MainViewModel.s_instance.selectedTabIndex == 0)
+                                {
+                                    convert =
+                                    new JObject(
+                                            new JProperty("beat_saber_convert",
+                                            new JObject(
+                                                new JProperty("$ne",
+                                                    new JValue(true)
+                                                )
+                                            )
+                                            )
+                                        );
+                                }
+
+                                string req = apiEndpoint + "?limit=" + getAllPageSize + "&page=" + i+"&s="+ convert.ToString(Formatting.None);
+
                                 var page = DeserializePage(await client.DownloadStringTaskAsync(req));
 
                                 if (MainViewModel.s_instance.closing) break;

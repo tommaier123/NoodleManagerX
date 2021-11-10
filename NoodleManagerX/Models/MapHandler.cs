@@ -49,7 +49,7 @@ namespace NoodleManagerX.Models
             MainViewModel.s_instance.localItems.AddRange(tmp);
         }
 
-        public override async Task GetLocalItem(string file, List<LocalItem> list)
+        public override async Task<bool> GetLocalItem(string file, List<LocalItem> list)
         {
             try
             {
@@ -75,7 +75,9 @@ namespace NoodleManagerX.Models
             {
                 MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
                 File.Delete(file);
+                return false;
             }
+            return true;
         }
 
         public override dynamic DeserializePage(string json)

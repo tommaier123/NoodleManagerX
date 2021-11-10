@@ -36,6 +36,20 @@ namespace NoodleManagerX.Models
         [Reactive] public bool downloaded { get; set; } = false;
         [Reactive] public bool blacklisted { get; set; } = false;
         [Reactive] public bool needsUpdate { get; set; } = false;
+        public GenericHandler handler
+        {
+            get
+            {
+                switch (itemType)
+                {
+                    case ItemType.Map: return MainViewModel.s_instance.mapHandler;
+                    case ItemType.Playlist: return MainViewModel.s_instance.playlistHandler;
+                    case ItemType.Avatar: return MainViewModel.s_instance.avatarHandler;
+                    case ItemType.Stage: return MainViewModel.s_instance.stageHandler;
+                    default: return null;
+                }
+            }
+        }
         public virtual string display_title { get; }
         public virtual string display_creator { get; }
         public virtual string display_preview { get { return null; } }
@@ -92,39 +106,39 @@ namespace NoodleManagerX.Models
             }));
         }
 
-        public Task UpdateDownloaded(bool forceUpdate=false)
+        public Task UpdateDownloaded(bool forceUpdate = false)
         {
-           return Task.Run(async () =>
-            {
-                List<LocalItem> tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
-                await Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    if (tmp.Count() > 0)
-                    {
-                        downloaded = true;
-                        download_filename = tmp[0].filename;
-                        if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
-                        {
-                            needsUpdate = tmp[0].hash != ((MapItem)this).hash;
-                            if (needsUpdate) Console.WriteLine("Hash difference detected for " + this.display_title);
-                        }
-                        else
-                        {
-                            needsUpdate = DateTime.Compare(updatedAt, tmp[0].modifiedTime) > 0;
-                            if (needsUpdate) Console.WriteLine("Date difference detected for " + this.display_title);
-                        }
-                    }
-                    else
-                    {
-                        downloaded = false;
-                        needsUpdate = false;
-                    }
-                    if (needsUpdate || forceUpdate)
-                    {
-                        DownloadScheduler.queue.Add(this);
-                    }
-                });
-            });
+            return Task.Run(async () =>
+             {
+                 List<LocalItem> tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
+                 await Dispatcher.UIThread.InvokeAsync(() =>
+                 {
+                     if (tmp.Count() > 0)
+                     {
+                         downloaded = true;
+                         download_filename = tmp[0].filename;
+                         if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
+                         {
+                             needsUpdate = tmp[0].hash != ((MapItem)this).hash;
+                             if (needsUpdate) Console.WriteLine("Hash difference detected for " + this.display_title);
+                         }
+                         else
+                         {
+                             needsUpdate = DateTime.Compare(updatedAt, tmp[0].modifiedTime) > 0;
+                             if (needsUpdate) Console.WriteLine("Date difference detected for " + this.display_title);
+                         }
+                     }
+                     else
+                     {
+                         downloaded = false;
+                         needsUpdate = false;
+                     }
+                     if (needsUpdate || forceUpdate)
+                     {
+                         DownloadScheduler.queue.Add(this);
+                     }
+                 });
+             });
         }
 
         public void UpdateBlacklisted()
@@ -150,7 +164,7 @@ namespace NoodleManagerX.Models
                     try
                     {
                         if (downloaded)
-                        {
+                        {//remove from local items
                             MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this) == false).ToList();
                         }
 
@@ -171,21 +185,16 @@ namespace NoodleManagerX.Models
                             download_filename = new ContentDisposition(header_contentDisposition).FileName;
                         }
 
+                        Console.WriteLine("Downloading " + download_filename);
+
                         string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, download_filename);
 
                         await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
 
                         webClient.Dispose();
 
-                        if (File.Exists(filepath))
+                        if (await handler.GetLocalItem(filepath, MainViewModel.s_instance.localItems))
                         {
-                            LocalItem localItem = new LocalItem(id, "", Path.GetFileName(filepath), DateTime.Now, this.itemType);
-                            if (itemType == ItemType.Map)
-                            {
-                                localItem.hash = ((MapItem)this).hash;
-                            }
-                            MainViewModel.s_instance.localItems.Add(localItem);
-
                             _ = Dispatcher.UIThread.InvokeAsync(() =>
                             {
                                 downloaded = true;
