@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Avalonia.Threading;
+using DynamicData;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,10 +10,6 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Avalonia.Threading;
-using DynamicData;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace NoodleManagerX.Models
 {
@@ -25,7 +25,7 @@ namespace NoodleManagerX.Models
         public virtual Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "name", "$contL" }, { "user.username", "$contL" } };
         public virtual string select { get; set; } = "name";
         public virtual string join { get; set; } = "";
-        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,description,score,rating,vote_diff,user,";
+        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,updated_at,download_count,upvote_count,downvote_count,score,rating,vote_diff,user,";
         public virtual string apiEndpoint { get; set; } = "";
         public virtual string folder { get; set; } = "";
         public virtual string[] extensions { get; set; } = { };
@@ -216,7 +216,7 @@ namespace NoodleManagerX.Models
                                         );
                                 }
 
-                                string req = apiEndpoint + "?limit=" + getAllPageSize + "&page=" + i+"&s="+ convert.ToString(Formatting.None);
+                                string req = apiEndpoint + "?limit=" + getAllPageSize + "&page=" + i + "&s=" + convert.ToString(Formatting.None);
 
                                 var page = DeserializePage(await client.DownloadStringTaskAsync(req));
 
@@ -228,7 +228,7 @@ namespace NoodleManagerX.Models
                                     {
                                         if (!instances[0].downloaded || instances[0].needsUpdate)
                                         {
-                                            DownloadScheduler.queue.Add(instances[0]);
+                                            DownloadScheduler.Download(instances[0]);
                                         }
                                     }
                                     else
@@ -236,7 +236,7 @@ namespace NoodleManagerX.Models
                                         await item.UpdateDownloaded();
                                         if (!item.downloaded || item.needsUpdate)
                                         {
-                                            DownloadScheduler.queue.Add(item);
+                                            DownloadScheduler.Download(item);
                                             if (item.needsUpdate) { MainViewModel.Log("Updating " + item.display_title); }
                                         }
                                     }

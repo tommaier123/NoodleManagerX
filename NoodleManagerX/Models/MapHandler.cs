@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reactive;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using ReactiveUI;
-using System.Reactive;
-using ReactiveUI.Fody.Helpers;
 
 namespace NoodleManagerX.Models
 {
@@ -43,7 +43,7 @@ namespace NoodleManagerX.Models
                 var files = MainViewModel.QuestDirectoryGetFiles("CustomSongs").Where(x => x.TrimEnd().EndsWith(".synth"));
                 foreach (string file in files)
                 {
-                    tmp.Add(new LocalItem(-1, "", file, new System.DateTime(), ItemType.Map));
+                    await base.GetLocalItem(file, tmp);
                 }
             }
             MainViewModel.s_instance.localItems.AddRange(tmp);
@@ -66,18 +66,22 @@ namespace NoodleManagerX.Models
                                 localItem.modifiedTime = File.GetLastWriteTime(file);
                                 localItem.itemType = ItemType.Map;
                                 list.Add(localItem);
+                                return true;
                             }
                         }
                     }
                 }
+
+                //no metadata -> delete
+                MainViewModel.Log("Deleting file without metadata " + Path.GetFileName(file));
+                File.Delete(file);
             }
             catch
             {
                 MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
                 File.Delete(file);
-                return false;
             }
-            return true;
+            return false;
         }
 
         public override dynamic DeserializePage(string json)

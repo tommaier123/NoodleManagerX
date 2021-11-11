@@ -1,31 +1,31 @@
-﻿using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using System;
-using System.Reactive;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using System.Collections.ObjectModel;
-using Newtonsoft.Json;
 using Avalonia.Threading;
 using DynamicData;
-using System.Threading.Tasks;
-using System.IO;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
+using ManagedBass;
 using Microsoft.Win32;
 using MsgBox;
-using static System.Environment;
-using System.Linq;
-using System.Collections.Specialized;
-using System.Reflection;
+using Newtonsoft.Json;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using SharpAdbClient;
-using System.Net;
-using System.IO.Compression;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
-using ManagedBass;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Net;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using static System.Environment;
 
 namespace NoodleManagerX.Models
 {
@@ -46,8 +46,8 @@ namespace NoodleManagerX.Models
         //use api filename instead of content dispositon
         //context menu for description
         //multiple files/versioning
-        //implement download timeout/retry counter
         //fix settings path dispaly
+        //only delete without metadata on first run, add warning
 
 
         public static MainViewModel s_instance;
@@ -204,7 +204,7 @@ namespace NoodleManagerX.Models
                 downloadPage = true;
                 foreach (GenericItem item in items.Where(x => !x.downloaded && !x.downloading))
                 {
-                    DownloadScheduler.queue.Add(item);
+                    DownloadScheduler.Download(item);
                 }
             }));
 

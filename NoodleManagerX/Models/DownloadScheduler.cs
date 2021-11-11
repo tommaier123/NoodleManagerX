@@ -21,6 +21,12 @@ namespace NoodleManagerX.Models
             queue.CollectionChanged += QueueChanged;
         }
 
+        public static void Download(GenericItem item)
+        {
+            item.downloadAttempts = 0;
+            queue.Add(item);
+        }
+
         private static void QueueChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (queue.Count > 0 && !running)

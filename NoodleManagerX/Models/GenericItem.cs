@@ -1,5 +1,4 @@
-﻿using Avalonia.Interactivity;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using ImageMagick;
 using ReactiveUI;
@@ -21,10 +20,13 @@ namespace NoodleManagerX.Models
     [DataContract]
     abstract class GenericItem : ReactiveObject
     {
+        public const int maxDownloadAttempts = 3;
+        public const int maxDeleteAttempts = 20;
+
         [DataMember] public int id { get; set; }
         [DataMember] public string cover_url { get; set; }
         [DataMember] public string download_url { get; set; }
-        [DataMember] public string published_at { get; set; }
+        [DataMember] public string updated_at { get; set; }
         [DataMember] public int download_count { get; set; }
         [DataMember] public int upvote_count { get; set; }
         [DataMember] public int downvote_count { get; set; }
@@ -62,6 +64,8 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> downloadCommand { get; set; }
         public ReactiveCommand<Unit, Unit> deleteCommand { get; set; }
 
+        public int downloadAttempts = 0;
+
 
         [OnDeserialized]
         private void OnDeserializedMethod(StreamingContext context)
@@ -72,7 +76,7 @@ namespace NoodleManagerX.Models
 
             Task.Run(() =>
             {
-                updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
+                updatedAt = DateTime.Parse(updated_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
             });
 
             downloadCommand = ReactiveCommand.Create((() =>
@@ -80,7 +84,7 @@ namespace NoodleManagerX.Models
                 if (MainViewModel.s_instance.CheckDirectory(MainViewModel.s_instance.settings.synthDirectory, true))
                 {
                     blacklisted = false;
-                    DownloadScheduler.queue.Add(this);
+                    DownloadScheduler.Download(this);
                 }
             }));
 
@@ -115,6 +119,16 @@ namespace NoodleManagerX.Models
                  {
                      if (tmp.Count() > 0)
                      {
+                         if (tmp.Count() > 1)
+                         {
+                             tmp = tmp.Where(x => x.itemType == itemType).OrderByDescending(x => x.modifiedTime).ToList();
+                             foreach (LocalItem l in tmp.Skip(1))
+                             {
+                                 Console.WriteLine("Old version deleted of " + l.filename);
+                                 Delete(l.filename);
+                             }
+                         }
+
                          downloaded = true;
                          download_filename = tmp[0].filename;
                          if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
@@ -135,7 +149,7 @@ namespace NoodleManagerX.Models
                      }
                      if (needsUpdate || forceUpdate)
                      {
-                         DownloadScheduler.queue.Add(this);
+                         DownloadScheduler.Download(this);
                      }
                  });
              });
@@ -161,6 +175,8 @@ namespace NoodleManagerX.Models
             {
                 Task.Run(async () =>
                 {
+                    string filepath = "";
+
                     try
                     {
                         if (downloaded)
@@ -187,30 +203,30 @@ namespace NoodleManagerX.Models
 
                         Console.WriteLine("Downloading " + download_filename);
 
-                        string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, download_filename);
+                        filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, download_filename);
 
                         await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
 
                         webClient.Dispose();
-
-                        if (await handler.GetLocalItem(filepath, MainViewModel.s_instance.localItems))
-                        {
-                            _ = Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                downloaded = true;
-                            });
-                        }
-                        else
-                        {
-                            //implement timeout!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                            MainViewModel.Log("Download failed. Requeueing " + display_title);
-                            DownloadScheduler.queue.Add(this);
-                        }
                     }
                     catch (Exception e)
                     {
-                        DownloadScheduler.queue.Add(this);
                         MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+                        Requeue();
+                    }
+
+                    if (await handler.GetLocalItem(filepath, MainViewModel.s_instance.localItems))
+                    {
+                        File.SetLastWriteTime(filepath, updatedAt);
+
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            downloaded = true;
+                        });
+                    }
+                    else
+                    {
+                        Requeue();
                     }
 
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
@@ -223,34 +239,60 @@ namespace NoodleManagerX.Models
             }
         }
 
+        private void Requeue()
+        {
+            if (downloadAttempts < maxDownloadAttempts)
+            {
+                MainViewModel.Log("Requeueing " + download_filename);
+                downloadAttempts++;
+                DownloadScheduler.queue.Add(this);
+            }
+            else
+            {
+                MainViewModel.Log("Timeout " + download_filename);
+            }
+        }
+
         public void Delete()
+        {
+            Delete(download_filename);
+        }
+
+        public void Delete(string filename)
         {
             Task.Run(async () =>
             {
-                if (!String.IsNullOrEmpty(download_filename))
+                if (!String.IsNullOrEmpty(filename))
                 {
-                    string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, download_filename);
+                    string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
 
-                    if (File.Exists(filepath))
+                    int i = 0;
+
+                    while (File.Exists(filepath) && i < maxDeleteAttempts)
                     {
+                        i++;
                         try
                         {
                             File.Delete(filepath);
                         }
                         catch (IOException e)
                         {
-                            //implement timeout!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                             MainViewModel.Log(e.Message);
-                            await Task.Delay(100);
-                            Delete();
+                            await Task.Delay(200);
                         }
-
-                        MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && !x.CheckEquality(this)).ToList();
+                    }
+                    if (!File.Exists(filepath))
+                    {
+                        MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && x.itemType == itemType && x.filename == filename).ToList();
 
                         _ = Dispatcher.UIThread.InvokeAsync(() =>
                         {
                             downloaded = false;
                         });
+                    }
+                    else
+                    {
+                        MainViewModel.Log("Failed to delete " + download_filename);
                     }
                 }
             });
