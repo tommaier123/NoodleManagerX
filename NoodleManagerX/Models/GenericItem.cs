@@ -31,7 +31,7 @@ namespace NoodleManagerX.Models
         [DataMember] public int upvote_count { get; set; }
         [DataMember] public int downvote_count { get; set; }
         [DataMember] public string description { get; set; }
-        [DataMember] public string download_filename { get; set; } = "";
+        [DataMember] public string filename { get; set; } = "";
         [Reactive] public Bitmap cover_bmp { get; set; }
         [Reactive] public bool selected { get; set; }
         [Reactive] public bool downloading { get; set; } = false;
@@ -100,11 +100,11 @@ namespace NoodleManagerX.Models
 
                     if (blacklisted)
                     {
-                        MainViewModel.s_instance.blacklist.Add(download_filename);
+                        MainViewModel.s_instance.blacklist.Add(filename);
                     }
                     else
                     {
-                        MainViewModel.s_instance.blacklist.Remove(download_filename);
+                        MainViewModel.s_instance.blacklist.Remove(filename);
                     }
                 }
             }));
@@ -130,7 +130,7 @@ namespace NoodleManagerX.Models
                          }
 
                          downloaded = true;
-                         download_filename = tmp[0].filename;
+                         filename = tmp[0].filename;
                          if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
                          {
                              needsUpdate = tmp[0].hash != ((MapItem)this).hash;
@@ -159,7 +159,7 @@ namespace NoodleManagerX.Models
         {
             Task.Run(() =>
             {
-                if (!String.IsNullOrEmpty(download_filename) && MainViewModel.s_instance.blacklist.Contains(download_filename))
+                if (!String.IsNullOrEmpty(filename) && MainViewModel.s_instance.blacklist.Contains(filename))
                 {
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
                     {
@@ -194,16 +194,16 @@ namespace NoodleManagerX.Models
                         string url = "https://synthriderz.com" + download_url;
 
                         //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        if (String.IsNullOrEmpty(download_filename))
+                        if (String.IsNullOrEmpty(filename))
                         {
                             webClient.OpenRead(url);
                             string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
-                            download_filename = new ContentDisposition(header_contentDisposition).FileName;
+                            filename = new ContentDisposition(header_contentDisposition).FileName;
                         }
 
-                        Console.WriteLine("Downloading " + download_filename);
+                        Console.WriteLine("Downloading " + filename);
 
-                        filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, download_filename);
+                        filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
 
                         await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
 
@@ -215,7 +215,7 @@ namespace NoodleManagerX.Models
                         Requeue();
                     }
 
-                    if (await handler.GetLocalItem(filepath, MainViewModel.s_instance.localItems))
+                    if (await handler.GetLocalItem(filepath, MainViewModel.s_instance.localItems, this))
                     {
                         File.SetLastWriteTime(filepath, updatedAt);
 
@@ -243,19 +243,19 @@ namespace NoodleManagerX.Models
         {
             if (downloadAttempts < maxDownloadAttempts)
             {
-                MainViewModel.Log("Requeueing " + download_filename);
+                MainViewModel.Log("Requeueing " + filename);
                 downloadAttempts++;
                 DownloadScheduler.queue.Add(this);
             }
             else
             {
-                MainViewModel.Log("Timeout " + download_filename);
+                MainViewModel.Log("Timeout " + filename);
             }
         }
 
         public void Delete()
         {
-            Delete(download_filename);
+            Delete(filename);
         }
 
         public void Delete(string filename)
@@ -292,7 +292,7 @@ namespace NoodleManagerX.Models
                     }
                     else
                     {
-                        MainViewModel.Log("Failed to delete " + download_filename);
+                        MainViewModel.Log("Failed to delete " + this.filename);
                     }
                 }
             });
@@ -353,7 +353,7 @@ namespace NoodleManagerX.Models
                 }
                 else
                 {
-                    return filename == item.download_filename;
+                    return filename == item.filename;
                 }
             }
             return false;

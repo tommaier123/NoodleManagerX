@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace NoodleManagerX.Models
     {
         public override ItemType itemType { get; set; } = ItemType.Map;
         public override Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "text_search", "$tsQuery" }, { "user.username", "$contL" } };
-        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,beat_saber_convert";
+        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,beat_saber_convert,filename";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
         public override async void LoadLocalItems()
@@ -49,7 +50,7 @@ namespace NoodleManagerX.Models
             MainViewModel.s_instance.localItems.AddRange(tmp);
         }
 
-        public override async Task<bool> GetLocalItem(string file, List<LocalItem> list)
+        public override async Task<bool> GetLocalItem(string file, List<LocalItem> list, GenericItem item = null)
         {
             try
             {
@@ -72,9 +73,29 @@ namespace NoodleManagerX.Models
                     }
                 }
 
-                //no metadata -> delete
-                MainViewModel.Log("Deleting file without metadata " + Path.GetFileName(file));
-                File.Delete(file);
+                //no metadata -> create
+                if (item != null)
+                {
+                    MainViewModel.Log("Creating metadata for " + item.filename);
+
+                    JObject metadata = new JObject(new JProperty("id", item.id), new JProperty("hash", ((MapItem)item).hash));
+
+                    using (ZipArchive archive = ZipFile.Open(file, ZipArchiveMode.Update))
+                    {
+                        ZipArchiveEntry entry = archive.CreateEntry("synthriderz.meta.json");
+                        using (StreamWriter writer = new StreamWriter(entry.Open()))
+                        {
+                            writer.Write(metadata.ToString(Formatting.None));
+                        }
+                        //archive.ExtractToDirectory(extractPath);
+                    }
+                    return true;
+                }
+                else
+                {
+                    MainViewModel.Log("Deleting file without metadata " + Path.GetFileName(file));
+                    File.Delete(file);
+                }
             }
             catch
             {

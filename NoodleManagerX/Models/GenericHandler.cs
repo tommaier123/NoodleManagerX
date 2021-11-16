@@ -50,7 +50,7 @@ namespace NoodleManagerX.Models
             }
         }
 
-        public virtual Task<bool> GetLocalItem(string file, List<LocalItem> list)
+        public virtual Task<bool> GetLocalItem(string file, List<LocalItem> list, GenericItem item=null)
         {
             list.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), itemType));
             return Task.FromResult(true);
