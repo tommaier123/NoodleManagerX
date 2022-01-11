@@ -46,11 +46,10 @@ namespace NoodleManagerX
             difficultyActiveBrush = (Brush)brushConverter.ConvertFromString(difficultyActiveColor);
             difficultyInactiveBrush = (Brush)brushConverter.ConvertFromString(difficultyInactiveColor);
 
-            //initialize Cef for webview
+            this.DataContext = new MainViewModel();
 
             InitializeComponent();
 
-            this.DataContext = new MainViewModel();
             blackBar = this.FindControl<Grid>("BlackBar");
 
             TextBox searchBox = this.FindControl<TextBox>("SearchBox");

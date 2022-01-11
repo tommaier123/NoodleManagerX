@@ -190,24 +190,24 @@ namespace NoodleManagerX.Models
                             downloading = true;
                         });
 
-                        WebClient webClient = new WebClient();
-                        string url = "https://synthriderz.com" + download_url;
-
-                        //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        if (String.IsNullOrEmpty(filename))
+                        using (WebClient webClient = new WebClient())
                         {
-                            webClient.OpenRead(url);
-                            string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
-                            filename = new ContentDisposition(header_contentDisposition).FileName;
+                            string url = "https://synthriderz.com" + download_url;
+
+                            //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            if (String.IsNullOrEmpty(filename))
+                            {
+                                webClient.OpenRead(url);
+                                string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
+                                filename = new ContentDisposition(header_contentDisposition).FileName;
+                            }
+
+                            Console.WriteLine("Downloading " + filename);
+
+                            filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
+
+                            await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
                         }
-
-                        Console.WriteLine("Downloading " + filename);
-
-                        filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
-
-                        await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
-
-                        webClient.Dispose();
                     }
                     catch (Exception e)
                     {

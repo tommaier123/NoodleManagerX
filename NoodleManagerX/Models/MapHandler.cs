@@ -16,7 +16,7 @@ namespace NoodleManagerX.Models
     {
         public override ItemType itemType { get; set; } = ItemType.Map;
         public override Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "text_search", "$tsQuery" }, { "user.username", "$contL" } };
-        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,beat_saber_convert,filename";
+        public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,beat_saber_convert";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
         public override async void LoadLocalItems()
@@ -87,7 +87,6 @@ namespace NoodleManagerX.Models
                         {
                             writer.Write(metadata.ToString(Formatting.None));
                         }
-                        //archive.ExtractToDirectory(extractPath);
                     }
                     return true;
                 }

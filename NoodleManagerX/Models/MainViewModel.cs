@@ -667,6 +667,7 @@ namespace NoodleManagerX.Models
             {
                 string path = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager", "Settings.json");
                 MainViewModel.Log("Loading Settings from " + path);
+
                 if (File.Exists(path))
                 {
                     using (StreamReader file = File.OpenText(path))
@@ -807,8 +808,12 @@ namespace NoodleManagerX.Models
 
         public static void Log(string message)
         {
-            Console.WriteLine(message);
-            File.AppendAllText("log.txt", message + Environment.NewLine);
+            try
+            {
+                Console.WriteLine(message);
+                File.AppendAllText("log.txt", message + Environment.NewLine);
+            }
+            catch { }
         }
     }
 }
