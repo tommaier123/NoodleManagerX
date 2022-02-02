@@ -22,8 +22,8 @@ namespace NoodleManagerX.Models
         public override async void LoadLocalItems()
         {
             List<LocalItem> tmp = new List<LocalItem>();
-            if (MainViewModel.s_instance.questSerial == "")
-            {
+            //if (MainViewModel.s_instance.questSerial == "")
+            //{
                 if (MainViewModel.s_instance.settings.synthDirectory != "")
                 {
                     string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs");
@@ -38,7 +38,7 @@ namespace NoodleManagerX.Models
                         }
                     }
                 }
-            }
+            /*}
             else
             {
                 var files = MainViewModel.QuestDirectoryGetFiles("CustomSongs").Where(x => x.TrimEnd().EndsWith(".synth"));
@@ -46,7 +46,7 @@ namespace NoodleManagerX.Models
                 {
                     await base.GetLocalItem(file, tmp);
                 }
-            }
+            }*/
             MainViewModel.s_instance.localItems.AddRange(tmp);
         }
 

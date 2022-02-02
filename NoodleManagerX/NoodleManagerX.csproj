@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks>net5.0-windows</TargetFrameworks>
     <ApplicationIcon>icon-nm.ico</ApplicationIcon>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
@@ -13,15 +13,16 @@
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.11" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.11" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.11" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.11" />
-    <PackageReference Include="Avalonia.Svg.Skia" Version="0.10.11.1" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="8.5.0" />
+    <PackageReference Include="Avalonia" Version="0.10.12" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.12" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.12" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.12" />
+    <PackageReference Include="Avalonia.Svg.Skia" Version="0.10.12" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="9.0.0" />
     <PackageReference Include="ManagedBass" Version="3.1.0" />
     <PackageReference Include="MediaDevices" Version="1.9.1" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageReference Include="NAudio" Version="2.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="ReactiveUI.Fody" Version="17.1.17" />
     <PackageReference Include="SharpAdbClient" Version="2.3.23" />
@@ -33,6 +34,7 @@
     <EmbeddedResource Include="Assets\icon-nm.ico" />
     <EmbeddedResource Include="Assets\Fonts\*.ttf" />
   </ItemGroup>
+<!--
   <ItemGroup Condition="'$(RuntimeIdentifier)'=='win-x64'or'$(Configuration)'=='DEBUG'">
     <EmbeddedResource Include="Resources\windows.zip" />
   </ItemGroup>
@@ -42,6 +44,7 @@
   <ItemGroup Condition="'$(RuntimeIdentifier)'=='osx-x64'">
     <EmbeddedResource Include="Resources\osx.zip" />
   </ItemGroup>
+-->
   <ItemGroup>
     <Compile Update="GetAllDialog.axaml.cs">
       <DependentUpon>GetAllDialog.axaml</DependentUpon>

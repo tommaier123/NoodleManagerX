@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using DynamicData;
-using ManagedBass;
 using Microsoft.Win32;
 using MsgBox;
 using Newtonsoft.Json;
@@ -70,7 +69,7 @@ namespace NoodleManagerX.Models
         [Reactive] public bool directoryValid { get; set; }
 
         [Reactive] public Settings settings { get; set; } = new Settings();
-        [Reactive] public string questSerial { get; set; } = "";
+        //[Reactive] public string questSerial { get; set; } = "";
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
@@ -115,7 +114,7 @@ namespace NoodleManagerX.Models
 
             MainWindow.s_instance.Closing += ClosingEvent;
 
-            ExtractResources();
+            //ExtractResources();
             LoadSettings();
             LoadBlacklist();
 
@@ -223,7 +222,7 @@ namespace NoodleManagerX.Models
             this.WhenAnyValue(x => x.selectedSortMethod).Skip(2).Subscribe(x => GetPage());//reload maps when the sort method changes
             this.WhenAnyValue(x => x.selectedSortOrder).Skip(2).Subscribe(x => GetPage());//reload maps when the sort order changes
 
-            this.WhenAnyValue(x => x.questSerial).Skip(1).Subscribe(x => LoadLocalItems());//reload local when the quest status changes
+            //this.WhenAnyValue(x => x.questSerial).Skip(1).Subscribe(x => LoadLocalItems());//reload local when the quest status changes
             settings.Changed.Subscribe(x => { SaveSettings(); LoadLocalItems(); LoadBlacklist(); });//save the settings when they change
             this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
             {
@@ -364,7 +363,7 @@ namespace NoodleManagerX.Models
                 }
             }
         }
-
+        /*
         public void ExtractResources()
         {
             Task.Run(() =>
@@ -555,6 +554,43 @@ namespace NoodleManagerX.Models
             });
         }
 
+                public static List<string> QuestDirectoryGetFiles(string path)
+        {
+            List<string> ret = new List<string>();
+            if (QuestPathExists(path))
+            {
+
+                var quests = MainViewModel.s_instance.adbClient.GetDevices().Where(x => x.Serial == MainViewModel.s_instance.questSerial);
+                if (quests.Count() > 0)
+                {
+                    DeviceData device = quests.First();
+
+                    var receiver = new ConsoleOutputReceiver();
+
+                    MainViewModel.s_instance.adbClient.ExecuteRemoteCommand("ls sdcard/Android/data/com.kluge.SynthRiders/files/" + path, device, receiver);
+                    ret.AddRange(receiver.ToString().Split(new char[] { '\n' }));
+                }
+            }
+            return ret;
+        }
+
+        public static bool QuestPathExists(string path)
+        {
+            List<string> ret = new List<string>();
+            var quests = MainViewModel.s_instance.adbClient.GetDevices().Where(x => x.Serial == MainViewModel.s_instance.questSerial);
+            if (quests.Count() > 0)
+            {
+                DeviceData device = quests.First();
+
+                var receiver = new ConsoleOutputReceiver();
+
+                MainViewModel.s_instance.adbClient.ExecuteRemoteCommand("ls sdcard/Android/data/com.kluge.SynthRiders/files", device, receiver);
+
+                return receiver.ToString().Contains(path);
+            }
+            return false;
+        }
+        */
         public void OpenErrorDialog(string text)
         {
             _ = Dispatcher.UIThread.InvokeAsync(async () =>
@@ -622,43 +658,6 @@ namespace NoodleManagerX.Models
                 }
             }
             catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
-        }
-
-        public static List<string> QuestDirectoryGetFiles(string path)
-        {
-            List<string> ret = new List<string>();
-            if (QuestPathExists(path))
-            {
-
-                var quests = MainViewModel.s_instance.adbClient.GetDevices().Where(x => x.Serial == MainViewModel.s_instance.questSerial);
-                if (quests.Count() > 0)
-                {
-                    DeviceData device = quests.First();
-
-                    var receiver = new ConsoleOutputReceiver();
-
-                    MainViewModel.s_instance.adbClient.ExecuteRemoteCommand("ls sdcard/Android/data/com.kluge.SynthRiders/files/" + path, device, receiver);
-                    ret.AddRange(receiver.ToString().Split(new char[] { '\n' }));
-                }
-            }
-            return ret;
-        }
-
-        public static bool QuestPathExists(string path)
-        {
-            List<string> ret = new List<string>();
-            var quests = MainViewModel.s_instance.adbClient.GetDevices().Where(x => x.Serial == MainViewModel.s_instance.questSerial);
-            if (quests.Count() > 0)
-            {
-                DeviceData device = quests.First();
-
-                var receiver = new ConsoleOutputReceiver();
-
-                MainViewModel.s_instance.adbClient.ExecuteRemoteCommand("ls sdcard/Android/data/com.kluge.SynthRiders/files", device, receiver);
-
-                return receiver.ToString().Contains(path);
-            }
-            return false;
         }
 
         public void LoadSettings()
@@ -769,7 +768,6 @@ namespace NoodleManagerX.Models
             if (!e.Cancel == true)
             {
                 //cleanup
-                Bass.Free();
             }
         }
 

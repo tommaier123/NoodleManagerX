@@ -1,15 +1,11 @@
-﻿//using NAudio.Wave;
-using ManagedBass;
+﻿using NAudio.Wave;
 using System;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Mime;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoutubeExplode;
+
 
 namespace NoodleManagerX.Models
 {
@@ -18,35 +14,8 @@ namespace NoodleManagerX.Models
         private static MapItem currentlyPlaying;
         private static YoutubeClient youtubeClient = new YoutubeClient();
         private const string regex = @"^.*((youtu\.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*";
-        private static Int32 channel = -1;
         private static int requestCounter = 0;
-        private static string[] plugins = new string[] { "libbass_aac.so"};
-
-        static PlaybackHandler()
-        {
-            Bass.Init();
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                foreach (string plugin in plugins)
-                {
-                    string location = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), plugin);
-                    Console.WriteLine("Loading Plugin from: " + location);
-                    int res = Bass.PluginLoad(location);
-                    if (res == 0)
-                    {
-                        Console.WriteLine("Error loading Plugin: " + Bass.LastError);
-                    }
-                    else
-                    {
-                        foreach (var format in Bass.PluginGetInfo(res).Formats)
-                        {
-                            Console.Write(format.ChannelType + " " + format.Name);
-                        }
-                    }
-                }
-            }
-        }
+        private static WaveOutEvent waveout;
 
         public static void Play(MapItem item)
         {
@@ -77,21 +46,15 @@ namespace NoodleManagerX.Models
 
                         var streamInfo = streamManifest.GetAudioOnlyStreams().OrderBy(x => x.Bitrate).FirstOrDefault();
 
-                        //This makes no fcking sense but it doesn't work without it. Thanks Bass
-                        DownloadProcedure Procedure = (IntPtr a, int b, IntPtr c) => { };
-
-                        channel = Bass.CreateStream(streamInfo.Url, 0, BassFlags.Default, Procedure);
-
-                        if (channel == 0)
+                        using (var mf = new MediaFoundationReader(streamInfo.Url))
+                        using (waveout = new WaveOutEvent())
                         {
-                            Console.WriteLine("Failed to create channel: " + Bass.LastError);
-                        }
-
-                        Bass.ChannelPlay(channel);
-
-                        while (Bass.ChannelIsActive(channel) == PlaybackState.Playing)
-                        {
-                            await Task.Delay(100);
+                            waveout.Init(mf);
+                            waveout.Play();
+                            while (waveout.PlaybackState == PlaybackState.Playing)
+                            {
+                                await Task.Delay(100);
+                            }
                         }
                         StopPlaying(playing);
                     }
@@ -106,16 +69,14 @@ namespace NoodleManagerX.Models
 
         public static void Stop()
         {
-            if (channel != -1)
+
+            try
             {
-                try
-                {
-                    Bass.ChannelPause(channel);
-                }
-                catch (Exception e)
-                {
-                    MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
-                }
+                waveout.Stop();
+            }
+            catch (Exception e)
+            {
+                MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
             }
             StopPlaying(currentlyPlaying);
         }
