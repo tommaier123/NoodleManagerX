@@ -2,11 +2,13 @@
 using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reactive;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
@@ -19,35 +21,25 @@ namespace NoodleManagerX.Models
         public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,beat_saber_convert";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
-        public override async void LoadLocalItems()
+        public override async Task<bool> LoadLocalItems()
         {
             List<LocalItem> tmp = new List<LocalItem>();
-            //if (MainViewModel.s_instance.questSerial == "")
-            //{
-                if (MainViewModel.s_instance.settings.synthDirectory != "")
+            if (MainViewModel.s_instance.settings.synthDirectory != "")
+            {
+                string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs");
+                if (Directory.Exists(directory))
                 {
-                    string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs");
-                    if (Directory.Exists(directory))
+                    foreach (string file in Directory.GetFiles(directory))
                     {
-                        foreach (string file in Directory.GetFiles(directory))
+                        if (Path.GetExtension(file) == ".synth")
                         {
-                            if (Path.GetExtension(file) == ".synth")
-                            {
-                                await GetLocalItem(file, tmp);
-                            }
+                            await GetLocalItem(file, tmp);
                         }
                     }
                 }
-            /*}
-            else
-            {
-                var files = MainViewModel.QuestDirectoryGetFiles("CustomSongs").Where(x => x.TrimEnd().EndsWith(".synth"));
-                foreach (string file in files)
-                {
-                    await base.GetLocalItem(file, tmp);
-                }
-            }*/
+            }
             MainViewModel.s_instance.localItems.AddRange(tmp);
+            return true;
         }
 
         public override async Task<bool> GetLocalItem(string file, List<LocalItem> list, GenericItem item = null)
@@ -72,7 +64,15 @@ namespace NoodleManagerX.Models
                         }
                     }
                 }
+            }
+            catch
+            {
+                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
+                File.Delete(file);
+            }
 
+            try
+            {
                 //no metadata -> create
                 if (item != null)
                 {
@@ -90,17 +90,14 @@ namespace NoodleManagerX.Models
                     }
                     return true;
                 }
-                else
+                else if (MainViewModel.s_instance.pruning)
                 {
-                    MainViewModel.Log("Deleting file without metadata " + Path.GetFileName(file));
+                    MainViewModel.Log("Deleting old file without metadata " + Path.GetFileName(file));
                     File.Delete(file);
                 }
             }
-            catch
-            {
-                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
-                File.Delete(file);
-            }
+            catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+
             return false;
         }
 

@@ -35,18 +35,13 @@ namespace NoodleManagerX.Models
         //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true  -p:PublishTrimmed=True -p:TrimMode=Link -p:PublishReadyToRun=false
 
 
-
-
-
         //Todo:
         //check which dispatchers should be awaited
         //possibly remove functions with switch parameters
-        //strip unnecessary ADB files
-        //use api filename instead of content dispositon
         //context menu for description
         //multiple files/versioning
         //fix settings path dispaly
-        //only delete without metadata on first run, add warning
+        //use state machine
 
 
         public static MainViewModel s_instance;
@@ -100,6 +95,7 @@ namespace NoodleManagerX.Models
         public bool updatingLocalItems = false;
 
         public bool getAllRunning = false;
+        public bool pruning = false;
 
         public int apiRequestCounter = 0;
 
@@ -116,7 +112,32 @@ namespace NoodleManagerX.Models
 
             //ExtractResources();
             LoadSettings();
-            LoadBlacklist();
+
+            settings.Changed.Subscribe(x => { SaveSettings(); LoadLocalItems(); LoadBlacklist(); });//save the settings when they change
+            this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
+            {
+                if (settings.synthDirectory != synthDirectory)
+                {
+                    directoryValid = CheckDirectory(synthDirectory);
+                    if (directoryValid)
+                    {
+                        _ = Dispatcher.UIThread.InvokeAsync(async () =>
+                        {
+                            var res = await MessageBox.Show(null, "All maps that were not downloaded from synthriderz.com within the last year will be deleted." + Environment.NewLine + "This will only happen once on a new game directory", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+                            if (res == MessageBox.MessageBoxResult.Ok)
+                            {
+                                Log("Directory changed to " + synthDirectory);
+                                pruning = true;
+                                settings.synthDirectory = synthDirectory;
+                            }
+                            else
+                            {
+                                synthDirectory = settings.synthDirectory;
+                            }
+                        });
+                    }
+                }
+            });
 
             if (!CheckDirectory(settings.synthDirectory))
             {
@@ -127,6 +148,8 @@ namespace NoodleManagerX.Models
             {
                 synthDirectory = settings.synthDirectory;
             }
+
+            LoadBlacklist();
 
             minimizeCommand = ReactiveCommand.Create(() =>
             {
@@ -223,18 +246,6 @@ namespace NoodleManagerX.Models
             this.WhenAnyValue(x => x.selectedSortOrder).Skip(2).Subscribe(x => GetPage());//reload maps when the sort order changes
 
             //this.WhenAnyValue(x => x.questSerial).Skip(1).Subscribe(x => LoadLocalItems());//reload local when the quest status changes
-            settings.Changed.Subscribe(x => { SaveSettings(); LoadLocalItems(); LoadBlacklist(); });//save the settings when they change
-            this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
-            {
-                directoryValid = CheckDirectory(synthDirectory);
-                if (directoryValid)
-                {
-                    Log("Directory changed to " + synthDirectory);
-                    settings.synthDirectory = synthDirectory;//save the current directory to the settings if it has changed and is valid
-                    LoadBlacklist();
-                    LoadLocalItems();
-                }
-            });
 
             items.CollectionChanged += ItemsCollectionChanged;
             blacklist.CollectionChanged += BlacklistCollectionChanged;
@@ -286,24 +297,26 @@ namespace NoodleManagerX.Models
                 return;//prevent issues with multithreading
             }
 
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 updatingLocalItems = true;
-                Log("Loading local items");
+                Log("Loading local items from " + settings.synthDirectory);
                 localItems.Clear();
 
-                mapHandler.LoadLocalItems();
-                playlistHandler.LoadLocalItems();
-                stageHandler.LoadLocalItems();
-                avatarHandler.LoadLocalItems();
+                await mapHandler.LoadLocalItems();
+                await playlistHandler.LoadLocalItems();
+                await stageHandler.LoadLocalItems();
+                await avatarHandler.LoadLocalItems();
 
-                Log("Done loading local items");
+                Log("Done loading local items from " + settings.synthDirectory);
 
                 foreach (GenericItem item in items)
                 {
                     item.UpdateDownloaded();
                 }
+
                 updatingLocalItems = false;
+                pruning = false;
             });
         }
 
@@ -652,7 +665,7 @@ namespace NoodleManagerX.Models
                         directory = string.Concat(directory.Split(Path.GetInvalidPathChars()));
                         if (!String.IsNullOrEmpty(directory) && CheckDirectory(directory))
                         {
-                            synthDirectory = directory;
+                            synthDirectory = directory.Trim('\\');
                         }
                     }
                 }

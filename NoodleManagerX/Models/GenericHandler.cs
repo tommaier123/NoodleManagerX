@@ -30,7 +30,7 @@ namespace NoodleManagerX.Models
         public virtual string folder { get; set; } = "";
         public virtual string[] extensions { get; set; } = { };
 
-        public virtual async void LoadLocalItems()
+        public virtual async Task<bool> LoadLocalItems()
         {
             if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
@@ -48,9 +48,10 @@ namespace NoodleManagerX.Models
                     MainViewModel.s_instance.localItems.AddRange(tmp);
                 }
             }
+            return true;
         }
 
-        public virtual Task<bool> GetLocalItem(string file, List<LocalItem> list, GenericItem item=null)
+        public virtual Task<bool> GetLocalItem(string file, List<LocalItem> list, GenericItem item = null)
         {
             list.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), itemType));
             return Task.FromResult(true);
