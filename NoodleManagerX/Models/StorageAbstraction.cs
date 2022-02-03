@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 
 namespace NoodleManagerX.Models
 {
+    //toDo
+    //prevent multiple write operations at a time
 
     class StorageAbstraction
     {
-
-        public static void WriteFile(Stream stream, string path)
+        public static Task WriteFile(Stream stream, string path)
         {
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 if (MtpDevice.connected)
                 {
@@ -59,6 +60,23 @@ namespace NoodleManagerX.Models
             {
                 return Directory.Exists(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
             }
+        }
+
+        public static string[] GetFilesInDirectory(string path)
+        {
+            if (MtpDevice.connected)
+            {
+                return MtpDevice.device.GetFiles(Path.Combine(MtpDevice.path, path));
+            }
+            else
+            {
+                return Directory.GetFiles(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+            }
+        }
+
+        public static void UpdateZip(string path)
+        {
+
         }
     }
 }

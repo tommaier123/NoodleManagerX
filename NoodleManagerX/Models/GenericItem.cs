@@ -175,7 +175,7 @@ namespace NoodleManagerX.Models
             {
                 Task.Run(async () =>
                 {
-                    string filepath = "";
+                    string path = "";
 
                     try
                     {
@@ -204,16 +204,14 @@ namespace NoodleManagerX.Models
 
                             MainViewModel.Log("Downloading " + filename);
 
-                            filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
+                            path = Path.Combine(target, filename);
 
-                            await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
-                            /*
                             WebRequest request = WebRequest.Create(new Uri(url));
 
                             using (WebResponse response = request.GetResponse())
                             {
-                                StorageAbstraction.WriteFile(response.GetResponseStream(), Path.Combine(target, filename));
-                            }*/
+                                await StorageAbstraction.WriteFile(response.GetResponseStream(), path);
+                            }
                         }
                     }
                     catch (Exception e)
@@ -222,11 +220,11 @@ namespace NoodleManagerX.Models
                         DownloadScheduler.Requeue(this);
                     }
 
-                    if (await handler.GetLocalItem(filepath, MainViewModel.s_instance.localItems, this))
+                    if (await handler.GetLocalItem(path, MainViewModel.s_instance.localItems, this))
                     {
                         if (updatedAt != new DateTime())
                         {
-                            File.SetLastWriteTime(filepath, updatedAt);
+                            //File.SetLastWriteTime(path, updatedAt);
                         }
 
                         _ = Dispatcher.UIThread.InvokeAsync(() =>

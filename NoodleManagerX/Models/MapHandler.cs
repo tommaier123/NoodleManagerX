@@ -23,17 +23,19 @@ namespace NoodleManagerX.Models
 
         public override async Task<bool> LoadLocalItems()
         {
+            Console.WriteLine("load map items");
             List<LocalItem> tmp = new List<LocalItem>();
             if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
-                string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, "CustomSongs");
-                if (Directory.Exists(directory))
+                if (StorageAbstraction.DirectoryExists("CustomSongs"))
                 {
-                    foreach (string file in Directory.GetFiles(directory))
+                    foreach (string file in StorageAbstraction.GetFilesInDirectory("CustomSongs"))
                     {
-                        if (Path.GetExtension(file) == ".synth")
+                        string path = Path.Combine("CustomSongs", Path.GetFileName(file));
+
+                        if (Path.GetExtension(path) == ".synth")
                         {
-                            await GetLocalItem(file, tmp);
+                            await GetLocalItem(path, tmp);
                         }
                     }
                 }
@@ -42,11 +44,12 @@ namespace NoodleManagerX.Models
             return true;
         }
 
-        public override async Task<bool> GetLocalItem(string file, List<LocalItem> list, GenericItem item = null)
+        public override async Task<bool> GetLocalItem(string path, List<LocalItem> list, GenericItem item = null)
         {
             try
             {
-                using (ZipArchive archive = ZipFile.OpenRead(file))
+                using (Stream file = StorageAbstraction.ReadFile(path))
+                using (ZipArchive archive = new ZipArchive(file))
                 {
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
@@ -55,8 +58,8 @@ namespace NoodleManagerX.Models
                             using (StreamReader sr = new StreamReader(entry.Open()))
                             {
                                 LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
-                                localItem.filename = Path.GetFileName(file);
-                                localItem.modifiedTime = File.GetLastWriteTime(file);
+                                localItem.filename = Path.GetFileName(path);
+                                //localItem.modifiedTime = File.GetLastWriteTime(path);
                                 localItem.itemType = ItemType.Map;
                                 list.Add(localItem);
                                 return true;
@@ -64,15 +67,15 @@ namespace NoodleManagerX.Models
                         }
                     }
                 }
-
+                
                 //no metadata -> create
                 if (item != null)
-                {
+                {/*
                     MainViewModel.Log("Creating metadata for " + item.filename);
 
                     JObject metadata = new JObject(new JProperty("id", item.id), new JProperty("hash", ((MapItem)item).hash));
 
-                    using (ZipArchive archive = ZipFile.Open(file, ZipArchiveMode.Update))
+                    using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Update))
                     {
                         ZipArchiveEntry entry = archive.CreateEntry("synthriderz.meta.json");
                         using (StreamWriter writer = new StreamWriter(entry.Open()))
@@ -80,19 +83,19 @@ namespace NoodleManagerX.Models
                             writer.Write(metadata.ToString(Formatting.None));
                         }
                     }
-                    return true;
+                    return true;*/
                 }
                 else if (MainViewModel.s_instance.pruning)
                 {
-                    MainViewModel.Log("Deleting old file without metadata " + Path.GetFileName(file));
-                    File.Delete(file);
+                    MainViewModel.Log("Deleting old file without metadata " + Path.GetFileName(path));
+                    File.Delete(path);
                 }
             }
             catch (Exception e)
             {
                 MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
-                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
-                File.Delete(file);
+                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(path));
+                File.Delete(path);
             }
 
             return false;

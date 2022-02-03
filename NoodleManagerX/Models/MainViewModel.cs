@@ -110,7 +110,7 @@ namespace NoodleManagerX.Models
 
             MainWindow.s_instance.Closing += ClosingEvent;
 
-            //MtpDevice.Connect();
+            MtpDevice.Connect();
 
 
             //ExtractResources();
@@ -302,8 +302,8 @@ namespace NoodleManagerX.Models
 
             Task.Run(async () =>
             {
+                Log("Loading local items");
                 updatingLocalItems = true;
-                Log("Loading local items from " + settings.synthDirectory);
                 localItems.Clear();
 
                 await mapHandler.LoadLocalItems();
@@ -311,7 +311,7 @@ namespace NoodleManagerX.Models
                 await stageHandler.LoadLocalItems();
                 await avatarHandler.LoadLocalItems();
 
-                Log("Done loading local items from " + settings.synthDirectory);
+                Log("Local items loaded");
 
                 foreach (GenericItem item in items)
                 {
