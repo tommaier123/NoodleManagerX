@@ -5,7 +5,7 @@ using Avalonia.Markup.Xaml;
 
 namespace MsgBox
 {
-    class MessageBox : Window
+    public class MessageBox : Window
     {
         public enum MessageBoxButtons
         {

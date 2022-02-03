@@ -45,9 +45,4 @@
     <EmbeddedResource Include="Resources\osx.zip" />
   </ItemGroup>
 -->
-  <ItemGroup>
-    <Compile Update="GetAllDialog.axaml.cs">
-      <DependentUpon>GetAllDialog.axaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
 </Project>

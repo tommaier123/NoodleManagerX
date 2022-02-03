@@ -64,15 +64,7 @@ namespace NoodleManagerX.Models
                         }
                     }
                 }
-            }
-            catch
-            {
-                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
-                File.Delete(file);
-            }
 
-            try
-            {
                 //no metadata -> create
                 if (item != null)
                 {
@@ -96,7 +88,12 @@ namespace NoodleManagerX.Models
                     File.Delete(file);
                 }
             }
-            catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+            catch (Exception e)
+            {
+                MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(file));
+                File.Delete(file);
+            }
 
             return false;
         }

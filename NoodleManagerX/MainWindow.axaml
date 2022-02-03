@@ -12,420 +12,422 @@
         Icon="resm:NoodleManagerX.Assets.icon-nm.ico"
         Title="NoodleManagerX">
 
-  <Window.Resources>
-    <local:EqualsConverter x:Key="EqualsConverter"/>
-    <local:TabHilightConverter x:Key="TabHilightConverter"/>
-    <local:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
-    <local:DifficultyPathConverter x:Key="DifficultyPathConverter"/>
-    <local:TwoParameterPathConverter x:Key="TwoParameterPathConverter"/>
-    <local:BoolColorConverter x:Key="BoolColorConverter"/>
-    <local:StringToBoolConverter x:Key="StringToBoolConverter"/>
-    <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
-    <SolidColorBrush x:Key = "ControlHeaderColor" Color = "#322680" />
-  </Window.Resources>
+	<Window.Resources>
+		<local:EqualsConverter x:Key="EqualsConverter"/>
+		<local:TabHilightConverter x:Key="TabHilightConverter"/>
+		<local:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
+		<local:DifficultyPathConverter x:Key="DifficultyPathConverter"/>
+		<local:TwoParameterPathConverter x:Key="TwoParameterPathConverter"/>
+		<local:BoolColorConverter x:Key="BoolColorConverter"/>
+		<local:StringToBoolConverter x:Key="StringToBoolConverter"/>
+		<local:NullToBoolConverter x:Key="NullToBoolConverter"/>
+		<SolidColorBrush x:Key = "ControlHeaderColor" Color = "#322680" />
+	</Window.Resources>
 
-  <Window.Styles>
-    <!--Set font-->
-    <Style Selector="TextBlock">
-      <Setter Property="FontFamily" Value="resm:NoodleManagerX.Assets.Fonts?assembly=NoodleManagerX#Noto Sans"/>
-    </Style>
-
-
-    <!--Button without animations-->
-    <Style Selector="Button.BlankButton">
-      <Setter Property="Background" Value="Transparent"/>
-      <Setter Property="BorderThickness" Value="0"/>
-      <Setter Property="Padding" Value="0"/>
-    </Style>
-    <Style Selector="Button.BlankButton ContentPresenter">
-      <Setter Property="Background" Value="Transparent"/>
-    </Style>
-
-    <!--Combobox without animations-->
-    <Style Selector="ComboBox.BlankBox">
-      <Setter Property="BorderThickness" Value="0"/>
-    </Style>
-    <Style Selector="ComboBox.BlankBox ToggleButton ContentPresenter">
-      <Setter Property="Background" Value="Transparent"/>
-    </Style>
+	<Window.Styles>
+		<!--Set font-->
+		<Style Selector="TextBlock">
+			<Setter Property="FontFamily" Value="resm:NoodleManagerX.Assets.Fonts?assembly=NoodleManagerX#Noto Sans"/>
+		</Style>
 
 
-    <!--Style for the tab header-->
-    <Style Selector="Button.Tab">
-      <Setter Property="VerticalAlignment" Value="Center"/>
-      <Setter Property="Margin" Value="10,0,10,0"/>
-      <Setter Property="FontWeight" Value="Bold"/>
-      <Setter Property="FontSize" Value="20"/>
-      <Setter Property="ClickMode" Value="1"/>
-    </Style>
+		<!--Button without animations-->
+		<Style Selector="Button.BlankButton">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Padding" Value="0"/>
+		</Style>
+		<Style Selector="Button.BlankButton ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
 
-    <!--Style for minimize, maximize, close-->
-    <Style Selector="Button.WControls">
-      <Setter Property="VerticalAlignment" Value="Top"/>
-      <Setter Property="Height" Value="20"/>
-      <Setter Property="Margin" Value="3,0,0,0"/>
-    </Style>
-
-    <!--Style for listbox-->
-    <Style Selector="ListBox.MyListBox">
-      <Setter Property="Margin" Value="10,10,10,10"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox">
-      <Setter Property="SelectionMode" Value="Single"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox">
-      <Setter Property="AutoScrollToSelectedItem" Value="True"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox">
-      <Setter Property="BorderThickness" Value="0"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox">
-      <Setter Property="Background" Value="Transparent"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox ScrollViewer">
-      <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox RepeatButton">
-      <Setter Property="IsVisible" Value="False"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox ScrollBar:vertical">
-      <Setter Property="Width" Value="22"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox ScrollBar:vertical Thumb">
-      <Setter Property="Width" Value="22"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox ListBoxItem">
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="IsSelected" Value="{Binding selected, Mode=TwoWay}"/>
-      <Setter Property="FocusAdorner" Value="{x:Null}"/>
-      <Setter Property="ContextMenu">
-        <Setter.Value>
-          <ContextMenu Background="#1a1b1f" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}">
-            <TextBlock Text="{Binding description}" TextWrapping="Wrap" Width="{Binding Source.Width}"/>
-          </ContextMenu>
-        </Setter.Value>
-      </Setter>
-    </Style>
-    <Style Selector="ListBox.MyListBox ItemsPresenter">
-      <Setter Property="Margin" Value="0"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox ListBoxItem:pointerover ContentPresenter">
-      <Setter Property="Background" Value="Transparent"/>
-    </Style>
-    <Style Selector="ListBox.MyListBox ListBoxItem:selected ContentPresenter">
-      <Setter Property="Background" Value="Transparent"/>
-    </Style>
-
-    <!--Different List Boxes-->
-    <Style Selector="ListBox.MyListBoxSmall ListBoxItem">
-      <Setter Property="Height" Value="162"/>
-    </Style>
-    <Style Selector="ListBox.MyListBoxSmall ListBoxItem:pointerover Image">
-      <Setter Property="Width" Value="160"/>
-      <Setter Property="Height" Value="160"/>
-    </Style>
-    <Style Selector="ListBox.MyListBoxSmall ListBoxItem:selected Image">
-      <Setter Property="Width" Value="160"/>
-      <Setter Property="Height" Value="160"/>
-    </Style>
-    <Style Selector="ListBox.MyListBoxSmall ListBoxItem:not(:pointerover):not(:selected) Image">
-      <Setter Property="Width" Value="140"/>
-      <Setter Property="Height" Value="140"/>
-    </Style>
-
-    <Style Selector="ListBox.MyListBoxBig ListBoxItem">
-      <Setter Property="Height" Value="242"/>
-    </Style>
-    <Style Selector="ListBox.MyListBoxBig ListBoxItem:pointerover Image">
-      <Setter Property="Width" Value="182"/>
-      <Setter Property="Height" Value="240"/>
-    </Style>
-    <Style Selector="ListBox.MyListBoxBig ListBoxItem:selected Image">
-      <Setter Property="Width" Value="182"/>
-      <Setter Property="Height" Value="240"/>
-    </Style>
-    <Style Selector="ListBox.MyListBoxBig ListBoxItem:not(:pointerover):not(:selected) Image">
-      <Setter Property="Width" Value="167"/>
-      <Setter Property="Height" Value="220"/>
-    </Style>
-
-    <!--Style for the difficulties-->
-    <Style Selector="TextBlock.Difficulty">
-      <Setter Property="VerticalAlignment" Value="Center"/>
-      <Setter Property="Margin" Value="20,0,0,0"/>
-      <Setter Property="FontWeight" Value="Bold"/>
-      <Setter Property="FontSize" Value="15"/>
-    </Style>
-
-    <!--Change text color when downloaded-->
-    <Style Selector="TextBlock.Downloaded">
-      <Setter Property="Foreground" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=#888888|#ffffff}"/>
-    </Style>
-
-    <!--Make text overlap the next grid-->
-    <Style Selector="TextBlock.DynamicText">
-      <Setter Property="ClipToBounds" Value="false"/>
-      <Setter Property="Width" Value="1"/>
-      <Setter Property="HorizontalAlignment" Value="Left"/>
-    </Style>
-
-    <!--Some general settings for the SVGs-->
-    <Style Selector="Svg">
-      <Setter Property="EnableCache" Value="True"/>
-      <Setter Property="UseLayoutRounding" Value="True"/>
-    </Style>
-
-    <!--Template for listbox items of maps, playlists, stages and avatars-->
-    <Style Selector="ListBox.ContentItem" >
-      <Setter Property="ItemTemplate">
-        <DataTemplate>
-          <!--v content, separator v-->
-          <Grid RowDefinitions="*,auto,auto">
-            <!--< cover, content >-->
-            <Grid ColumnDefinitions="auto,*" Grid.Row="0">
-              <Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
-              <!--< info, stats, buttons >-->
-              <Grid ColumnDefinitions="*,auto,auto" Grid.Column="1" Margin="20,0,10,5">
-                <!--v title, artist, mapper, *, duration/difficulty v-->
-                <Grid RowDefinitions="auto,auto,auto,*,auto">
-                  <TextBlock Grid.Row="0" Text="{Binding display_title}" Classes="Downloaded DynamicText" FontSize="35"/>
-                  <TextBlock Grid.Row="1" Text="{Binding artist}" Classes="Downloaded DynamicText" FontSize="20"/>
-                  <TextBlock Grid.Row="2" Text="{Binding display_creator}" Classes="Downloaded DynamicText" FontSize="20"/>
-                  <!--< duration, difficulty>-->
-                  <Grid Grid.Row="4" ColumnDefinitions="auto,*">
-                    <TextBlock Grid.Column="0" Text="{Binding duration}" Classes="Downloaded DynamicText" FontSize="30" FontWeight="SemiBold" Width="77"/>
-                    <Grid Grid.Column="1" ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" HorizontalAlignment="Center" IsVisible="{Binding Path=display_difficulties, Converter={StaticResource NullToBoolConverter}}">
-                      <TextBlock Grid.Column="1" Text="EASY" Classes="Difficulty"
-                                 Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=0}"/>
-                      <TextBlock Grid.Column="2" Text="NORMAL" Classes="Difficulty"
-                                 Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=1}"/>
-                      <TextBlock Grid.Column="3" Text="HARD" Classes="Difficulty"
-                                 Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=2}"/>
-                      <TextBlock Grid.Column="4" Text="EXPERT" Classes="Difficulty"
-                                 Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=3}"/>
-                      <TextBlock Grid.Column="5" Text="MASTER" Classes="Difficulty"
-                                 Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=4}"/>
-                      <TextBlock Grid.Column="6" Text="CUSTOM" Classes="Difficulty"
-                                 Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=5}"/>
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <!--v stats, icons v-->
-                <Grid Grid.Column="1" RowDefinitions="auto,auto,auto" ColumnDefinitions="*,auto" VerticalAlignment="Center">
-                  <TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding upvote_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
-                  <Svg Grid.Column="1" Grid.Row="0" Height="10"
-                       Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket_g.svg|resm:NoodleManagerX.Assets.icons.bracket.svg}"/>
-                  <TextBlock Grid.Column="0" Grid.Row="1" Text="{Binding downvote_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
-                  <Svg Grid.Column="1" Grid.Row="1" Height="10"
-                       Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket_g.svg|resm:NoodleManagerX.Assets.icons.bracket.svg}">
-                    <Svg.RenderTransform>
-                      <RotateTransform Angle="180"/>
-                    </Svg.RenderTransform>
-                  </Svg>
-                  <TextBlock Grid.Column="0" Grid.Row="2" Text="{Binding download_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
-                  <Button Grid.Column="1" Grid.Row="2" Classes="BlankButton" Height="30" Margin="10,0,10,0" Command="{Binding downloadCommand}">
-                    <Svg Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.download_g.svg|resm:NoodleManagerX.Assets.icons.download.svg}"/>
-                  </Button>
-                </Grid>
-                <!--v buttons v-->
-                <Grid Grid.Column="2" RowDefinitions="auto,auto" VerticalAlignment="Center" Margin="10,0,10,0">
-                  <Button Grid.Row="0" Classes="BlankButton" Height="20" Width="20" Margin="0,0,0,5" Command="{Binding playPreviewCommand}" IsVisible="{Binding Path=display_preview, Converter={StaticResource StringToBoolConverter}}">
-                    <Svg>
-                      <Svg.Path>
-                        <MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
-                                      ConverterParameter="resm:NoodleManagerX.Assets.icons.play.svg|resm:NoodleManagerX.Assets.icons.play_g.svg|resm:NoodleManagerX.Assets.icons.stop.svg|resm:NoodleManagerX.Assets.icons.stop_g.svg">
-                          <Binding Path="downloaded"/>
-                          <Binding Path="playing"/>
-                        </MultiBinding>
-                      </Svg.Path>
-                    </Svg>
-                  </Button>
-                  <Button Grid.Row="1" Classes="BlankButton" Height="30" Width="30" Margin="0,5,0,0" Command="{Binding deleteCommand}">
-                    <Svg>
-                      <Svg.Path>
-                        <MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
-                                      ConverterParameter="resm:NoodleManagerX.Assets.icons.delete.svg|resm:NoodleManagerX.Assets.icons.delete_g.svg|resm:NoodleManagerX.Assets.icons.blacklist.svg|resm:NoodleManagerX.Assets.icons.blacklist_g.svg">
-                          <Binding Path="downloaded"/>
-                          <Binding Path="blacklisted"/>
-                        </MultiBinding>
-                      </Svg.Path>
-                    </Svg>
-                  </Button>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Canvas Grid.Row="1" >
-            <TextBlock Text="{Binding description}" TextWrapping="Wrap" Width="{Binding Source.Width}" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}"/>
-            </Canvas>
-            <Grid Grid.Row="2" Background="#999999" Height="2"/>
-          </Grid>
-        </DataTemplate>
-      </Setter>
-    </Style>
-  </Window.Styles>
+		<!--Combobox without animations-->
+		<Style Selector="ComboBox.BlankBox">
+			<Setter Property="BorderThickness" Value="0"/>
+		</Style>
+		<Style Selector="ComboBox.BlankBox ToggleButton ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
 
 
-  <Grid RowDefinitions="auto,auto,*">
-    <Grid Grid.Row="0" Height="70" Background="Black" Name="BlackBar"
-          ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,auto,*,auto">
+		<!--Style for the tab header-->
+		<Style Selector="Button.Tab">
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Margin" Value="10,0,10,0"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="FontSize" Value="20"/>
+			<Setter Property="ClickMode" Value="1"/>
+		</Style>
 
-      <Svg Path="resm:NoodleManagerX.Assets.icons.NoodleManagerLogo.svg" Grid.Column="0" Margin="12,12,20,12"/>
+		<!--Style for minimize, maximize, close-->
+		<Style Selector="Button.WControls">
+			<Setter Property="VerticalAlignment" Value="Top"/>
+			<Setter Property="Height" Value="20"/>
+			<Setter Property="Margin" Value="3,0,0,0"/>
+		</Style>
 
-      <!--Tab header buttons-->
-      <Button Grid.Column="1" Classes="BlankButton Tab" Content="MAPS" Command="{Binding tabSelectCommand}" CommandParameter="0"
-              Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=0}"/>
-      <Button Grid.Column="2" Classes="BlankButton Tab" Content="PLAYLISTS" Command="{Binding tabSelectCommand}" CommandParameter="1"
-              Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=1}"/>
-      <Button Grid.Column="3" Classes="BlankButton Tab" Content="STAGES" Command="{Binding tabSelectCommand}" CommandParameter="2"
-              Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=2}"/>
-      <Button Grid.Column="4" Classes="BlankButton Tab" Content="AVATARS" Command="{Binding tabSelectCommand}" CommandParameter="3"
-              Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=3}"/>
-      <Button Grid.Column="5" Classes="BlankButton Tab" Content="MODS" Command="{Binding tabSelectCommand}" CommandParameter="4"
-              Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=4}"/>
-      <Button Grid.Column="6" Classes="BlankButton Tab" Content="TOOLS" Command="{Binding tabSelectCommand}" CommandParameter="5"
-              Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=5}"/>
-      <Button Grid.Column="7" Classes="BlankButton Tab" Content="SETTINGS" Command="{Binding tabSelectCommand}" CommandParameter="6"
-              Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=6}"/>
+		<!--Style for listbox-->
+		<Style Selector="ListBox.MyListBox">
+			<Setter Property="SelectionMode" Value="Single"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox">
+			<Setter Property="AutoScrollToSelectedItem" Value="True"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox">
+			<Setter Property="BorderThickness" Value="0"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox ScrollViewer">
+			<Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox RepeatButton">
+			<Setter Property="IsVisible" Value="False"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox ScrollBar:vertical">
+			<Setter Property="Width" Value="22"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox ScrollBar:vertical Thumb">
+			<Setter Property="Width" Value="22"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox ListBoxItem">
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="IsSelected" Value="{Binding selected, Mode=TwoWay}"/>
+			<Setter Property="FocusAdorner" Value="{x:Null}"/>
+			<Setter Property="ContextMenu">
+				<Setter.Value>
+					<ContextMenu Background="#1a1b1f" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}">
+						<TextBlock Text="{Binding description}" TextWrapping="Wrap" Width="{Binding Source.Width}"/>
+					</ContextMenu>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style Selector="ListBox.MyListBox ItemsPresenter">
+			<Setter Property="Margin" Value="0"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox ListBoxItem:pointerover ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox ListBoxItem:selected ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
+		</Style>
+
+		<!--Different List Boxes-->
+		<Style Selector="ListBox.MyListBoxSmall ListBoxItem">
+			<Setter Property="Height" Value="162"/>
+		</Style>
+		<Style Selector="ListBox.MyListBoxSmall ListBoxItem:pointerover Image">
+			<Setter Property="Width" Value="160"/>
+			<Setter Property="Height" Value="160"/>
+		</Style>
+		<Style Selector="ListBox.MyListBoxSmall ListBoxItem:selected Image">
+			<Setter Property="Width" Value="160"/>
+			<Setter Property="Height" Value="160"/>
+		</Style>
+		<Style Selector="ListBox.MyListBoxSmall ListBoxItem:not(:pointerover):not(:selected) Image">
+			<Setter Property="Width" Value="140"/>
+			<Setter Property="Height" Value="140"/>
+		</Style>
+
+		<Style Selector="ListBox.MyListBoxBig ListBoxItem">
+			<Setter Property="Height" Value="242"/>
+		</Style>
+		<Style Selector="ListBox.MyListBoxBig ListBoxItem:pointerover Image">
+			<Setter Property="Width" Value="182"/>
+			<Setter Property="Height" Value="240"/>
+		</Style>
+		<Style Selector="ListBox.MyListBoxBig ListBoxItem:selected Image">
+			<Setter Property="Width" Value="182"/>
+			<Setter Property="Height" Value="240"/>
+		</Style>
+		<Style Selector="ListBox.MyListBoxBig ListBoxItem:not(:pointerover):not(:selected) Image">
+			<Setter Property="Width" Value="167"/>
+			<Setter Property="Height" Value="220"/>
+		</Style>
+
+		<!--Style for the difficulties-->
+		<Style Selector="TextBlock.Difficulty">
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="Margin" Value="20,0,0,0"/>
+			<Setter Property="FontWeight" Value="Bold"/>
+			<Setter Property="FontSize" Value="15"/>
+		</Style>
+
+		<!--Change text color when downloaded-->
+		<Style Selector="TextBlock.Downloaded">
+			<Setter Property="Foreground" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=#888888|#ffffff}"/>
+		</Style>
+
+		<!--Make text overlap the next grid-->
+		<Style Selector="TextBlock.DynamicText">
+			<Setter Property="ClipToBounds" Value="false"/>
+			<Setter Property="Width" Value="1"/>
+			<Setter Property="HorizontalAlignment" Value="Left"/>
+		</Style>
+
+		<!--Some general settings for the SVGs-->
+		<Style Selector="Svg">
+			<Setter Property="EnableCache" Value="True"/>
+			<Setter Property="UseLayoutRounding" Value="True"/>
+		</Style>
+
+		<!--Template for listbox items of maps, playlists, stages and avatars-->
+		<Style Selector="ListBox.ContentItem" >
+			<Setter Property="ItemTemplate">
+				<DataTemplate>
+					<!--v content, separator v-->
+					<Grid RowDefinitions="*,auto,auto">
+						<!--< cover, content >-->
+						<Grid ColumnDefinitions="auto,*" Grid.Row="0">
+							<Image Grid.Column="0" Source="{Binding cover_bmp}" Stretch="UniformToFill"/>
+							<!--< info, stats, buttons >-->
+							<Grid ColumnDefinitions="*,auto,auto" Grid.Column="1" Margin="20,0,10,5">
+								<!--v title, artist, mapper, *, duration/difficulty v-->
+								<Grid RowDefinitions="auto,auto,auto,*,auto">
+									<TextBlock Grid.Row="0" Text="{Binding display_title}" Classes="Downloaded DynamicText" FontSize="35"/>
+									<TextBlock Grid.Row="1" Text="{Binding artist}" Classes="Downloaded DynamicText" FontSize="20"/>
+									<TextBlock Grid.Row="2" Text="{Binding display_creator}" Classes="Downloaded DynamicText" FontSize="20"/>
+									<!--< duration, difficulty>-->
+									<Grid Grid.Row="4" ColumnDefinitions="auto,*">
+										<TextBlock Grid.Column="0" Text="{Binding duration}" Classes="Downloaded DynamicText" FontSize="30" FontWeight="SemiBold" Width="77"/>
+										<Grid Grid.Column="1" ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" HorizontalAlignment="Center" IsVisible="{Binding Path=display_difficulties, Converter={StaticResource NullToBoolConverter}}">
+											<TextBlock Grid.Column="1" Text="EASY" Classes="Difficulty"
+													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=0}"/>
+											<TextBlock Grid.Column="2" Text="NORMAL" Classes="Difficulty"
+													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=1}"/>
+											<TextBlock Grid.Column="3" Text="HARD" Classes="Difficulty"
+													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=2}"/>
+											<TextBlock Grid.Column="4" Text="EXPERT" Classes="Difficulty"
+													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=3}"/>
+											<TextBlock Grid.Column="5" Text="MASTER" Classes="Difficulty"
+													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=4}"/>
+											<TextBlock Grid.Column="6" Text="CUSTOM" Classes="Difficulty"
+													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=5}"/>
+										</Grid>
+									</Grid>
+								</Grid>
+								<!--v stats, icons v-->
+								<Grid Grid.Column="1" RowDefinitions="auto,auto,auto" ColumnDefinitions="*,auto" VerticalAlignment="Center">
+									<TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding upvote_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
+									<Svg Grid.Column="1" Grid.Row="0" Height="10"
+										 Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket_g.svg|resm:NoodleManagerX.Assets.icons.bracket.svg}"/>
+									<TextBlock Grid.Column="0" Grid.Row="1" Text="{Binding downvote_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
+									<Svg Grid.Column="1" Grid.Row="1" Height="10"
+										 Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket_g.svg|resm:NoodleManagerX.Assets.icons.bracket.svg}">
+										<Svg.RenderTransform>
+											<RotateTransform Angle="180"/>
+										</Svg.RenderTransform>
+									</Svg>
+									<TextBlock Grid.Column="0" Grid.Row="2" Text="{Binding download_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
+									<Button Grid.Column="1" Grid.Row="2" Classes="BlankButton" Height="30" Margin="10,0,10,0" Command="{Binding downloadCommand}">
+										<Svg Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.download_g.svg|resm:NoodleManagerX.Assets.icons.download.svg}"/>
+									</Button>
+								</Grid>
+								<!--v buttons v-->
+								<Grid Grid.Column="2" RowDefinitions="auto,auto" VerticalAlignment="Center" Margin="10,0,10,0">
+									<Button Grid.Row="0" Classes="BlankButton" Height="20" Width="20" Margin="0,0,0,5" Command="{Binding playPreviewCommand}" IsVisible="{Binding Path=display_preview, Converter={StaticResource StringToBoolConverter}}">
+										<Svg>
+											<Svg.Path>
+												<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
+															  ConverterParameter="resm:NoodleManagerX.Assets.icons.play.svg|resm:NoodleManagerX.Assets.icons.play_g.svg|resm:NoodleManagerX.Assets.icons.stop.svg|resm:NoodleManagerX.Assets.icons.stop_g.svg">
+													<Binding Path="downloaded"/>
+													<Binding Path="playing"/>
+												</MultiBinding>
+											</Svg.Path>
+										</Svg>
+									</Button>
+									<Button Grid.Row="1" Classes="BlankButton" Height="30" Width="30" Margin="0,5,0,0" Command="{Binding deleteCommand}">
+										<Svg>
+											<Svg.Path>
+												<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
+															  ConverterParameter="resm:NoodleManagerX.Assets.icons.delete.svg|resm:NoodleManagerX.Assets.icons.delete_g.svg|resm:NoodleManagerX.Assets.icons.blacklist.svg|resm:NoodleManagerX.Assets.icons.blacklist_g.svg">
+													<Binding Path="downloaded"/>
+													<Binding Path="blacklisted"/>
+												</MultiBinding>
+											</Svg.Path>
+										</Svg>
+									</Button>
+								</Grid>
+							</Grid>
+						</Grid>
+						<Canvas Grid.Row="1" >
+							<TextBlock Text="{Binding description}" TextWrapping="Wrap" Width="{Binding Source.Width}" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}"/>
+						</Canvas>
+						<Grid Grid.Row="2" Background="#999999" Height="2"/>
+					</Grid>
+				</DataTemplate>
+			</Setter>
+		</Style>
+	</Window.Styles>
 
 
-      <!--Minimize, maximize and close-->
-      <Grid Grid.Column="9" ColumnDefinitions="auto,auto,auto" Margin="0,5,6,0">
-        <Button Grid.Column="0" Classes="BlankButton WControls" Command="{Binding minimizeCommand}">
-          <Svg Path="resm:NoodleManagerX.Assets.icons.minimize.svg"/>
-        </Button>
-        <Button Grid.Column="1" Classes="BlankButton WControls" Command="{Binding toggleFullscreenCommand}">
-          <Svg Path="resm:NoodleManagerX.Assets.icons.maximize.svg"/>
-        </Button>
-        <Button Grid.Column="2" Classes="BlankButton WControls" Command="{Binding closeCommand}">
-          <Svg Path="resm:NoodleManagerX.Assets.icons.close.svg"/>
-        </Button>
-      </Grid>
-    </Grid>
+	<Grid RowDefinitions="auto,auto,auto,*">
+		<Grid Grid.Row="0" Height="70" Background="Black" Name="BlackBar"
+			  ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,auto,*,auto">
 
-    <!--Control Header-->
-    <Grid Grid.Row="1" Height="50" Background="{StaticResource ControlHeaderColor}" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}"
-          ColumnDefinitions="135,auto,auto,auto,*,auto">
+			<Svg Path="resm:NoodleManagerX.Assets.icons.NoodleManagerLogo.svg" Grid.Column="0" Margin="12,12,20,12"/>
 
-      <!--Search-->
-      <Grid Grid.Column="1" ColumnDefinitions="auto,auto">
-        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-          <TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff" Text="{Binding searchText}" Name="SearchBox"/>
-          <Svg Path="resm:NoodleManagerX.Assets.icons.searchbar.svg" Height="2" Width="200" Stretch="Fill"/>
-        </StackPanel>
-        <Button Grid.Column="1" Classes="BlankButton" Height="22" Command="{Binding searchCommand}">
-          <Svg Path="resm:NoodleManagerX.Assets.icons.search.svg"/>
-        </Button>
-      </Grid>
+			<!--Tab header buttons-->
+			<Button Grid.Column="1" Classes="BlankButton Tab" Content="MAPS" Command="{Binding tabSelectCommand}" CommandParameter="0"
+					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=0}"/>
+			<Button Grid.Column="2" Classes="BlankButton Tab" Content="PLAYLISTS" Command="{Binding tabSelectCommand}" CommandParameter="1"
+					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=1}"/>
+			<Button Grid.Column="3" Classes="BlankButton Tab" Content="STAGES" Command="{Binding tabSelectCommand}" CommandParameter="2"
+					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=2}"/>
+			<Button Grid.Column="4" Classes="BlankButton Tab" Content="AVATARS" Command="{Binding tabSelectCommand}" CommandParameter="3"
+					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=3}"/>
+			<Button Grid.Column="5" Classes="BlankButton Tab" Content="MODS" Command="{Binding tabSelectCommand}" CommandParameter="4"
+					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=4}"/>
+			<Button Grid.Column="6" Classes="BlankButton Tab" Content="TOOLS" Command="{Binding tabSelectCommand}" CommandParameter="5"
+					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=5}"/>
+			<Button Grid.Column="7" Classes="BlankButton Tab" Content="SETTINGS" Command="{Binding tabSelectCommand}" CommandParameter="6"
+					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=6}"/>
 
-      <!--Filter-->
-      <Grid Grid.Column="2" ColumnDefinitions="70,70,95,50" Margin="50,0,0,0">
-        <ComboBox Grid.Column="0" Classes="BlankBox" SelectedIndex="{Binding selectedSearchParameterIndex}" SelectedItem="{Binding Path=selectedSearchParameter, Mode=OneWayToSource}">
-          <ComboBoxItem Name="all">All </ComboBoxItem>
-          <ComboBoxItem Name="title" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Title</ComboBoxItem>
-          <ComboBoxItem Name="name" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Title</ComboBoxItem>
-          <ComboBoxItem Name="artist" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Artist</ComboBoxItem>
-          <ComboBoxItem Name="mapper" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Mapper</ComboBoxItem>
-          <ComboBoxItem Name="user.username" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Creator</ComboBoxItem>
-        </ComboBox>
-        <ComboBox Grid.Column="1" Classes="BlankBox" SelectedIndex="{Binding selectedDifficultyIndex}" SelectedItem="{Binding Path=selectedDifficulty, Mode=OneWayToSource}"
-                  IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
-          <ComboBoxItem Name="All">All</ComboBoxItem>
-          <ComboBoxItem Name="Easy">Easy</ComboBoxItem>
-          <ComboBoxItem Name="Normal">Normal</ComboBoxItem>
-          <ComboBoxItem Name="Hard">Hard</ComboBoxItem>
-          <ComboBoxItem Name="Expert">Expert</ComboBoxItem>
-          <ComboBoxItem Name="Master">Master</ComboBoxItem>
-          <ComboBoxItem Name="Custom">Custom</ComboBoxItem>
-        </ComboBox>
-        <ComboBox Grid.Column="2" Classes="BlankBox" SelectedIndex="{Binding selectedSortMethodIndex}" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
-          <ComboBoxItem Name="published_at">Upload Date</ComboBoxItem>
-          <ComboBoxItem Name="score">Hypefactor</ComboBoxItem>
-          <ComboBoxItem Name="rating">Rating</ComboBoxItem>
-          <ComboBoxItem Name="vote_diff">Vote</ComboBoxItem>
-          <ComboBoxItem Name="download_count">Downloads</ComboBoxItem>
-        </ComboBox>
-        <ComboBox Grid.Column="3" Classes="BlankBox" SelectedIndex="{Binding selectedSortOrderIndex}" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
-          <ComboBoxItem Name="DESC">DSC</ComboBoxItem>
-          <ComboBoxItem Name="ASC">ASC</ComboBoxItem>
-        </ComboBox>
-      </Grid>
 
-      <!--Get-->
-      <Grid Grid.Column="3" ColumnDefinitions="auto,auto" Margin="40,0,0,0">
-        <Button Grid.Column="0" Classes="BlankButton" Command="{Binding getAllCommand}">
-          <Grid RowDefinitions="auto,auto">
-            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Get"/>
-            <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="All"/>
-          </Grid>
-        </Button>
-        <Button Grid.Column="1" Classes="BlankButton" Margin="16,0,0,0" Command="{Binding getPageCommand}">
-          <Grid RowDefinitions="auto,auto">
-            <TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Get"/>
-            <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="Page"/>
-          </Grid>
-        </Button>
-      </Grid>
+			<!--Minimize, maximize and close-->
+			<Grid Grid.Column="9" ColumnDefinitions="auto,auto,auto" Margin="0,5,6,0">
+				<Button Grid.Column="0" Classes="BlankButton WControls" Command="{Binding minimizeCommand}">
+					<Svg Path="resm:NoodleManagerX.Assets.icons.minimize.svg"/>
+				</Button>
+				<Button Grid.Column="1" Classes="BlankButton WControls" Command="{Binding toggleFullscreenCommand}">
+					<Svg Path="resm:NoodleManagerX.Assets.icons.maximize.svg"/>
+				</Button>
+				<Button Grid.Column="2" Classes="BlankButton WControls" Command="{Binding closeCommand}">
+					<Svg Path="resm:NoodleManagerX.Assets.icons.close.svg"/>
+				</Button>
+			</Grid>
+		</Grid>
 
-      <!--Pagination-->
-      <Grid Grid.Column="5" ColumnDefinitions="auto,auto,auto,auto,auto" Margin="0,0,20,0">
-        <Button Grid.Column="0" Classes="BlankButton" Command="{Binding pageDownCommand}" Width="12" Height="20" Margin="0,0,5,0">
-          <Svg Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Width="20">
-            <Svg.RenderTransform>
-              <RotateTransform Angle="-90"/>
-            </Svg.RenderTransform>
-          </Svg>
-        </Button>
-        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding currentPage}"/>
-        <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="/"/>
-        <TextBlock Grid.Column="3" VerticalAlignment="Center" Text="{Binding numberOfPages}"/>
-        <Button Grid.Column="4" Classes="BlankButton" Command="{Binding pageUpCommand}" Width="12" Height="20" Margin="5,0,0,0">
-          <Svg Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Width="20">
-            <Svg.RenderTransform>
-              <RotateTransform Angle="90"/>
-            </Svg.RenderTransform>
-          </Svg>
-        </Button>
-      </Grid>
-    </Grid>
+		<!--Control Header-->
+		<Grid Grid.Row="1" Height="50" Background="{StaticResource ControlHeaderColor}" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}"
+			  ColumnDefinitions="135,auto,auto,auto,*,auto">
 
-    <!--Tab content-->
-    <Grid Grid.Row="2">
-      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
-        <ListBox Items="{Binding Path=maps}" Classes="MyListBox MyListBoxSmall ContentItem"/>
-      </Grid>
-      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1}">
-        <ListBox Items="{Binding Path=playlists}" Classes="MyListBox MyListBoxSmall ContentItem"/>
-      </Grid>
-      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=2}">
-        <ListBox Items="{Binding Path=stages}" Classes="MyListBox MyListBoxBig ContentItem"/>
-      </Grid>
-      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=3}">
-        <ListBox Items="{Binding Path=avatars}" Classes="MyListBox MyListBoxBig ContentItem"/>
-      </Grid>
-      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=4}">
-      </Grid>
-      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
-        <!--<TextBlock Text="These are the tools (Sync to Quest, Sync to PC, Download Songs from Playlist, Setup Twitch Integration)"/>-->
-      </Grid>
-      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
-        <!--Path, Quest Enabled, Auto Update Content, Disable NM Update Notification-->
-        <Grid RowDefinitions="auto,auto,*" Margin="10,10,10,10">
-          <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Margin="10,10,10,10">
-            <TextBlock Grid.Column="0" Text="Synth Riders Directory" VerticalAlignment="Center"/>
-            <Border Grid.Column="1" Margin="20,0,0,0" BorderBrush="{Binding Path=directoryValid, Converter={StaticResource BoolColorConverter}, ConverterParameter=#aaaaaa|#ff0000}" BorderThickness="1">
-              <TextBox Text="{Binding synthDirectory}" BorderThickness="0"/>
-            </Border>
-            <Button Grid.Column="2" Margin="16,0,0,0" Command="{Binding selectDirectoryCommand}">
-              <TextBlock Text="Select"/>
-            </Button>
-          </Grid>
-          <Grid Grid.Row="1" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10">
-            <TextBlock Grid.Column="0" Text="Allow Converts" VerticalAlignment="Center"/>
-            <CheckBox Grid.Column="1" Margin="16,0,0,0" IsChecked="{Binding settings.allowConverts}"/>
-          </Grid>
-        </Grid>
-      </Grid>
-    </Grid>
-  </Grid>
+			<!--Search-->
+			<Grid Grid.Column="1" ColumnDefinitions="auto,auto">
+				<StackPanel Grid.Column="0" VerticalAlignment="Center">
+					<TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff" Text="{Binding searchText}" Name="SearchBox"/>
+					<Svg Path="resm:NoodleManagerX.Assets.icons.searchbar.svg" Height="2" Width="200" Stretch="Fill"/>
+				</StackPanel>
+				<Button Grid.Column="1" Classes="BlankButton" Height="22" Command="{Binding searchCommand}">
+					<Svg Path="resm:NoodleManagerX.Assets.icons.search.svg"/>
+				</Button>
+			</Grid>
+
+			<!--Filter-->
+			<Grid Grid.Column="2" ColumnDefinitions="70,70,95,50" Margin="50,0,0,0">
+				<ComboBox Grid.Column="0" Classes="BlankBox" SelectedIndex="{Binding selectedSearchParameterIndex}" SelectedItem="{Binding Path=selectedSearchParameter, Mode=OneWayToSource}">
+					<ComboBoxItem Name="all">All </ComboBoxItem>
+					<ComboBoxItem Name="title" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Title</ComboBoxItem>
+					<ComboBoxItem Name="name" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Title</ComboBoxItem>
+					<ComboBoxItem Name="artist" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Artist</ComboBoxItem>
+					<ComboBoxItem Name="mapper" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Mapper</ComboBoxItem>
+					<ComboBoxItem Name="user.username" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Creator</ComboBoxItem>
+				</ComboBox>
+				<ComboBox Grid.Column="1" Classes="BlankBox" SelectedIndex="{Binding selectedDifficultyIndex}" SelectedItem="{Binding Path=selectedDifficulty, Mode=OneWayToSource}"
+						  IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
+					<ComboBoxItem Name="All">All</ComboBoxItem>
+					<ComboBoxItem Name="Easy">Easy</ComboBoxItem>
+					<ComboBoxItem Name="Normal">Normal</ComboBoxItem>
+					<ComboBoxItem Name="Hard">Hard</ComboBoxItem>
+					<ComboBoxItem Name="Expert">Expert</ComboBoxItem>
+					<ComboBoxItem Name="Master">Master</ComboBoxItem>
+					<ComboBoxItem Name="Custom">Custom</ComboBoxItem>
+				</ComboBox>
+				<ComboBox Grid.Column="2" Classes="BlankBox" SelectedIndex="{Binding selectedSortMethodIndex}" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
+					<ComboBoxItem Name="published_at">Upload Date</ComboBoxItem>
+					<ComboBoxItem Name="score">Hypefactor</ComboBoxItem>
+					<ComboBoxItem Name="rating">Rating</ComboBoxItem>
+					<ComboBoxItem Name="vote_diff">Vote</ComboBoxItem>
+					<ComboBoxItem Name="download_count">Downloads</ComboBoxItem>
+				</ComboBox>
+				<ComboBox Grid.Column="3" Classes="BlankBox" SelectedIndex="{Binding selectedSortOrderIndex}" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
+					<ComboBoxItem Name="DESC">DSC</ComboBoxItem>
+					<ComboBoxItem Name="ASC">ASC</ComboBoxItem>
+				</ComboBox>
+			</Grid>
+
+			<!--Get-->
+			<Grid Grid.Column="3" ColumnDefinitions="auto,auto" Margin="40,0,0,0">
+				<Button Grid.Column="0" Classes="BlankButton" Command="{Binding getAllCommand}">
+					<Grid RowDefinitions="auto,auto">
+						<TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Get"/>
+						<TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="All"/>
+					</Grid>
+				</Button>
+				<Button Grid.Column="1" Classes="BlankButton" Margin="16,0,0,0" Command="{Binding getPageCommand}">
+					<Grid RowDefinitions="auto,auto">
+						<TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Get"/>
+						<TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="Page"/>
+					</Grid>
+				</Button>
+			</Grid>
+
+			<!--Pagination-->
+			<Grid Grid.Column="5" ColumnDefinitions="auto,auto,auto,auto,auto" Margin="0,0,20,0">
+				<Button Grid.Column="0" Classes="BlankButton" Command="{Binding pageDownCommand}" Width="12" Height="20" Margin="0,0,5,0">
+					<Svg Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Width="20">
+						<Svg.RenderTransform>
+							<RotateTransform Angle="-90"/>
+						</Svg.RenderTransform>
+					</Svg>
+				</Button>
+				<TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding currentPage}"/>
+				<TextBlock Grid.Column="2" VerticalAlignment="Center" Text="/"/>
+				<TextBlock Grid.Column="3" VerticalAlignment="Center" Text="{Binding numberOfPages}"/>
+				<Button Grid.Column="4" Classes="BlankButton" Command="{Binding pageUpCommand}" Width="12" Height="20" Margin="5,0,0,0">
+					<Svg Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Width="20">
+						<Svg.RenderTransform>
+							<RotateTransform Angle="90"/>
+						</Svg.RenderTransform>
+					</Svg>
+				</Button>
+			</Grid>
+		</Grid>
+
+		<!--Progress bar-->
+		<Grid Grid.Row="2" Height="2" Background="Transparent" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}">
+			<ProgressBar Height="2" MinHeight="2" Foreground="green" Background="Transparent" Value="{Binding Path=progress}"/>
+		</Grid>
+
+		<!--Tab content-->
+		<Grid Grid.Row="3" Margin="10,8,10,10">
+			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
+				<ListBox Items="{Binding Path=maps}" Classes="MyListBox MyListBoxSmall ContentItem"/>
+			</Grid>
+			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1}">
+				<ListBox Items="{Binding Path=playlists}" Classes="MyListBox MyListBoxSmall ContentItem"/>
+			</Grid>
+			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=2}">
+				<ListBox Items="{Binding Path=stages}" Classes="MyListBox MyListBoxBig ContentItem"/>
+			</Grid>
+			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=3}">
+				<ListBox Items="{Binding Path=avatars}" Classes="MyListBox MyListBoxBig ContentItem"/>
+			</Grid>
+			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=4}">
+			</Grid>
+			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
+				<!--<TextBlock Text="These are the tools (Sync to Quest, Sync to PC, Download Songs from Playlist, Setup Twitch Integration)"/>-->
+			</Grid>
+			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
+				<!--Path, Quest Enabled, Auto Update Content, Disable NM Update Notification-->
+				<Grid RowDefinitions="auto,auto,*">
+					<Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Margin="10,10,10,10">
+						<TextBlock Grid.Column="0" Text="Synth Riders Directory" VerticalAlignment="Center"/>
+						<Border Grid.Column="1" Margin="20,0,0,0" BorderBrush="{Binding Path=directoryValid, Converter={StaticResource BoolColorConverter}, ConverterParameter=#aaaaaa|#ff0000}" BorderThickness="1">
+							<TextBox Text="{Binding synthDirectory}" BorderThickness="0"/>
+						</Border>
+						<Button Grid.Column="2" Margin="16,0,0,0" Command="{Binding selectDirectoryCommand}">
+							<TextBlock Text="Select"/>
+						</Button>
+					</Grid>
+					<Grid Grid.Row="1" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10">
+						<TextBlock Grid.Column="0" Text="Allow Converts" VerticalAlignment="Center"/>
+						<CheckBox Grid.Column="1" Margin="16,0,0,0" IsChecked="{Binding settings.allowConverts}"/>
+					</Grid>
+				</Grid>
+			</Grid>
+		</Grid>
+	</Grid>
 </Window>
 

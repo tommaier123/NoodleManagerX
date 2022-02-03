@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Avalonia.Threading;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -13,6 +14,8 @@ namespace NoodleManagerX.Models
         public static ObservableCollection<GenericItem> downloading = new ObservableCollection<GenericItem>();
 
         public const int downloadTasks = 4;
+        public const int maxDownloadAttempts = 3;
+        public static int toDownload = 0;
 
         private static bool running = false;
 
@@ -23,18 +26,37 @@ namespace NoodleManagerX.Models
 
         public static void Download(GenericItem item)
         {
-            item.downloadAttempts = 0;
-            queue.Add(item);
+            if (item.itemType == ItemType.Map)
+            {
+                toDownload++;
+                item.downloadAttempts = 0;
+                queue.Add(item);
+            }
+        }
+
+        public static void Requeue(GenericItem item)
+        {
+            if (item.downloadAttempts < maxDownloadAttempts)
+            {
+                MainViewModel.Log("Requeueing " + item.filename);
+                item.downloadAttempts++;
+                queue.Add(item);
+            }
+            else
+            {
+                MainViewModel.Log("Timeout " + item.filename);
+            }
         }
 
         private static void QueueChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (queue.Count > 0 && !running)
+            Task.Run(async () =>
             {
-                running = true;
-                MainViewModel.Log("Started queue check");
-                Task.Run(async () =>
+                if (queue.Count > 0 && !running)
                 {
+                    running = true;
+                    await Task.Delay(100);//not sure why this is necessary for requeueing. Seems like queuecount is !=0 but the queue is empty?
+                    MainViewModel.Log("Started queue check");
                     while (queue.Count > 0)
                     {
                         if (downloading.Count < downloadTasks)
@@ -45,6 +67,11 @@ namespace NoodleManagerX.Models
                                 downloading.Add(queue[0]);
                             }
                             queue.Remove(queue[0]);
+
+                            _ = Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                MainViewModel.s_instance.progress = 100 - (int)((queue.Count) / (toDownload * 0.01f));
+                            });
                         }
                         else
                         {
@@ -52,9 +79,13 @@ namespace NoodleManagerX.Models
                         }
                     }
                     running = false;
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        MainViewModel.s_instance.progress = 0;
+                    });
                     MainViewModel.Log("Stopped queue check");
-                });
-            }
+                }
+            });
         }
     }
 }

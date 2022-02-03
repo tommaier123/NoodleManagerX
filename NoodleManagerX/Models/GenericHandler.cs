@@ -243,6 +243,22 @@ namespace NoodleManagerX.Models
                                     }
                                 }
                                 pageCountAll = page.pagecount;
+
+                                if (DownloadScheduler.queue.Count == 0)
+                                {
+                                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                                    {
+                                        if (i < pageCountAll)
+                                        {
+                                            MainViewModel.s_instance.progress = (int)(i / (pageCountAll * 0.01f));
+                                        }
+                                        else
+                                        {
+                                            MainViewModel.s_instance.progress = 0;
+                                        }
+                                    });
+                                }
+
                                 i++;
                             }
                         }

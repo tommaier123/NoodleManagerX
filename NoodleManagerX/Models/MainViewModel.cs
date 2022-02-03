@@ -30,18 +30,18 @@ namespace NoodleManagerX.Models
 {
     class MainViewModel : ReactiveObject
     {
-        //dotnet publish -c Release -f netcoreapp3.1 -r win-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=Link -p:PublishReadyToRun=false
-        //dotnet publish -c Release -f netcoreapp3.1 -r linux-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=Link -p:PublishReadyToRun=false
-        //dotnet publish -c Release -f netcoreapp3.1 -r osx-x64 --self-contained true /p:PublishSingleFile=true  -p:PublishTrimmed=True -p:TrimMode=Link -p:PublishReadyToRun=false
+        //dotnet publish -c Release -f net5.0 -r win-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=Link -p:PublishReadyToRun=false
+        //dotnet publish -c Release -f net5.0 -r linux-x64 --self-contained true /p:PublishSingleFile=true -p:PublishTrimmed=True -p:TrimMode=Link -p:PublishReadyToRun=false
+        //dotnet publish -c Release -f net5.0 -r osx-x64 --self-contained true /p:PublishSingleFile=true  -p:PublishTrimmed=True -p:TrimMode=Link -p:PublishReadyToRun=false
 
 
         //Todo:
         //check which dispatchers should be awaited
-        //possibly remove functions with switch parameters
+        //possibly remove unnecessary flags from function parameters
         //context menu for description
-        //multiple files/versioning
-        //fix settings path dispaly
+        //multiple files
         //use state machine
+        //get description when rightclicking an item
 
 
         public static MainViewModel s_instance;
@@ -62,6 +62,7 @@ namespace NoodleManagerX.Models
         [Reactive] public int selectedSortOrderIndex { get; set; } = 0;
         [Reactive] private string synthDirectory { get; set; }
         [Reactive] public bool directoryValid { get; set; }
+        [Reactive] public int progress { get; set; } = 0;
 
         [Reactive] public Settings settings { get; set; } = new Settings();
         //[Reactive] public string questSerial { get; set; } = "";
@@ -93,9 +94,8 @@ namespace NoodleManagerX.Models
         public bool closing = false;
         public bool downloadPage = false;//so that loading pages get downloaded when using get page
         public bool updatingLocalItems = false;
-
         public bool getAllRunning = false;
-        public bool pruning = false;
+        public bool pruning = false;//maps without metadata should be deleted
 
         public int apiRequestCounter = 0;
 
@@ -110,15 +110,18 @@ namespace NoodleManagerX.Models
 
             MainWindow.s_instance.Closing += ClosingEvent;
 
+            //MtpDevice.Connect();
+
+
             //ExtractResources();
             LoadSettings();
 
             settings.Changed.Subscribe(x => { SaveSettings(); LoadLocalItems(); LoadBlacklist(); });//save the settings when they change
             this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
             {
+                directoryValid = CheckDirectory(synthDirectory);
                 if (settings.synthDirectory != synthDirectory)
                 {
-                    directoryValid = CheckDirectory(synthDirectory);
                     if (directoryValid)
                     {
                         _ = Dispatcher.UIThread.InvokeAsync(async () =>
@@ -312,7 +315,7 @@ namespace NoodleManagerX.Models
 
                 foreach (GenericItem item in items)
                 {
-                    item.UpdateDownloaded();
+                    _ = item.UpdateDownloaded();
                 }
 
                 updatingLocalItems = false;
@@ -351,13 +354,7 @@ namespace NoodleManagerX.Models
         {
             if (CheckDirectory(settings.synthDirectory, true))
             {
-                searchText = lastSearchText = "";
-                currentPage = 1;
-                selectedSearchParameterIndex = 0;
-                selectedDifficultyIndex = 0;
-                selectedSortMethodIndex = 0;
-                selectedSortOrderIndex = 0;
-                GetPage();
+                DownloadScheduler.toDownload = DownloadScheduler.queue.Count;
 
                 switch (selectedTabIndex)
                 {
@@ -819,12 +816,25 @@ namespace NoodleManagerX.Models
 
         public static void Log(string message)
         {
-            try
+            Task.Run(async () =>
             {
-                Console.WriteLine(message);
-                File.AppendAllText("log.txt", message + Environment.NewLine);
-            }
-            catch { }
+                try
+                {
+                    Console.WriteLine(message);
+
+                    string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager");
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    using (StreamWriter sw = File.AppendText(Path.Combine(directory, "Log.txt")))
+                    {
+                        await sw.WriteAsync(DateTime.Now.ToString("dd'.'MM HH':'mm':'ss") + "     " + message + Environment.NewLine);
+                    }
+                }
+                catch { }
+            });
         }
     }
 }

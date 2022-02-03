@@ -14,13 +14,13 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace NoodleManagerX.Models
 {
     [DataContract]
     abstract class GenericItem : ReactiveObject
     {
-        public const int maxDownloadAttempts = 3;
         public const int maxDeleteAttempts = 20;
 
         [DataMember] public int id { get; set; }
@@ -124,7 +124,7 @@ namespace NoodleManagerX.Models
                              tmp = tmp.Where(x => x.itemType == itemType).OrderByDescending(x => x.modifiedTime).ToList();
                              foreach (LocalItem l in tmp.Skip(1))
                              {
-                                 Console.WriteLine("Old version deleted of " + l.filename);
+                                 MainViewModel.Log("Old version deleted of " + l.filename);
                                  Delete(l.filename);
                              }
                          }
@@ -134,12 +134,12 @@ namespace NoodleManagerX.Models
                          if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
                          {
                              needsUpdate = tmp[0].hash != ((MapItem)this).hash;
-                             if (needsUpdate) Console.WriteLine("Hash difference detected for " + this.display_title);
+                             if (needsUpdate) MainViewModel.Log("Hash difference detected for " + this.display_title);
                          }
                          else
                          {
                              needsUpdate = DateTime.Compare(updatedAt, tmp[0].modifiedTime) > 0;
-                             if (needsUpdate) Console.WriteLine("Date difference detected for " + this.display_title);
+                             if (needsUpdate) MainViewModel.Log("Date difference detected for " + this.display_title);
                          }
                      }
                      else
@@ -199,25 +199,35 @@ namespace NoodleManagerX.Models
                             {
                                 webClient.OpenRead(url);
                                 string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
-                                filename = new ContentDisposition(header_contentDisposition).FileName;
+                                filename = HttpUtility.UrlDecode(new ContentDisposition(header_contentDisposition).FileName);
                             }
 
-                            Console.WriteLine("Downloading " + filename);
+                            MainViewModel.Log("Downloading " + filename);
 
                             filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
 
                             await webClient.DownloadFileTaskAsync(new Uri(url), filepath);
+                            /*
+                            WebRequest request = WebRequest.Create(new Uri(url));
+
+                            using (WebResponse response = request.GetResponse())
+                            {
+                                StorageAbstraction.WriteFile(response.GetResponseStream(), Path.Combine(target, filename));
+                            }*/
                         }
                     }
                     catch (Exception e)
                     {
                         MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
-                        Requeue();
+                        DownloadScheduler.Requeue(this);
                     }
 
                     if (await handler.GetLocalItem(filepath, MainViewModel.s_instance.localItems, this))
                     {
-                        File.SetLastWriteTime(filepath, updatedAt);
+                        if (updatedAt != new DateTime())
+                        {
+                            File.SetLastWriteTime(filepath, updatedAt);
+                        }
 
                         _ = Dispatcher.UIThread.InvokeAsync(() =>
                         {
@@ -226,7 +236,7 @@ namespace NoodleManagerX.Models
                     }
                     else
                     {
-                        Requeue();
+                        DownloadScheduler.Requeue(this);
                     }
 
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
@@ -236,20 +246,6 @@ namespace NoodleManagerX.Models
 
                     DownloadScheduler.downloading.Remove(this);
                 });
-            }
-        }
-
-        private void Requeue()
-        {
-            if (downloadAttempts < maxDownloadAttempts)
-            {
-                MainViewModel.Log("Requeueing " + filename);
-                downloadAttempts++;
-                DownloadScheduler.queue.Add(this);
-            }
-            else
-            {
-                MainViewModel.Log("Timeout " + filename);
             }
         }
 
