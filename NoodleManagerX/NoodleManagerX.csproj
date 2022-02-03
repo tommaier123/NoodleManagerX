@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFrameworks>net5.0-windows</TargetFrameworks>
     <ApplicationIcon>icon-nm.ico</ApplicationIcon>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
@@ -8,6 +8,7 @@
     <TrimMode>link</TrimMode>
     <DebugType>embedded</DebugType>
     <Platforms>AnyCPU;x64</Platforms>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />

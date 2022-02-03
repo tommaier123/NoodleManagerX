@@ -42,6 +42,7 @@ namespace NoodleManagerX.Models
         //multiple files
         //use state machine
         //get description when rightclicking an item
+        //get a updated at timestamp for updating, published at is fine for filesystem timestamp
 
 
         [Reactive] private string version { get; set; } = "V0.5.0";

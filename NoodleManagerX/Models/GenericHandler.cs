@@ -25,7 +25,7 @@ namespace NoodleManagerX.Models
         public virtual Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "name", "$contL" }, { "user.username", "$contL" } };
         public virtual string select { get; set; } = "name";
         public virtual string join { get; set; } = "";
-        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,updated_at,download_count,upvote_count,downvote_count,score,rating,vote_diff,user,filename,";
+        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,score,rating,vote_diff,user,filename,";
         public virtual string apiEndpoint { get; set; } = "";
         public virtual string folder { get; set; } = "";
         public virtual string[] extensions { get; set; } = { };
