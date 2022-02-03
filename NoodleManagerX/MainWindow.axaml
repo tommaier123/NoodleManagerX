@@ -411,7 +411,7 @@
 			</Grid>
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
 				<!--Path, Quest Enabled, Auto Update Content, Disable NM Update Notification-->
-				<Grid RowDefinitions="auto,auto,*">
+				<Grid RowDefinitions="auto,auto,*,auto">
 					<Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Margin="10,10,10,10">
 						<TextBlock Grid.Column="0" Text="Synth Riders Directory" VerticalAlignment="Center"/>
 						<Border Grid.Column="1" Margin="20,0,0,0" BorderBrush="{Binding Path=directoryValid, Converter={StaticResource BoolColorConverter}, ConverterParameter=#aaaaaa|#ff0000}" BorderThickness="1">
@@ -425,6 +425,7 @@
 						<TextBlock Grid.Column="0" Text="Allow Converts" VerticalAlignment="Center"/>
 						<CheckBox Grid.Column="1" Margin="16,0,0,0" IsChecked="{Binding settings.allowConverts}"/>
 					</Grid>
+					<TextBlock Grid.Row="4" Text="{Binding version}" VerticalAlignment="Center" Foreground="Gray"/>
 				</Grid>
 			</Grid>
 		</Grid>

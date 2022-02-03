@@ -44,7 +44,11 @@ namespace NoodleManagerX.Models
         //get description when rightclicking an item
 
 
+        [Reactive] private string version { get; set; } = "V0.5.0";
+
         public static MainViewModel s_instance;
+
+        [Reactive] public Settings settings { get; set; } = new Settings();
 
         [Reactive] public int selectedTabIndex { get; set; } = 0;
         [Reactive] public int currentPage { get; set; } = 1;
@@ -63,9 +67,6 @@ namespace NoodleManagerX.Models
         [Reactive] private string synthDirectory { get; set; }
         [Reactive] public bool directoryValid { get; set; }
         [Reactive] public int progress { get; set; } = 0;
-
-        [Reactive] public Settings settings { get; set; } = new Settings();
-        //[Reactive] public string questSerial { get; set; } = "";
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
@@ -89,7 +90,6 @@ namespace NoodleManagerX.Models
 
         public AdbServer adbServer = new AdbServer();
         public AdbClient adbClient = new AdbClient();
-        public DeviceMonitor deviceMonitor;
 
         public bool closing = false;
         public bool downloadPage = false;//so that loading pages get downloaded when using get page
