@@ -209,8 +209,10 @@ namespace NoodleManagerX.Models
                             WebRequest request = WebRequest.Create(new Uri(url));
 
                             using (WebResponse response = request.GetResponse())
+                            using (Stream stream = response.GetResponseStream())
+                            using (MemoryStream str = FixMetadata(stream))
                             {
-                                await StorageAbstraction.WriteFile(response.GetResponseStream(), path);
+                                await StorageAbstraction.WriteFile(str, path);
                             }
                         }
                     }
@@ -220,7 +222,7 @@ namespace NoodleManagerX.Models
                         DownloadScheduler.Requeue(this);
                     }
 
-                    if (await handler.GetLocalItem(path, MainViewModel.s_instance.localItems, this))
+                    if (await handler.GetLocalItem(path, MainViewModel.s_instance.localItems))
                     {
                         if (updatedAt != new DateTime())
                         {
@@ -245,6 +247,13 @@ namespace NoodleManagerX.Models
                     DownloadScheduler.downloading.Remove(this);
                 });
             }
+        }
+
+        public virtual MemoryStream FixMetadata(Stream stream)
+        {
+            MemoryStream ms = new MemoryStream();
+            stream.CopyTo(ms);
+            return ms;
         }
 
         public void Delete()

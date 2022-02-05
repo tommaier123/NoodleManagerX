@@ -14,7 +14,7 @@ namespace NoodleManagerX.Models
         public static ObservableCollection<GenericItem> downloading = new ObservableCollection<GenericItem>();
 
         public const int downloadTasks = 4;
-        public const int maxDownloadAttempts = 3;
+        public const int maxDownloadAttempts = 3;//1 fore debugging
         public static int toDownload = 0;
 
         private static bool running = false;
@@ -29,7 +29,7 @@ namespace NoodleManagerX.Models
             if (item.itemType == ItemType.Map)
             {
                 toDownload++;
-                item.downloadAttempts = 0;
+                item.downloadAttempts = 1;
                 queue.Add(item);
             }
         }

@@ -42,6 +42,12 @@ namespace NoodleManagerX.Models
         //multiple files
         //use state machine
         //get description when rightclicking an item
+        //prevent downloading while local files are not loaded yet
+        //reload local items when quest connects/disconnects
+        //check devices that connect
+        //update reminder
+        //optimize storage abstraction with async multitasking
+        //make sure all streams are closed when no longer needed
 
 
         [Reactive] private string version { get; set; } = "V0.5.0";
@@ -674,7 +680,7 @@ namespace NoodleManagerX.Models
         {
             try
             {
-                string path = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager", "Settings.json");
+                string path = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX", "Settings.json");
                 MainViewModel.Log("Loading Settings from " + path);
 
                 if (File.Exists(path))
@@ -698,7 +704,7 @@ namespace NoodleManagerX.Models
                     MainViewModel.Log("Saving Settings");
                     string output = JsonConvert.SerializeObject(settings);
 
-                    string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager");
+                    string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX");
                     if (!Directory.Exists(directory))
                     {
                         Directory.CreateDirectory(directory);
@@ -822,7 +828,7 @@ namespace NoodleManagerX.Models
                 {
                     Console.WriteLine(message);
 
-                    string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManager");
+                    string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX");
                     if (!Directory.Exists(directory))
                     {
                         Directory.CreateDirectory(directory);

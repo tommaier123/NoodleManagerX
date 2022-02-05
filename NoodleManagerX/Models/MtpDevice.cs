@@ -15,7 +15,7 @@ namespace NoodleManagerX.Models
         public static void Connect()
         {
             var devices = MediaDevice.GetDevices();
-            Console.WriteLine(devices.Count() + " devices connected");
+            MainViewModel.Log(devices.Count() + " mtp devices connected");
             foreach (MediaDevice d in devices)
             {
                 try
@@ -29,7 +29,7 @@ namespace NoodleManagerX.Models
                         {
                             if (Path.GetFileName(subsubdirectory) == "SynthRidersUC")
                             {
-                                Console.WriteLine("Synth Riders device found " + d.Description);
+                                MainViewModel.Log("Synth Riders device found " + d.Description);
                                 device = d;
                                 path = subsubdirectory;
                                 connected = true;

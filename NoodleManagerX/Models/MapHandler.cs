@@ -23,7 +23,6 @@ namespace NoodleManagerX.Models
 
         public override async Task<bool> LoadLocalItems()
         {
-            Console.WriteLine("load map items");
             List<LocalItem> tmp = new List<LocalItem>();
             if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
@@ -44,12 +43,12 @@ namespace NoodleManagerX.Models
             return true;
         }
 
-        public override async Task<bool> GetLocalItem(string path, List<LocalItem> list, GenericItem item = null)
+        public override async Task<bool> GetLocalItem(string path, List<LocalItem> list)
         {
             try
             {
-                using (Stream file = StorageAbstraction.ReadFile(path))
-                using (ZipArchive archive = new ZipArchive(file))
+                using (Stream stream = StorageAbstraction.ReadFile(path))
+                using (ZipArchive archive = new ZipArchive(stream))
                 {
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
@@ -66,36 +65,19 @@ namespace NoodleManagerX.Models
                             }
                         }
                     }
-                }
-                
-                //no metadata -> create
-                if (item != null)
-                {/*
-                    MainViewModel.Log("Creating metadata for " + item.filename);
 
-                    JObject metadata = new JObject(new JProperty("id", item.id), new JProperty("hash", ((MapItem)item).hash));
-
-                    using (ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Update))
+                    if (MainViewModel.s_instance.pruning)
                     {
-                        ZipArchiveEntry entry = archive.CreateEntry("synthriderz.meta.json");
-                        using (StreamWriter writer = new StreamWriter(entry.Open()))
-                        {
-                            writer.Write(metadata.ToString(Formatting.None));
-                        }
+                        MainViewModel.Log("Deleting old file without metadata " + Path.GetFileName(path));
+                        StorageAbstraction.DeleteFile(path);
                     }
-                    return true;*/
-                }
-                else if (MainViewModel.s_instance.pruning)
-                {
-                    MainViewModel.Log("Deleting old file without metadata " + Path.GetFileName(path));
-                    File.Delete(path);
                 }
             }
             catch (Exception e)
             {
                 MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
                 MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(path));
-                File.Delete(path);
+                StorageAbstraction.DeleteFile(path);
             }
 
             return false;
@@ -146,6 +128,34 @@ namespace NoodleManagerX.Models
             {
                 PlaybackHandler.Play(this);
             }));
+        }
+
+        public override MemoryStream FixMetadata(Stream stream)
+        {
+            MemoryStream ms = new MemoryStream();
+            stream.CopyTo(ms);
+
+            using (ZipArchive archive = new ZipArchive(ms, ZipArchiveMode.Update, true))
+            {
+                foreach (ZipArchiveEntry zipEntry in archive.Entries)
+                {
+                    if (zipEntry.FullName == "synthriderz.meta.json")
+                    {
+                        return ms;
+                    }
+                }
+
+                MainViewModel.Log("Creating metadata for " + filename);
+                JObject metadata = new JObject(new JProperty("id", id), new JProperty("hash", hash));
+
+                ZipArchiveEntry entry = archive.CreateEntry("synthriderz.meta.json");
+                using (StreamWriter writer = new StreamWriter(entry.Open()))
+                {
+                    writer.Write(metadata.ToString(Formatting.None));
+                }
+
+                return ms;
+            }
         }
     }
 
