@@ -42,5 +42,10 @@ namespace NoodleManagerX.Models
                 catch { }
             }
         }
+
+        public static void Disconnect()
+        {
+            if (connected) device.Disconnect();
+        }
     }
 }

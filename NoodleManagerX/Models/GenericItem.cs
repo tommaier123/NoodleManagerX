@@ -69,7 +69,7 @@ namespace NoodleManagerX.Models
 
             downloadCommand = ReactiveCommand.Create((() =>
             {
-                if (MainViewModel.s_instance.CheckDirectory(MainViewModel.s_instance.settings.synthDirectory, true))
+                if (MainViewModel.s_instance.CheckDirectory(MainViewModel.s_instance.settings.synthDirectory, true) && !MainViewModel.s_instance.updatingLocalItems)
                 {
                     blacklisted = false;
                     DownloadScheduler.Download(this);
@@ -78,21 +78,24 @@ namespace NoodleManagerX.Models
 
             deleteCommand = ReactiveCommand.Create((() =>
             {
-                if (downloaded)
+                if (!MainViewModel.s_instance.updatingLocalItems)
                 {
-                    Delete();
-                }
-                else
-                {
-                    blacklisted = !blacklisted;
-
-                    if (blacklisted)
+                    if (downloaded)
                     {
-                        MainViewModel.s_instance.blacklist.Add(filename);
+                        Delete();
                     }
                     else
                     {
-                        MainViewModel.s_instance.blacklist.Remove(filename);
+                        blacklisted = !blacklisted;
+
+                        if (blacklisted)
+                        {
+                            MainViewModel.s_instance.blacklist.Add(filename);
+                        }
+                        else
+                        {
+                            MainViewModel.s_instance.blacklist.Remove(filename);
+                        }
                     }
                 }
             }));
@@ -300,7 +303,7 @@ namespace NoodleManagerX.Models
         [DataMember] public string description { get; set; }
         [Reactive] public Bitmap cover_bmp { get; set; }
         [Reactive] public bool selected { get; set; }
-        
+
         public virtual string display_title { get; }
         public virtual string display_creator { get; }
         public virtual string display_preview { get { return null; } }

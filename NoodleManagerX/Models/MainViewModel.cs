@@ -42,7 +42,6 @@ namespace NoodleManagerX.Models
         //multiple files
         //use state machine
         //get description when rightclicking an item
-        //prevent downloading while local files are not loaded yet
         //reload local items when quest connects/disconnects
         //check devices that connect
         //update reminder
@@ -233,10 +232,13 @@ namespace NoodleManagerX.Models
 
             getPageCommand = ReactiveCommand.Create((() =>
             {
-                downloadPage = true;
-                foreach (GenericItem item in items.Where(x => !x.downloaded && !x.downloading))
+                if (!updatingLocalItems)
                 {
-                    DownloadScheduler.Download(item);
+                    downloadPage = true;
+                    foreach (GenericItem item in items.Where(x => !x.downloaded && !x.downloading))
+                    {
+                        DownloadScheduler.Download(item);
+                    }
                 }
             }));
 
@@ -359,7 +361,7 @@ namespace NoodleManagerX.Models
 
         public void GetAll()
         {
-            if (CheckDirectory(settings.synthDirectory, true))
+            if (CheckDirectory(settings.synthDirectory, true) && !updatingLocalItems)
             {
                 DownloadScheduler.toDownload = DownloadScheduler.queue.Count;
 
@@ -785,6 +787,7 @@ namespace NoodleManagerX.Models
             if (!e.Cancel == true)
             {
                 //cleanup
+                MtpDevice.Disconnect();
             }
         }
 
