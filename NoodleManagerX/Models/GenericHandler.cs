@@ -23,9 +23,11 @@ namespace NoodleManagerX.Models
         public int chunkCount = 1;
 
         public virtual Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "name", "$contL" }, { "user.username", "$contL" } };
-        public virtual string select { get; set; } = "name";
         public virtual string join { get; set; } = "";
         private string selectAll { get; set; } = "id,cover_url,download_url,published_at,updated_at,download_count,upvote_count,downvote_count,score,rating,vote_diff,user,filename,";
+        public virtual string select { get; set; } = "name";
+        private string selectDownloadAll { get; set; } = "id,download_url,published_at,updated_at,filename,";
+        public virtual string selectDownload { get; set; } = "";
         public virtual string apiEndpoint { get; set; } = "";
         public virtual string folder { get; set; } = "";
         public virtual string[] extensions { get; set; } = { };
@@ -217,12 +219,12 @@ namespace NoodleManagerX.Models
                                         );
                                 }
 
-                                string req = apiEndpoint + "?limit=" + getAllPageSize + "&page=" + i + "&s=" + convert.ToString(Formatting.None);
+                                string req = apiEndpoint + "?select=" + selectDownloadAll + selectDownload + "&limit=" + getAllPageSize + "&page=" + i + "&s=" + convert.ToString(Formatting.None);
 
-                                var page = DeserializePage(await client.DownloadStringTaskAsync(req));
+                                var page = JsonConvert.DeserializeObject<GenericPageDownload>(await client.DownloadStringTaskAsync(req));
 
                                 if (MainViewModel.s_instance.closing) break;
-                                foreach (GenericItem item in page.data)
+                                foreach (GenericItemDownload item in page.data)
                                 {
                                     List<GenericItem> instances = MainViewModel.s_instance.items.Where(x => x.itemType == ItemType.Map && x.id == item.id).ToList();
                                     if (instances.Count > 0)
@@ -238,7 +240,7 @@ namespace NoodleManagerX.Models
                                         if (!item.downloaded || item.needsUpdate)
                                         {
                                             DownloadScheduler.Download(item);
-                                            if (item.needsUpdate) { MainViewModel.Log("Updating " + item.display_title); }
+                                            if (item.needsUpdate) { MainViewModel.Log("Updating " + item.filename); }
                                         }
                                     }
                                 }
@@ -272,7 +274,6 @@ namespace NoodleManagerX.Models
                 });
             }
         }
-
 
 
         public virtual dynamic DeserializePage(string json) { return null; }

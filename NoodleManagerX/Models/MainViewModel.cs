@@ -50,6 +50,7 @@ namespace NoodleManagerX.Models
         //make sure all streams are closed when no longer needed
 
 
+
         [Reactive] private string version { get; set; } = "V0.5.0";
 
         public static MainViewModel s_instance;

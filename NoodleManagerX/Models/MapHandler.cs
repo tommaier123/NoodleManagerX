@@ -19,6 +19,7 @@ namespace NoodleManagerX.Models
         public override ItemType itemType { get; set; } = ItemType.Map;
         public override Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "text_search", "$tsQuery" }, { "user.username", "$contL" } };
         public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,beat_saber_convert";
+        public override string selectDownload { get; set; } = "hash,beat_saber_convert";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
 
         public override async Task<bool> LoadLocalItems()
