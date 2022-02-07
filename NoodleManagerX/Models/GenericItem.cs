@@ -219,7 +219,6 @@ namespace NoodleManagerX.Models
                     catch (Exception e)
                     {
                         MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
-                        DownloadScheduler.Requeue(this);
                     }
 
                     if (await handler.GetLocalItem(filepath, MainViewModel.s_instance.localItems, this))
