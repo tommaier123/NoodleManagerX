@@ -1,6 +1,5 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Input.Raw;
@@ -9,10 +8,7 @@ using Avalonia.Media;
 using NoodleManagerX.Models;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 
 namespace NoodleManagerX

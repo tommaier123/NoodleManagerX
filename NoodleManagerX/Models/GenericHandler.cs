@@ -4,12 +4,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Path = System.IO.Path;
+
 
 namespace NoodleManagerX.Models
 {
@@ -36,11 +37,10 @@ namespace NoodleManagerX.Models
         {
             if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
-                string directory = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, folder);
-                if (Directory.Exists(directory))
+                if (StorageAbstraction.DirectoryExists(folder))
                 {
                     List<LocalItem> tmp = new List<LocalItem>();
-                    foreach (string file in Directory.GetFiles(directory))
+                    foreach (string file in StorageAbstraction.GetFilesInDirectory(folder))
                     {
                         if (extensions.Contains(Path.GetExtension(file)))
                         {
@@ -55,7 +55,7 @@ namespace NoodleManagerX.Models
 
         public virtual Task<bool> GetLocalItem(string file, List<LocalItem> list)
         {
-            list.Add(new LocalItem(-1, "", Path.GetFileName(file), File.GetLastWriteTime(file), itemType));
+            list.Add(new LocalItem(-1, "", Path.GetFileName(file), StorageAbstraction.GetLastWriteTime(file), itemType));
             return Task.FromResult(true);
         }
 

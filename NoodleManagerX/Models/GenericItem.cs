@@ -5,7 +5,6 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mime;
@@ -15,6 +14,9 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Path = System.IO.Path;
+using Stream = System.IO.Stream;
+using MemoryStream = System.IO.MemoryStream;
 
 namespace NoodleManagerX.Models
 {
@@ -69,7 +71,7 @@ namespace NoodleManagerX.Models
 
             downloadCommand = ReactiveCommand.Create((() =>
             {
-                if (MainViewModel.s_instance.CheckDirectory(MainViewModel.s_instance.settings.synthDirectory, true) && !MainViewModel.s_instance.updatingLocalItems)
+                if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
                 {
                     blacklisted = false;
                     DownloadScheduler.Download(this);
@@ -258,36 +260,14 @@ namespace NoodleManagerX.Models
             {
                 if (!String.IsNullOrEmpty(filename))
                 {
-                    string filepath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, target, filename);
+                    await StorageAbstraction.DeleteFile(Path.Combine(target, filename));
 
-                    int i = 0;
+                    MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && x.itemType == itemType && x.filename == filename).ToList();
 
-                    while (File.Exists(filepath) && i < maxDeleteAttempts)
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        i++;
-                        try
-                        {
-                            File.Delete(filepath);
-                        }
-                        catch (IOException e)
-                        {
-                            MainViewModel.Log(e.Message);
-                            await Task.Delay(200);
-                        }
-                    }
-                    if (!File.Exists(filepath))
-                    {
-                        MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && x.itemType == itemType && x.filename == filename).ToList();
-
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            downloaded = false;
-                        });
-                    }
-                    else
-                    {
-                        MainViewModel.Log("Failed to delete " + this.filename);
-                    }
+                        downloaded = false;
+                    });
                 }
             });
         }

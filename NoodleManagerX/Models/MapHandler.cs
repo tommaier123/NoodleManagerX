@@ -4,13 +4,15 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Reactive;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Path = System.IO.Path;
+using Stream = System.IO.Stream;
+using MemoryStream = System.IO.MemoryStream;
+
 
 namespace NoodleManagerX.Models
 {
@@ -48,29 +50,32 @@ namespace NoodleManagerX.Models
         {
             try
             {
-                using (Stream stream = StorageAbstraction.ReadFile(path))
-                using (ZipArchive archive = new ZipArchive(stream))
+                if (StorageAbstraction.DirectoryExists(path))
                 {
-                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    using (Stream stream = StorageAbstraction.ReadFile(path))
+                    using (ZipArchive archive = new ZipArchive(stream))
                     {
-                        if (entry.FullName == "synthriderz.meta.json")
+                        foreach (ZipArchiveEntry entry in archive.Entries)
                         {
-                            using (StreamReader sr = new StreamReader(entry.Open()))
+                            if (entry.FullName == "synthriderz.meta.json")
                             {
-                                LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
-                                localItem.filename = Path.GetFileName(path);
-                                //localItem.modifiedTime = File.GetLastWriteTime(path);
-                                localItem.itemType = ItemType.Map;
-                                list.Add(localItem);
-                                return true;
+                                using (System.IO.StreamReader sr = new System.IO.StreamReader(entry.Open()))
+                                {
+                                    LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
+                                    localItem.filename = Path.GetFileName(path);
+                                    //localItem.modifiedTime = File.GetLastWriteTime(path);
+                                    localItem.itemType = ItemType.Map;
+                                    list.Add(localItem);
+                                    return true;
+                                }
                             }
                         }
-                    }
 
-                    if (MainViewModel.s_instance.pruning)
-                    {
-                        MainViewModel.Log("Deleting old file without metadata " + Path.GetFileName(path));
-                        StorageAbstraction.DeleteFile(path);
+                        if (MainViewModel.s_instance.pruning)
+                        {
+                            MainViewModel.Log("Deleting old file without metadata " + Path.GetFileName(path));
+                            await StorageAbstraction.DeleteFile(path);
+                        }
                     }
                 }
             }
@@ -78,7 +83,7 @@ namespace NoodleManagerX.Models
             {
                 MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
                 MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(path));
-                StorageAbstraction.DeleteFile(path);
+                await StorageAbstraction.DeleteFile(path);
             }
 
             return false;
@@ -150,7 +155,7 @@ namespace NoodleManagerX.Models
                 JObject metadata = new JObject(new JProperty("id", id), new JProperty("hash", hash));
 
                 ZipArchiveEntry entry = archive.CreateEntry("synthriderz.meta.json");
-                using (StreamWriter writer = new StreamWriter(entry.Open()))
+                using (System.IO.StreamWriter writer = new System.IO.StreamWriter(entry.Open()))
                 {
                     writer.Write(metadata.ToString(Formatting.None));
                 }

@@ -1,11 +1,5 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NoodleManagerX.Models
@@ -19,7 +13,7 @@ namespace NoodleManagerX.Models
         {
             return Task.Run(async () =>
             {
-                if (File.Exists(path)) DeleteFile(path);
+                if (File.Exists(path)) await DeleteFile(path);
 
                 stream.Seek(0, SeekOrigin.Begin);
 
@@ -37,6 +31,11 @@ namespace NoodleManagerX.Models
                     }
                 }
                 stream.Close();
+
+                while (!File.Exists(path))
+                {
+                    await Task.Delay(100);
+                }
             });
         }
 
@@ -66,16 +65,23 @@ namespace NoodleManagerX.Models
             }
         }
 
-        public static void DeleteFile(string path)
+        public static Task DeleteFile(string path)
         {
-            if (MtpDevice.connected)
+            return Task.Run(async () =>
             {
-                MtpDevice.device.DeleteFile(Path.Combine(MtpDevice.path, path));
-            }
-            else
-            {
-                File.Delete(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
-            }
+                if (MtpDevice.connected)
+                {
+                    MtpDevice.device.DeleteFile(Path.Combine(MtpDevice.path, path));
+                }
+                else
+                {
+                    File.Delete(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                }
+                while (FileExists(path))
+                {
+                    await Task.Delay(100);
+                }
+            });
         }
 
         public static bool DirectoryExists(string path)
@@ -100,6 +106,27 @@ namespace NoodleManagerX.Models
             else
             {
                 return Directory.GetFiles(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+            }
+        }
+
+        public static DateTime GetLastWriteTime(string path)
+        {
+            if (MtpDevice.connected)
+            {
+                return MtpDevice.device.GetFileInfo(Path.Combine(MtpDevice.path, path)).LastWriteTime.Value;
+            }
+            else
+            {
+                return File.GetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+            }
+        }
+
+        public static bool CanDownload(bool silent = false)
+        {
+            if (MtpDevice.connected) return true;
+            else
+            {
+                return MainViewModel.s_instance.CheckDirectory(MainViewModel.s_instance.settings.synthDirectory, !silent);
             }
         }
     }

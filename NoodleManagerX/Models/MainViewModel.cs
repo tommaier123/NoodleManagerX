@@ -13,11 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Net;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -25,6 +21,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Environment;
+using Path = System.IO.Path;
+using Stream = System.IO.Stream;
+using MemoryStream = System.IO.MemoryStream;
+
 
 namespace NoodleManagerX.Models
 {
@@ -126,25 +126,22 @@ namespace NoodleManagerX.Models
             this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
             {
                 directoryValid = CheckDirectory(synthDirectory);
-                if (settings.synthDirectory != synthDirectory)
+                if (settings.synthDirectory != synthDirectory && directoryValid)
                 {
-                    if (directoryValid)
+                    _ = Dispatcher.UIThread.InvokeAsync(async () =>
                     {
-                        _ = Dispatcher.UIThread.InvokeAsync(async () =>
+                        var res = await MessageBox.Show(null, "All maps that were not downloaded from synthriderz.com within the last year will be deleted." + Environment.NewLine + "This will only happen once on a new game directory", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+                        if (res == MessageBox.MessageBoxResult.Ok)
                         {
-                            var res = await MessageBox.Show(null, "All maps that were not downloaded from synthriderz.com within the last year will be deleted." + Environment.NewLine + "This will only happen once on a new game directory", "Warning", MessageBox.MessageBoxButtons.OkCancel);
-                            if (res == MessageBox.MessageBoxResult.Ok)
-                            {
-                                Log("Directory changed to " + synthDirectory);
-                                pruning = true;
-                                settings.synthDirectory = synthDirectory;
-                            }
-                            else
-                            {
-                                synthDirectory = settings.synthDirectory;
-                            }
-                        });
-                    }
+                            Log("Directory changed to " + synthDirectory);
+                            pruning = true;
+                            settings.synthDirectory = synthDirectory;
+                        }
+                        else
+                        {
+                            synthDirectory = settings.synthDirectory;
+                        }
+                    });
                 }
             });
 
@@ -361,7 +358,7 @@ namespace NoodleManagerX.Models
 
         public void GetAll()
         {
-            if (CheckDirectory(settings.synthDirectory, true) && !updatingLocalItems)
+            if (StorageAbstraction.CanDownload() && !updatingLocalItems)
             {
                 DownloadScheduler.toDownload = DownloadScheduler.queue.Count;
 
@@ -621,9 +618,10 @@ namespace NoodleManagerX.Models
         public bool CheckDirectory(string path, bool dialog = false)
         {
             bool ret = false;
+
             if (!String.IsNullOrEmpty(path))
             {
-                if (Directory.Exists(path) && File.Exists(Path.Combine(path, "SynthRiders.exe"))) ret = true;
+                if (System.IO.Directory.Exists(path) && System.IO.File.Exists(Path.Combine(path, "SynthRiders.exe"))) ret = true;
             }
 
             if (dialog && !ret)
@@ -644,7 +642,7 @@ namespace NoodleManagerX.Models
 
                 if (!String.IsNullOrEmpty(directory))
                 {
-                    string parent = Directory.GetParent(directory).FullName;
+                    string parent = System.IO.Directory.GetParent(directory).FullName;
                     if (CheckDirectory(parent))
                     {
                         synthDirectory = parent;
@@ -686,9 +684,9 @@ namespace NoodleManagerX.Models
                 string path = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX", "Settings.json");
                 MainViewModel.Log("Loading Settings from " + path);
 
-                if (File.Exists(path))
+                if (System.IO.File.Exists(path))
                 {
-                    using (StreamReader file = File.OpenText(path))
+                    using (System.IO.StreamReader file = System.IO.File.OpenText(path))
                     {
                         JsonSerializer serializer = new JsonSerializer();
                         settings = (Settings)serializer.Deserialize(file, typeof(Settings));
@@ -708,12 +706,12 @@ namespace NoodleManagerX.Models
                     string output = JsonConvert.SerializeObject(settings);
 
                     string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX");
-                    if (!Directory.Exists(directory))
+                    if (!System.IO.Directory.Exists(directory))
                     {
-                        Directory.CreateDirectory(directory);
+                        System.IO.Directory.CreateDirectory(directory);
                     }
 
-                    using (StreamWriter sw = new StreamWriter(Path.Combine(directory, "Settings.json")))
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(Path.Combine(directory, "Settings.json")))
                     {
                         await sw.WriteAsync(output);
                     }
@@ -727,17 +725,15 @@ namespace NoodleManagerX.Models
             try
             {
                 blacklist.Clear();
-                if (CheckDirectory(settings.synthDirectory))
+                string path = "NmBlacklist.json";
+                MainViewModel.Log("Loading Blacklist");
+                if (StorageAbstraction.FileExists(path))
                 {
-                    string path = Path.Combine(settings.synthDirectory, "NmBlacklist.json");
-                    MainViewModel.Log("Loading Blacklist from " + path);
-                    if (File.Exists(path))
+                    using (Stream stream = StorageAbstraction.ReadFile(path))
+                    using (System.IO.StreamReader file = new System.IO.StreamReader(stream))
                     {
-                        using (StreamReader file = File.OpenText(path))
-                        {
-                            JsonSerializer serializer = new JsonSerializer();
-                            blacklist.AddRange((List<string>)serializer.Deserialize(file, typeof(List<string>)));
-                        }
+                        JsonSerializer serializer = new JsonSerializer();
+                        blacklist.AddRange((List<string>)serializer.Deserialize(file, typeof(List<string>)));
                     }
                 }
                 foreach (GenericItem item in items)
@@ -754,15 +750,17 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
-                    if (CheckDirectory(settings.synthDirectory))
+                    if (StorageAbstraction.CanDownload(true))
                     {
                         MainViewModel.Log("Saving Blacklist");
                         string output = JsonConvert.SerializeObject(blacklist.ToList());
 
-                        using (StreamWriter sw = new StreamWriter(Path.Combine(settings.synthDirectory, "NmBlacklist.json")))
+                        MemoryStream stream = new MemoryStream();
+                        using (System.IO.StreamWriter sw = new System.IO.StreamWriter(stream))
                         {
                             await sw.WriteAsync(output);
                         }
+                        await StorageAbstraction.WriteFile(stream, "NmBlacklist.json");
                     }
                 }
                 catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
@@ -833,12 +831,12 @@ namespace NoodleManagerX.Models
                     Console.WriteLine(message);
 
                     string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX");
-                    if (!Directory.Exists(directory))
+                    if (!System.IO.Directory.Exists(directory))
                     {
-                        Directory.CreateDirectory(directory);
+                        System.IO.Directory.CreateDirectory(directory);
                     }
 
-                    using (StreamWriter sw = File.AppendText(Path.Combine(directory, "Log.txt")))
+                    using (System.IO.StreamWriter sw = System.IO.File.AppendText(Path.Combine(directory, "Log.txt")))
                     {
                         await sw.WriteAsync(DateTime.Now.ToString("dd'.'MM HH':'mm':'ss") + "     " + message + Environment.NewLine);
                     }

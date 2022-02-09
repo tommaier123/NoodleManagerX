@@ -1,9 +1,7 @@
-﻿using Avalonia.Threading;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using Avalonia.Threading;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NoodleManagerX.Models
