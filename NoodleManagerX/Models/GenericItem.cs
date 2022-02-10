@@ -246,6 +246,8 @@ namespace NoodleManagerX.Models
         {
             MemoryStream ms = new MemoryStream();
             stream.CopyTo(ms);
+            stream.Flush();
+            stream.Close();
             return ms;
         }
 

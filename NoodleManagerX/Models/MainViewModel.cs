@@ -47,6 +47,7 @@ namespace NoodleManagerX.Models
         //update reminder
         //optimize storage abstraction with async multitasking
         //make sure all streams are closed when no longer needed
+        //don't leave thread safety up to luck
 
 
 
@@ -752,14 +753,13 @@ namespace NoodleManagerX.Models
                 {
                     if (StorageAbstraction.CanDownload(true))
                     {
-                        MainViewModel.Log("Saving Blacklist");
+                        Log("Saving Blacklist");
                         string output = JsonConvert.SerializeObject(blacklist.ToList());
 
                         MemoryStream stream = new MemoryStream();
-                        using (System.IO.StreamWriter sw = new System.IO.StreamWriter(stream))
-                        {
-                            await sw.WriteAsync(output);
-                        }
+                        System.IO.StreamWriter sw = new System.IO.StreamWriter(stream);
+                        await sw.WriteAsync(output);
+                        sw.Flush();
                         await StorageAbstraction.WriteFile(stream, "NmBlacklist.json");
                     }
                 }

@@ -15,9 +15,12 @@ namespace NoodleManagerX.Models
             {
                 if (DirectoryExists(Path.GetDirectoryName(path)))
                 {
-                    if (File.Exists(path)) await DeleteFile(path);
+                    if (FileExists(path))
+                    {
+                        await DeleteFile(path);
+                    }
 
-                    stream.Seek(0, SeekOrigin.Begin);
+                    stream.Position = 0;
 
                     if (MtpDevice.connected)
                     {

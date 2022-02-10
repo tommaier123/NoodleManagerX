@@ -135,8 +135,7 @@ namespace NoodleManagerX.Models
 
         public override MemoryStream FixMetadata(Stream stream)
         {
-            MemoryStream ms = new MemoryStream();
-            stream.CopyTo(ms);
+            MemoryStream ms = base.FixMetadata(stream);
 
             using (ZipArchive archive = new ZipArchive(ms, ZipArchiveMode.Update, true))
             {
