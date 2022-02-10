@@ -37,18 +37,15 @@ namespace NoodleManagerX.Models
         {
             if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
-                if (StorageAbstraction.DirectoryExists(folder))
+                List<LocalItem> tmp = new List<LocalItem>();
+                foreach (string file in StorageAbstraction.GetFilesInDirectory(folder))
                 {
-                    List<LocalItem> tmp = new List<LocalItem>();
-                    foreach (string file in StorageAbstraction.GetFilesInDirectory(folder))
+                    if (extensions.Contains(Path.GetExtension(file)))
                     {
-                        if (extensions.Contains(Path.GetExtension(file)))
-                        {
-                            await GetLocalItem(file, tmp);
-                        }
+                        await GetLocalItem(file, tmp);
                     }
-                    MainViewModel.s_instance.localItems.AddRange(tmp);
                 }
+                MainViewModel.s_instance.localItems.AddRange(tmp);
             }
             return true;
         }

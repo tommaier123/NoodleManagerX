@@ -4,37 +4,43 @@ using System.Threading.Tasks;
 
 namespace NoodleManagerX.Models
 {
-    //toDo
-    //prevent write while busy
 
     class StorageAbstraction
     {
+        static object MtpDeviceLock = new object();
+
         public static Task WriteFile(MemoryStream stream, string path)
         {
             return Task.Run(async () =>
             {
-                if (File.Exists(path)) await DeleteFile(path);
-
-                stream.Seek(0, SeekOrigin.Begin);
-
-                if (MtpDevice.connected)
+                if (DirectoryExists(Path.GetDirectoryName(path)))
                 {
-                    await stream.CopyToAsync(stream);
+                    if (File.Exists(path)) await DeleteFile(path);
+
                     stream.Seek(0, SeekOrigin.Begin);
-                    MtpDevice.device.UploadFile(stream, Path.Combine(MtpDevice.path, path));
-                }
-                else
-                {
-                    using (FileStream file = new FileStream(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), FileMode.Create, FileAccess.Write))
-                    {
-                        await stream.CopyToAsync(file);
-                    }
-                }
-                stream.Close();
 
-                while (!File.Exists(path))
-                {
-                    await Task.Delay(100);
+                    if (MtpDevice.connected)
+                    {
+                        try
+                        {
+                            lock (MtpDeviceLock)
+                            {
+                                MtpDevice.device.UploadFile(stream, Path.Combine(MtpDevice.path, path));
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Error writing to " + path + ": " + e.Message);
+                        }
+                    }
+                    else
+                    {
+                        using (FileStream file = new FileStream(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), FileMode.Create, FileAccess.Write))
+                        {
+                            await stream.CopyToAsync(file);
+                        }
+                    }
+                    stream.Close();
                 }
             });
         }
@@ -43,9 +49,12 @@ namespace NoodleManagerX.Models
         {
             if (MtpDevice.connected)
             {
-                Stream ms = new MemoryStream();
-                MtpDevice.device.DownloadFile(Path.Combine(MtpDevice.path, path), ms);
-                return ms;
+                lock (MtpDeviceLock)
+                {
+                    Stream ms = new MemoryStream();
+                    MtpDevice.device.DownloadFile(Path.Combine(MtpDevice.path, path), ms);
+                    return ms;
+                }
             }
             else
             {
@@ -57,7 +66,10 @@ namespace NoodleManagerX.Models
         {
             if (MtpDevice.connected)
             {
-                return MtpDevice.device.FileExists(Path.Combine(MtpDevice.path, path));
+                lock (MtpDeviceLock)
+                {
+                    return MtpDevice.device.FileExists(Path.Combine(MtpDevice.path, path));
+                }
             }
             else
             {
@@ -67,19 +79,21 @@ namespace NoodleManagerX.Models
 
         public static Task DeleteFile(string path)
         {
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
-                if (MtpDevice.connected)
+                if (FileExists(path))
                 {
-                    MtpDevice.device.DeleteFile(Path.Combine(MtpDevice.path, path));
-                }
-                else
-                {
-                    File.Delete(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
-                }
-                while (FileExists(path))
-                {
-                    await Task.Delay(100);
+                    if (MtpDevice.connected)
+                    {
+                        lock (MtpDeviceLock)
+                        {
+                            MtpDevice.device.DeleteFile(Path.Combine(MtpDevice.path, path));
+                        }
+                    }
+                    else
+                    {
+                        File.Delete(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                    }
                 }
             });
         }
@@ -88,7 +102,10 @@ namespace NoodleManagerX.Models
         {
             if (MtpDevice.connected)
             {
-                return MtpDevice.device.DirectoryExists(Path.Combine(MtpDevice.path, path));
+                lock (MtpDeviceLock)
+                {
+                    return MtpDevice.device.DirectoryExists(Path.Combine(MtpDevice.path, path));
+                }
             }
             else
             {
@@ -99,26 +116,40 @@ namespace NoodleManagerX.Models
         public static string[] GetFilesInDirectory(string path)
         {
             Console.WriteLine("getting files in " + path);
-            if (MtpDevice.connected)
+            if (DirectoryExists(path))
             {
-                return MtpDevice.device.GetFiles(Path.Combine(MtpDevice.path, path));
+                if (MtpDevice.connected)
+                {
+                    lock (MtpDeviceLock)
+                    {
+                        return MtpDevice.device.GetFiles(Path.Combine(MtpDevice.path, path));
+                    }
+                }
+                else
+                {
+                    return Directory.GetFiles(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                }
             }
-            else
-            {
-                return Directory.GetFiles(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
-            }
+            else return new string[0];
         }
 
         public static DateTime GetLastWriteTime(string path)
         {
-            if (MtpDevice.connected)
+            if (FileExists(path))
             {
-                return MtpDevice.device.GetFileInfo(Path.Combine(MtpDevice.path, path)).LastWriteTime.Value;
+                if (MtpDevice.connected)
+                {
+                    lock (MtpDeviceLock)
+                    {
+                        return MtpDevice.device.GetFileInfo(Path.Combine(MtpDevice.path, path)).LastWriteTime.Value;
+                    }
+                }
+                else
+                {
+                    return File.GetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                }
             }
-            else
-            {
-                return File.GetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
-            }
+            else return new DateTime();
         }
 
         public static bool CanDownload(bool silent = false)

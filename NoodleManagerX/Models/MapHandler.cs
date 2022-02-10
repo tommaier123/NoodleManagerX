@@ -29,16 +29,13 @@ namespace NoodleManagerX.Models
             List<LocalItem> tmp = new List<LocalItem>();
             if (MainViewModel.s_instance.settings.synthDirectory != "")
             {
-                if (StorageAbstraction.DirectoryExists("CustomSongs"))
+                foreach (string file in StorageAbstraction.GetFilesInDirectory("CustomSongs"))
                 {
-                    foreach (string file in StorageAbstraction.GetFilesInDirectory("CustomSongs"))
-                    {
-                        string path = Path.Combine("CustomSongs", Path.GetFileName(file));
+                    string path = Path.Combine("CustomSongs", Path.GetFileName(file));
 
-                        if (Path.GetExtension(path) == ".synth")
-                        {
-                            await GetLocalItem(path, tmp);
-                        }
+                    if (Path.GetExtension(path) == ".synth")
+                    {
+                        await GetLocalItem(path, tmp);
                     }
                 }
             }
@@ -50,7 +47,7 @@ namespace NoodleManagerX.Models
         {
             try
             {
-                if (StorageAbstraction.DirectoryExists(path))
+                if (StorageAbstraction.FileExists(path))
                 {
                     using (Stream stream = StorageAbstraction.ReadFile(path))
                     using (ZipArchive archive = new ZipArchive(stream))
@@ -63,7 +60,7 @@ namespace NoodleManagerX.Models
                                 {
                                     LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
                                     localItem.filename = Path.GetFileName(path);
-                                    //localItem.modifiedTime = File.GetLastWriteTime(path);
+                                    localItem.modifiedTime = StorageAbstraction.GetLastWriteTime(path);
                                     localItem.itemType = ItemType.Map;
                                     list.Add(localItem);
                                     return true;
