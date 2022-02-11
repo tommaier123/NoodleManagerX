@@ -33,7 +33,7 @@ namespace NoodleManagerX.Models
         public virtual string selectDownloadAll { get; set; } = "id,download_url,published_at,updated_at,filename,";
         public virtual string selectDownload { get; set; } = "";
 
-        public virtual async Task<bool> LoadLocalItems()
+        public async Task<bool> LoadLocalItems()
         {
             List<LocalItem> tmp = new List<LocalItem>();
             foreach (string file in StorageAbstraction.GetFilesInDirectory(folder))
@@ -53,7 +53,7 @@ namespace NoodleManagerX.Models
             return Task.FromResult(true);
         }
 
-        public virtual void GetPage()
+        public void GetPage()
         {
             int requestID = MainViewModel.s_instance.apiRequestCounter;
             Clear();
@@ -179,7 +179,7 @@ namespace NoodleManagerX.Models
 
         }
 
-        public virtual void GetAll()
+        public void GetAll()
         {
             if (!MainViewModel.s_instance.getAllRunning)
             {
