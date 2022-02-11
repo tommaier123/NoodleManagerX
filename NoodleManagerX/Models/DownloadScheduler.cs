@@ -24,7 +24,7 @@ namespace NoodleManagerX.Models
 
         public static void Download(GenericItem item)
         {
-            if (item.itemType == ItemType.Map)
+            if (item.itemType == ItemType.Map && !item.blacklisted)
             {
                 toDownload++;
                 item.downloadAttempts = 1;

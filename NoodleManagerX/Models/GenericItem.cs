@@ -181,86 +181,90 @@ namespace NoodleManagerX.Models
                         blacklisted = true;
                     });
                 }
+                else
+                {
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        blacklisted = false;
+                    });
+                }
             });
         }
 
         public void Download()
         {
-            if (MainViewModel.s_instance.settings.synthDirectory != "" && !blacklisted)
+            Task.Run(async () =>
             {
-                Task.Run(async () =>
+                string path = "";
+
+                try
                 {
-                    string path = "";
-
-                    try
-                    {
-                        if (downloaded)
-                        {//remove from local items
+                    if (downloaded)
+                    {//remove from local items
                             MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this) == false).ToList();
-                        }
-
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            downloaded = false;
-                            downloading = true;
-                        });
-
-                        using (WebClient webClient = new WebClient())
-                        {
-                            string url = "https://synthriderz.com" + download_url;
-
-                            //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                            if (String.IsNullOrEmpty(filename))
-                            {
-                                webClient.OpenRead(url);
-                                string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
-                                filename = HttpUtility.UrlDecode(new ContentDisposition(header_contentDisposition).FileName);
-                            }
-
-                            MainViewModel.Log("Downloading " + filename);
-
-                            path = Path.Combine(target, filename);
-
-                            WebRequest request = WebRequest.Create(new Uri(url));
-
-                            using (WebResponse response = request.GetResponse())
-                            using (Stream stream = response.GetResponseStream())
-                            using (MemoryStream str = FixMetadata(stream))
-                            {
-                                await StorageAbstraction.WriteFile(str, path);
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
-                    }
-
-                    if (await handler.GetLocalItem(path, MainViewModel.s_instance.localItems))
-                    {
-                        if (updatedAt != new DateTime())
-                        {
-                            StorageAbstraction.SetLastWriteTime(updatedAt, path);
-                        }
-
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            downloaded = true;
-                        });
-                    }
-                    else
-                    {
-                        DownloadScheduler.Requeue(this);
                     }
 
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        downloading = false;
+                        downloaded = false;
+                        downloading = true;
                     });
 
-                    DownloadScheduler.downloading.Remove(this);
+                    using (WebClient webClient = new WebClient())
+                    {
+                        string url = "https://synthriderz.com" + download_url;
+
+                            //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            if (String.IsNullOrEmpty(filename))
+                        {
+                            webClient.OpenRead(url);
+                            string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
+                            filename = HttpUtility.UrlDecode(new ContentDisposition(header_contentDisposition).FileName);
+                        }
+
+                        MainViewModel.Log("Downloading " + filename);
+
+                        path = Path.Combine(target, filename);
+
+                        WebRequest request = WebRequest.Create(new Uri(url));
+
+                        using (WebResponse response = request.GetResponse())
+                        using (Stream stream = response.GetResponseStream())
+                        using (MemoryStream str = FixMetadata(stream))
+                        {
+                            await StorageAbstraction.WriteFile(str, path);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+                }
+
+                if (await handler.GetLocalItem(path, MainViewModel.s_instance.localItems))
+                {
+                    if (updatedAt != new DateTime())
+                    {
+                        StorageAbstraction.SetLastWriteTime(updatedAt, path);
+                    }
+
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        downloaded = true;
+                    });
+                }
+                else
+                {
+                    DownloadScheduler.Requeue(this);
+                }
+
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    downloading = false;
                 });
-            }
+
+                DownloadScheduler.downloading.Remove(this);
+            });
         }
 
         public virtual MemoryStream FixMetadata(Stream stream)

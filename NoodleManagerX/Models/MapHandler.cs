@@ -78,6 +78,9 @@ namespace NoodleManagerX.Models
     [DataContract]
     class MapItem : GenericItem
     {
+        public override string target { get; set; } = "CustomSongs";
+        public override ItemType itemType { get; set; } = ItemType.Map;
+
         [DataMember] public string title { get; set; }
         [DataMember] public string artist { get; set; }
         [DataMember] public string mapper { get; set; }
@@ -104,8 +107,6 @@ namespace NoodleManagerX.Models
         {
             get { return difficulties; }
         }
-        public override string target { get; set; } = "CustomSongs";
-        public override ItemType itemType { get; set; } = ItemType.Map;
 
         [OnDeserialized]
         private void OnDeserializedMethod(StreamingContext context)
