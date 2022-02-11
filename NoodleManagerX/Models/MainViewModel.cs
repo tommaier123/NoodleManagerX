@@ -48,6 +48,7 @@ namespace NoodleManagerX.Models
         //optimize storage abstraction with async multitasking
         //make sure all streams are closed when no longer needed
         //don't leave thread safety up to luck
+        //get a updated at timestamp for updating, published at is fine for filesystem timestamp
 
 
 
@@ -129,7 +130,7 @@ namespace NoodleManagerX.Models
                 {
                     _ = Dispatcher.UIThread.InvokeAsync(async () =>
                     {
-                        var res = await MessageBox.Show(null, "All maps that were not downloaded from synthriderz.com within the last year will be deleted." + Environment.NewLine + "This will only happen once on a new game directory", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+                        var res = await MessageBox.Show(MainWindow.s_instance, "All maps that were not downloaded from synthriderz.com within the last year will be deleted." + Environment.NewLine + "This will only happen once on a new game directory", "Warning", MessageBox.MessageBoxButtons.OkCancel);
                         if (res == MessageBox.MessageBoxResult.Ok)
                         {
                             Log("Directory changed to " + synthDirectory);

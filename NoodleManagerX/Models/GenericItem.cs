@@ -28,7 +28,7 @@ namespace NoodleManagerX.Models
         [DataMember] public int id { get; set; }
         [DataMember] public string cover_url { get; set; }
         [DataMember] public string download_url { get; set; }
-        [DataMember] public string updated_at { get; set; }
+        [DataMember] public string published_at { get; set; }
         [DataMember] public int download_count { get; set; }
         [DataMember] public int upvote_count { get; set; }
         [DataMember] public int downvote_count { get; set; }
@@ -78,7 +78,7 @@ namespace NoodleManagerX.Models
 
             Task.Run(() =>
             {
-                updatedAt = DateTime.Parse(updated_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
+                updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
             });
 
             downloadCommand = ReactiveCommand.Create((() =>
@@ -224,7 +224,6 @@ namespace NoodleManagerX.Models
                     catch (Exception e)
                     {
                         MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
-                        DownloadScheduler.Requeue(this);
                     }
 
                     if (await handler.GetLocalItem(path, MainViewModel.s_instance.localItems))
