@@ -25,10 +25,11 @@ namespace NoodleManagerX.Models
         public override ItemType itemType { get; set; } = ItemType.Stage;
     }
 
-
+#pragma warning disable 0649
     class StagePage : GenericPage
     {
         public List<StageItem> data;
     }
+#pragma warning restore 0649
 }
 

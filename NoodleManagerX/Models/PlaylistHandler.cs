@@ -36,9 +36,11 @@ namespace NoodleManagerX.Models
         [DataMember] public int id { get; set; }
     }
 
+#pragma warning disable 0649
     class PlaylistPage : GenericPage
     {
         public List<PlaylistItem> data;
     }
+#pragma warning restore 0649
 }
 

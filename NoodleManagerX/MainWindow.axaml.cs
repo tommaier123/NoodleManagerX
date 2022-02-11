@@ -54,7 +54,7 @@ namespace NoodleManagerX
 #if DEBUG
             this.AttachDevTools();
 #endif
-
+#pragma warning disable 0618
             Application.Current.InputManager.Process.Subscribe(x =>
             {
                 if (mouse == null)
@@ -88,6 +88,7 @@ namespace NoodleManagerX
                     }
                 }
             });
+#pragma warning disable 0618
         }
 
         private void SearchBoxKeyEvent(object sender, KeyEventArgs e)

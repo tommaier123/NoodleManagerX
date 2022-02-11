@@ -25,10 +25,11 @@ namespace NoodleManagerX.Models
         public override ItemType itemType { get; set; } = ItemType.Avatar;
     }
 
-
+#pragma warning disable 0649
     class AvatarPage : GenericPage
     {
         public List<AvatarItem> data;
     }
+#pragma warning restore 0649
 }
 

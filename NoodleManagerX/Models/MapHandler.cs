@@ -144,9 +144,10 @@ namespace NoodleManagerX.Models
         }
     }
 
-
+#pragma warning disable 0649
     class MapPage : GenericPage
     {
         public List<MapItem> data;
     }
+#pragma warning restore 0649
 }
