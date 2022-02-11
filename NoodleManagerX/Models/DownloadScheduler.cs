@@ -8,8 +8,8 @@ namespace NoodleManagerX.Models
 {
     static class DownloadScheduler
     {
-        public static ObservableCollection<GenericItemDownload> queue = new ObservableCollection<GenericItemDownload>();
-        public static ObservableCollection<GenericItemDownload> downloading = new ObservableCollection<GenericItemDownload>();
+        public static ObservableCollection<GenericItem> queue = new ObservableCollection<GenericItem>();
+        public static ObservableCollection<GenericItem> downloading = new ObservableCollection<GenericItem>();
 
         public const int downloadTasks = 4;
         public const int maxDownloadAttempts = 3;//1 fore debugging
@@ -22,7 +22,7 @@ namespace NoodleManagerX.Models
             queue.CollectionChanged += QueueChanged;
         }
 
-        public static void Download(GenericItemDownload item)
+        public static void Download(GenericItem item)
         {
             if (item.itemType == ItemType.Map)
             {
@@ -32,7 +32,7 @@ namespace NoodleManagerX.Models
             }
         }
 
-        public static void Requeue(GenericItemDownload item)
+        public static void Requeue(GenericItem item)
         {
             if (item.downloadAttempts < maxDownloadAttempts)
             {

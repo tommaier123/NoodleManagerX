@@ -218,10 +218,10 @@ namespace NoodleManagerX.Models
 
                                 string req = apiEndpoint + "?select=" + selectDownloadAll + selectDownload + "&limit=" + getAllPageSize + "&page=" + i + "&s=" + convert.ToString(Formatting.None);
 
-                                var page = JsonConvert.DeserializeObject<GenericPageDownload>(await client.DownloadStringTaskAsync(req));
+                                var page = DeserializePage(await client.DownloadStringTaskAsync(req));
 
                                 if (MainViewModel.s_instance.closing) break;
-                                foreach (GenericItemDownload item in page.data)
+                                foreach (GenericItem item in page.data)
                                 {
                                     List<GenericItem> instances = MainViewModel.s_instance.items.Where(x => x.id == item.id).ToList();
                                     if (instances.Count > 0)

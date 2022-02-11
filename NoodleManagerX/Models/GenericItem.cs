@@ -21,14 +21,21 @@ using MemoryStream = System.IO.MemoryStream;
 namespace NoodleManagerX.Models
 {
     [DataContract]
-    class GenericItemDownload : ReactiveObject
+    abstract class GenericItem : ReactiveObject
     {
         public const int maxDeleteAttempts = 5;
 
         [DataMember] public int id { get; set; }
+        [DataMember] public string cover_url { get; set; }
         [DataMember] public string download_url { get; set; }
         [DataMember] public string updated_at { get; set; }
+        [DataMember] public int download_count { get; set; }
+        [DataMember] public int upvote_count { get; set; }
+        [DataMember] public int downvote_count { get; set; }
+        [DataMember] public string description { get; set; }
         [DataMember] public string filename { get; set; } = "";
+        [Reactive] public Bitmap cover_bmp { get; set; }
+        [Reactive] public bool selected { get; set; }
         [Reactive] public bool downloading { get; set; } = false;
         [Reactive] public bool downloaded { get; set; } = false;
         [Reactive] public bool blacklisted { get; set; } = false;
@@ -47,7 +54,10 @@ namespace NoodleManagerX.Models
                 }
             }
         }
-
+        public virtual string display_title { get; }
+        public virtual string display_creator { get; }
+        public virtual string display_preview { get { return null; } }
+        public virtual string[] display_difficulties { get { return null; } }
         public DateTime updatedAt { get; set; }
         public virtual string target { get; set; }
 
@@ -62,6 +72,8 @@ namespace NoodleManagerX.Models
         [OnDeserialized]
         private void OnDeserializedMethod(StreamingContext context)
         {
+            LoadBitmap();
+
             UpdateBlacklisted();
 
             Task.Run(() =>
@@ -273,29 +285,6 @@ namespace NoodleManagerX.Models
                 }
             });
         }
-    }
-
-    [DataContract]
-    abstract class GenericItem : GenericItemDownload
-    {
-        [DataMember] public string cover_url { get; set; }
-        [DataMember] public int download_count { get; set; }
-        [DataMember] public int upvote_count { get; set; }
-        [DataMember] public int downvote_count { get; set; }
-        [DataMember] public string description { get; set; }
-        [Reactive] public Bitmap cover_bmp { get; set; }
-        [Reactive] public bool selected { get; set; }
-
-        public virtual string display_title { get; }
-        public virtual string display_creator { get; }
-        public virtual string display_preview { get { return null; } }
-        public virtual string[] display_difficulties { get { return null; } }
-
-        [OnDeserialized]
-        private void OnDeserializedMethod(StreamingContext context)
-        {
-            LoadBitmap();
-        }
 
         public void LoadBitmap()
         {
@@ -342,7 +331,7 @@ namespace NoodleManagerX.Models
         public DateTime modifiedTime = new DateTime();
         public ItemType itemType = ItemType.init;
 
-        public bool CheckEquality(GenericItemDownload item, bool checkHash = false)
+        public bool CheckEquality(GenericItem item, bool checkHash = false)
         {
             if (item != null && itemType == item.itemType)
             {
@@ -365,11 +354,6 @@ namespace NoodleManagerX.Models
         public int total = -1;
         public int page = -1;
         public int pagecount = -1;
-    }
-
-    class GenericPageDownload : GenericPage
-    {
-        public List<GenericItemDownload> data;
     }
 
     [DataContract]
