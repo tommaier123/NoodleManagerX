@@ -23,18 +23,8 @@ namespace NoodleManagerX.Models
     [DataContract]
     class PlaylistItem : GenericItem
     {
-        [DataMember] public string name { get; set; }
-        [DataMember] public User user { get; set; }
         [DataMember] public List<PlaylistEntryItem> items { get; set; }
         public string duration { get { return items != null ? items.Count().ToString() : "0"; } }
-        public override string display_title
-        {
-            get { return name; }
-        }
-        public override string display_creator
-        {
-            get { return user.username; }
-        }
 
         public override string target { get; set; } = "Playlist";
         public override ItemType itemType { get; set; } = ItemType.Playlist;

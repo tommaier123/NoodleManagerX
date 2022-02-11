@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using Path = System.IO.Path;
 using Stream = System.IO.Stream;
 using MemoryStream = System.IO.MemoryStream;
-
+using System.Linq;
 
 namespace NoodleManagerX.Models
 {
@@ -23,25 +23,8 @@ namespace NoodleManagerX.Models
         public override string select { get; set; } = "title,artist,mapper,duration,difficulties,hash,youtube_url,beat_saber_convert";
         public override string selectDownload { get; set; } = "hash,beat_saber_convert";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/beatmaps";
-
-        public override async Task<bool> LoadLocalItems()
-        {
-            List<LocalItem> tmp = new List<LocalItem>();
-            if (MainViewModel.s_instance.settings.synthDirectory != "")
-            {
-                foreach (string file in StorageAbstraction.GetFilesInDirectory("CustomSongs"))
-                {
-                    string path = Path.Combine("CustomSongs", Path.GetFileName(file));
-
-                    if (Path.GetExtension(path) == ".synth")
-                    {
-                        await GetLocalItem(path, tmp);
-                    }
-                }
-            }
-            MainViewModel.s_instance.localItems.AddRange(tmp);
-            return true;
-        }
+        public override string folder { get; set; } = "CustomSongs";
+        public override string[] extensions { get; set; } = { ".synth" };
 
         public override async Task<bool> GetLocalItem(string path, List<LocalItem> list)
         {

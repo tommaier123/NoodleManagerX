@@ -14,9 +14,12 @@ using Path = System.IO.Path;
 
 namespace NoodleManagerX.Models
 {
-    class GenericHandler
+    abstract class GenericHandler
     {
-        public virtual ItemType itemType { get; set; }
+        public abstract ItemType itemType { get; set; }
+        public abstract string apiEndpoint { get; set; }
+        public abstract string folder { get; set; }
+        public abstract string[] extensions { get; set; }
 
         public const int pageChunkCount = 6;
         public const int pageChunkSize = 10;
@@ -25,28 +28,22 @@ namespace NoodleManagerX.Models
 
         public virtual Dictionary<string, string> queryFields { get; set; } = new Dictionary<string, string>() { { "name", "$contL" }, { "user.username", "$contL" } };
         public virtual string join { get; set; } = "";
-        private string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,score,rating,vote_diff,user,filename,";
+        public virtual string selectAll { get; set; } = "id,cover_url,download_url,published_at,download_count,upvote_count,downvote_count,score,rating,vote_diff,user,filename,";
         public virtual string select { get; set; } = "name";
-        private string selectDownloadAll { get; set; } = "id,download_url,published_at,updated_at,filename,";
+        public virtual string selectDownloadAll { get; set; } = "id,download_url,published_at,updated_at,filename,";
         public virtual string selectDownload { get; set; } = "";
-        public virtual string apiEndpoint { get; set; } = "";
-        public virtual string folder { get; set; } = "";
-        public virtual string[] extensions { get; set; } = { };
 
         public virtual async Task<bool> LoadLocalItems()
         {
-            if (MainViewModel.s_instance.settings.synthDirectory != "")
+            List<LocalItem> tmp = new List<LocalItem>();
+            foreach (string file in StorageAbstraction.GetFilesInDirectory(folder))
             {
-                List<LocalItem> tmp = new List<LocalItem>();
-                foreach (string file in StorageAbstraction.GetFilesInDirectory(folder))
+                if (extensions.Contains(Path.GetExtension(file)))
                 {
-                    if (extensions.Contains(Path.GetExtension(file)))
-                    {
-                        await GetLocalItem(file, tmp);
-                    }
+                    await GetLocalItem(file, tmp);
                 }
-                MainViewModel.s_instance.localItems.AddRange(tmp);
             }
+            MainViewModel.s_instance.localItems.AddRange(tmp);
             return true;
         }
 
@@ -272,8 +269,7 @@ namespace NoodleManagerX.Models
             }
         }
 
-
-        public virtual dynamic DeserializePage(string json) { return null; }
+        public abstract dynamic DeserializePage(string json);
 
         public void Clear()
         {

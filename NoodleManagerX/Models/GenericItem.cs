@@ -25,6 +25,9 @@ namespace NoodleManagerX.Models
     {
         public const int maxDeleteAttempts = 5;
 
+        public abstract string target { get; set; }
+        public abstract ItemType itemType { get; set; }
+
         [DataMember] public int id { get; set; }
         [DataMember] public string cover_url { get; set; }
         [DataMember] public string download_url { get; set; }
@@ -33,13 +36,15 @@ namespace NoodleManagerX.Models
         [DataMember] public int upvote_count { get; set; }
         [DataMember] public int downvote_count { get; set; }
         [DataMember] public string description { get; set; }
-        [DataMember] public string filename { get; set; } = "";
+        [DataMember] public string filename { get; set; }
         [Reactive] public Bitmap cover_bmp { get; set; }
         [Reactive] public bool selected { get; set; }
         [Reactive] public bool downloading { get; set; } = false;
         [Reactive] public bool downloaded { get; set; } = false;
         [Reactive] public bool blacklisted { get; set; } = false;
         [Reactive] public bool needsUpdate { get; set; } = false;
+        [DataMember] public string name { get; set; }
+        [DataMember] public User user { get; set; }
         public GenericHandler handler
         {
             get
@@ -54,14 +59,19 @@ namespace NoodleManagerX.Models
                 }
             }
         }
-        public virtual string display_title { get; }
-        public virtual string display_creator { get; }
+
+        public virtual string display_title
+        {
+            get { return name; }
+        }
+        public virtual string display_creator
+        {
+            get { return user.username; }
+        }
         public virtual string display_preview { get { return null; } }
         public virtual string[] display_difficulties { get { return null; } }
-        public DateTime updatedAt { get; set; }
-        public virtual string target { get; set; }
 
-        public virtual ItemType itemType { get; set; }
+        public DateTime updatedAt { get; set; }
 
         public ReactiveCommand<Unit, Unit> downloadCommand { get; set; }
         public ReactiveCommand<Unit, Unit> deleteCommand { get; set; }
