@@ -155,6 +155,21 @@ namespace NoodleManagerX.Models
             else return new DateTime();
         }
 
+        public static void SetLastWriteTime(DateTime timestamp, string path)
+        {
+            if (FileExists(path))
+            {
+                if (MtpDevice.connected)
+                {
+                    //no idea how to change timestamp over mtp
+                }
+                else
+                {
+                    File.SetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), timestamp);
+                }
+            }
+        }
+
         public static bool CanDownload(bool silent = false)
         {
             if (MtpDevice.connected) return true;

@@ -56,7 +56,7 @@ namespace NoodleManagerX.Models
             return Task.FromResult(true);
         }
 
-        public void GetPage()
+        public virtual void GetPage()
         {
             int requestID = MainViewModel.s_instance.apiRequestCounter;
             Clear();
@@ -157,7 +157,7 @@ namespace NoodleManagerX.Models
                             if (i == 1)
                             {
                                 chunkCount = page.pagecount;
-                                //dont wait by discarding result with _ variable
+
                                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                                 {
                                     MainViewModel.s_instance.numberOfPages = (int)Math.Ceiling((double)page.pagecount / pageChunkCount);
@@ -182,7 +182,7 @@ namespace NoodleManagerX.Models
 
         }
 
-        public void GetAll()
+        public virtual void GetAll()
         {
             if (!MainViewModel.s_instance.getAllRunning)
             {
@@ -223,7 +223,7 @@ namespace NoodleManagerX.Models
                                 if (MainViewModel.s_instance.closing) break;
                                 foreach (GenericItemDownload item in page.data)
                                 {
-                                    List<GenericItem> instances = MainViewModel.s_instance.items.Where(x => x.itemType == ItemType.Map && x.id == item.id).ToList();
+                                    List<GenericItem> instances = MainViewModel.s_instance.items.Where(x => x.id == item.id).ToList();
                                     if (instances.Count > 0)
                                     {
                                         if (!instances[0].downloaded || instances[0].needsUpdate)
@@ -236,8 +236,8 @@ namespace NoodleManagerX.Models
                                         await item.UpdateDownloaded();
                                         if (!item.downloaded || item.needsUpdate)
                                         {
-                                            DownloadScheduler.Download(item);
                                             if (item.needsUpdate) { MainViewModel.Log("Updating " + item.filename); }
+                                            DownloadScheduler.Download(item);
                                         }
                                     }
                                 }
