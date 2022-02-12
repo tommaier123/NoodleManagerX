@@ -33,37 +33,55 @@ namespace NoodleManagerX.Models
         public virtual string selectDownloadAll { get; set; } = "id,download_url,published_at,updated_at,filename,";
         public virtual string selectDownload { get; set; } = "";
 
-        public async Task<bool> LoadLocalItems()
+        public Task LoadLocalItems()
         {
-            List<LocalItem> tmp = new List<LocalItem>();
-            foreach (string path in await StorageAbstraction.GetFilesInDirectory(folder))
+            return Task.Run(async () =>//if not working return bool again
             {
-                string filename = Path.GetFileName(path);
+                List<LocalItem> add = new List<LocalItem>();
+                List<LocalItem> remove = new List<LocalItem>();
+                string[] localItems = await StorageAbstraction.GetFilesInDirectory(folder);
 
-                if (extensions.Contains(Path.GetExtension(filename)))
+                foreach (LocalItem item in MainViewModel.s_instance.localItems)
                 {
-                    List<LocalItem> existingEntries = MainViewModel.s_instance.localItems.Where(x => x.filename == filename).ToList();
-                    if (existingEntries.Count() == 0)
+                    if (item.itemType == itemType)
                     {
-                        Console.WriteLine("Missing from db " + filename);
-                        await GetLocalItem(path, tmp);
-                    }
-                    else
-                    {
-                        if (existingEntries.Count() > 1)//duplicates in database, take the latest one
+                        if (!localItems.Select(x => Path.GetFileName(x)).Contains(item.filename))
                         {
-                            MainViewModel.Log("Duplicates in database of: " + filename);
-                            existingEntries = existingEntries.OrderByDescending(x => x).ToList();
-                            foreach (var entry in existingEntries.Skip(1))
+                            Console.WriteLine("Missing from files " + item.filename);
+                            remove.Add(item);
+                        }
+                    }
+                }
+                MainViewModel.s_instance.localItems.Remove(remove);
+
+                foreach (string path in localItems)
+                {
+                    string filename = Path.GetFileName(path);
+
+                    if (extensions.Contains(Path.GetExtension(filename)))
+                    {
+                        List<LocalItem> existingEntries = MainViewModel.s_instance.localItems.Where(x => x.filename == filename).ToList();
+                        if (existingEntries.Count() == 0)
+                        {
+                            Console.WriteLine("Missing from db " + filename);
+                            await GetLocalItem(path, add);
+                        }
+                        else
+                        {
+                            if (existingEntries.Count() > 1)//duplicates in database, take the latest one
                             {
-                                MainViewModel.s_instance.localItems.Remove(entry);
+                                MainViewModel.Log("Duplicates in database of: " + filename);
+                                existingEntries = existingEntries.OrderByDescending(x => x).ToList();
+                                foreach (var entry in existingEntries.Skip(1))
+                                {
+                                    MainViewModel.s_instance.localItems.Remove(entry);
+                                }
                             }
                         }
                     }
                 }
-            }
-            MainViewModel.s_instance.localItems.AddRange(tmp);
-            return true;
+                MainViewModel.s_instance.localItems.AddRange(add);
+            });
         }
 
         public virtual Task<bool> GetLocalItem(string path, List<LocalItem> list)
