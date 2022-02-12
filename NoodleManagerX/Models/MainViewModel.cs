@@ -128,20 +128,7 @@ namespace NoodleManagerX.Models
                 directoryValid = CheckDirectory(synthDirectory);
                 if (settings.synthDirectory != synthDirectory && directoryValid)
                 {
-                    _ = Dispatcher.UIThread.InvokeAsync(async () =>
-                    {
-                        var res = await MessageBox.Show(MainWindow.s_instance, "All maps that were not downloaded from synthriderz.com within the last year will be deleted." + Environment.NewLine + "This will only happen once on a new game directory", "Warning", MessageBox.MessageBoxButtons.OkCancel);
-                        if (res == MessageBox.MessageBoxResult.Ok)
-                        {
-                            Log("Directory changed to " + synthDirectory);
-                            pruning = true;
-                            settings.synthDirectory = synthDirectory;
-                        }
-                        else
-                        {
-                            synthDirectory = settings.synthDirectory;
-                        }
-                    });
+                    settings.synthDirectory = synthDirectory;
                 }
             });
 
@@ -323,6 +310,17 @@ namespace NoodleManagerX.Models
                             tmp = (List<LocalItem>)serializer.Deserialize(file, typeof(List<LocalItem>));
                         }
                         localItems.AddRange(tmp);
+                    }
+                    else
+                    {
+                        await Dispatcher.UIThread.InvokeAsync(async () =>
+                        {
+                            var res = await MessageBox.Show(MainWindow.s_instance, "Maps that have the wrong metadata or were not downloaded from synthriderz.com will be DELETED" + Environment.NewLine + "This will only happen once when loading a new game directory", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+                            if (res == MessageBox.MessageBoxResult.Ok)
+                            {
+                                pruning = true;
+                            }
+                        });
                     }
                 }
                 catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
