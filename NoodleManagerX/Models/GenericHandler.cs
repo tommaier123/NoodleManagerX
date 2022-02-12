@@ -37,7 +37,6 @@ namespace NoodleManagerX.Models
         {
             return Task.Run(async () =>//if not working return bool again
             {
-                List<LocalItem> add = new List<LocalItem>();
                 List<LocalItem> remove = new List<LocalItem>();
                 string[] localItems = await StorageAbstraction.GetFilesInDirectory(folder);
 
@@ -54,8 +53,15 @@ namespace NoodleManagerX.Models
                 }
                 MainViewModel.s_instance.localItems.Remove(remove);
 
+                int i = 0;
                 foreach (string path in localItems)
                 {
+                    i++;
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        MainViewModel.s_instance.progress = (int)(i / (localItems.Length * 0.01f));
+                    });
+
                     string filename = Path.GetFileName(path);
 
                     if (extensions.Contains(Path.GetExtension(filename)))
@@ -64,7 +70,7 @@ namespace NoodleManagerX.Models
                         if (existingEntries.Count() == 0)
                         {
                             Console.WriteLine("Missing from db " + filename);
-                            await GetLocalItem(path, add);
+                            await GetLocalItem(path);
                         }
                         else
                         {
@@ -80,17 +86,20 @@ namespace NoodleManagerX.Models
                         }
                     }
                 }
-                MainViewModel.s_instance.localItems.AddRange(add);
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    MainViewModel.s_instance.progress = 0;
+                });
             });
         }
 
-        public virtual Task<bool> GetLocalItem(string path, List<LocalItem> list)
+        public virtual Task<bool> GetLocalItem(string path)
         {
             return Task.Run(async () =>
             {
                 if (await StorageAbstraction.FileExists(path))
                 {
-                    list.Add(new LocalItem(-1, "", Path.GetFileName(path), await StorageAbstraction.GetLastWriteTime(path), itemType));
+                    MainViewModel.s_instance.localItems.Add(new LocalItem(-1, "", Path.GetFileName(path), await StorageAbstraction.GetLastWriteTime(path), itemType));
                     return true;
                 }
                 else return false;

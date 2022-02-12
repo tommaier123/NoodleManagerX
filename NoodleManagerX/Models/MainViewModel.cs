@@ -597,7 +597,7 @@ namespace NoodleManagerX.Models
             }
             if (!e.Cancel == true)
             {
-                Close();
+                MtpDevice.Disconnect();
             }
         }
 
@@ -622,20 +622,12 @@ namespace NoodleManagerX.Models
                           await Task.Delay(500);
                       }
 
-                      Close();
-
                       _ = Dispatcher.UIThread.InvokeAsync(() =>
                           {
                               MainWindow.s_instance.Close();
                           });
                   });
             }
-        }
-
-        private void Close()
-        {
-            SaveLocalItems().Wait();
-            MtpDevice.Disconnect();
         }
 
         public static void Log(MethodBase m, Exception e)

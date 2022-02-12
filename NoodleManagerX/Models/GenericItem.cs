@@ -238,7 +238,7 @@ namespace NoodleManagerX.Models
                     MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
                 }
 
-                if (await handler.GetLocalItem(path, MainViewModel.s_instance.localItems))
+                if (await handler.GetLocalItem(path))
                 {
                     if (updatedAt != new DateTime())
                     {
@@ -260,7 +260,7 @@ namespace NoodleManagerX.Models
                     downloading = false;
                 });
 
-                DownloadScheduler.downloading.Remove(this);
+                DownloadScheduler.Remove(this);
             });
         }
 

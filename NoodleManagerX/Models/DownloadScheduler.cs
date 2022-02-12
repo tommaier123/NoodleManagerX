@@ -46,6 +46,26 @@ namespace NoodleManagerX.Models
             }
         }
 
+        public static void Remove(GenericItem item)
+        {
+            downloading.Remove(item);
+            if (downloading.Count == 0)
+            {
+                _ = MainViewModel.s_instance.SaveLocalItems();
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    MainViewModel.s_instance.progress = 0;
+                });
+            }
+            else
+            {
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    MainViewModel.s_instance.progress = 100 - (int)((queue.Count + downloading.Count) / (toDownload * 0.01f));
+                });
+            }
+        }
+
         private static void QueueChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             Task.Run(async () =>
@@ -53,6 +73,8 @@ namespace NoodleManagerX.Models
                 if (queue.Count > 0 && !running)
                 {
                     running = true;
+                    System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+                    stopWatch.Start();
                     await Task.Delay(100);//not sure why this is necessary for requeueing. Seems like queuecount is !=0 but the queue is empty?
                     MainViewModel.Log("Started queue check");
                     while (queue.Count > 0)
@@ -66,10 +88,7 @@ namespace NoodleManagerX.Models
                             }
                             queue.Remove(queue[0]);
 
-                            _ = Dispatcher.UIThread.InvokeAsync(() =>
-                            {
-                                MainViewModel.s_instance.progress = 100 - (int)((queue.Count) / (toDownload * 0.01f));
-                            });
+
                         }
                         else
                         {
@@ -77,10 +96,8 @@ namespace NoodleManagerX.Models
                         }
                     }
                     running = false;
-                    _ = Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        MainViewModel.s_instance.progress = 0;
-                    });
+                    stopWatch.Stop();
+                    Console.WriteLine("Time taken " + stopWatch.Elapsed.Minutes + ":" + stopWatch.Elapsed.Seconds);
                     MainViewModel.Log("Stopped queue check");
                 }
             });

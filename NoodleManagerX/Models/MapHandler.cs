@@ -26,7 +26,7 @@ namespace NoodleManagerX.Models
         public override string folder { get; set; } = "CustomSongs";
         public override string[] extensions { get; set; } = { ".synth" };
 
-        public override Task<bool> GetLocalItem(string path, List<LocalItem> list)
+        public override Task<bool> GetLocalItem(string path)
         {
             return Task.Run(async () =>
             {
@@ -47,7 +47,7 @@ namespace NoodleManagerX.Models
                                         localItem.filename = Path.GetFileName(path);
                                         localItem.modifiedTime = await StorageAbstraction.GetLastWriteTime(path);
                                         localItem.itemType = ItemType.Map;
-                                        list.Add(localItem);
+                                        MainViewModel.s_instance.localItems.Add(localItem);
                                         return true;
                                     }
                                 }
