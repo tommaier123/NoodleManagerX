@@ -26,47 +26,50 @@ namespace NoodleManagerX.Models
         public override string folder { get; set; } = "CustomSongs";
         public override string[] extensions { get; set; } = { ".synth" };
 
-        public override async Task<bool> GetLocalItem(string path, List<LocalItem> list)
+        public override Task<bool> GetLocalItem(string path, List<LocalItem> list)
         {
-            try
+            return Task.Run(async () =>
             {
-                if (StorageAbstraction.FileExists(path))
+                try
                 {
-                    using (Stream stream = StorageAbstraction.ReadFile(path))
-                    using (ZipArchive archive = new ZipArchive(stream))
+                    if (await StorageAbstraction.FileExists(path))
                     {
-                        foreach (ZipArchiveEntry entry in archive.Entries)
+                        using (Stream stream = await StorageAbstraction.ReadFile(path))
+                        using (ZipArchive archive = new ZipArchive(stream))
                         {
-                            if (entry.FullName == "synthriderz.meta.json")
+                            foreach (ZipArchiveEntry entry in archive.Entries)
                             {
-                                using (System.IO.StreamReader sr = new System.IO.StreamReader(entry.Open()))
+                                if (entry.FullName == "synthriderz.meta.json")
                                 {
-                                    LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
-                                    localItem.filename = Path.GetFileName(path);
-                                    localItem.modifiedTime = StorageAbstraction.GetLastWriteTime(path);
-                                    localItem.itemType = ItemType.Map;
-                                    list.Add(localItem);
-                                    return true;
+                                    using (System.IO.StreamReader sr = new System.IO.StreamReader(entry.Open()))
+                                    {
+                                        LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
+                                        localItem.filename = Path.GetFileName(path);
+                                        localItem.modifiedTime = await StorageAbstraction.GetLastWriteTime(path);
+                                        localItem.itemType = ItemType.Map;
+                                        list.Add(localItem);
+                                        return true;
+                                    }
                                 }
                             }
-                        }
 
-                        if (MainViewModel.s_instance.pruning)
-                        {
-                            MainViewModel.Log("Deleting old file without metadata " + Path.GetFileName(path));
-                            await StorageAbstraction.DeleteFile(path);
+                            if (MainViewModel.s_instance.pruning)
+                            {
+                                MainViewModel.Log("Deleting old file without metadata " + Path.GetFileName(path));
+                                await StorageAbstraction.DeleteFile(path);
+                            }
                         }
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
-                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(path));
-                await StorageAbstraction.DeleteFile(path);
-            }
+                catch (Exception e)
+                {
+                    MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+                    MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(path));
+                    await StorageAbstraction.DeleteFile(path);
+                }
 
-            return false;
+                return false;
+            });
         }
 
         public override dynamic DeserializePage(string json)
@@ -117,31 +120,34 @@ namespace NoodleManagerX.Models
             }));
         }
 
-        public override MemoryStream FixMetadata(Stream stream)
+        public override Task<MemoryStream> FixMetadata(Stream stream)
         {
-            MemoryStream ms = base.FixMetadata(stream);
-
-            using (ZipArchive archive = new ZipArchive(ms, ZipArchiveMode.Update, true))
+            return Task.Run(async () =>
             {
-                foreach (ZipArchiveEntry zipEntry in archive.Entries)
+                MemoryStream ms = await base.FixMetadata(stream);
+
+                using (ZipArchive archive = new ZipArchive(ms, ZipArchiveMode.Update, true))
                 {
-                    if (zipEntry.FullName == "synthriderz.meta.json")
+                    foreach (ZipArchiveEntry zipEntry in archive.Entries)
                     {
-                        return ms;
+                        if (zipEntry.FullName == "synthriderz.meta.json")
+                        {
+                            return ms;
+                        }
                     }
+
+                    MainViewModel.Log("Creating metadata for " + filename);
+                    JObject metadata = new JObject(new JProperty("id", id), new JProperty("hash", hash));
+
+                    ZipArchiveEntry entry = archive.CreateEntry("synthriderz.meta.json");
+                    using (System.IO.StreamWriter writer = new System.IO.StreamWriter(entry.Open()))
+                    {
+                        writer.Write(metadata.ToString(Formatting.None));
+                    }
+
+                    return ms;
                 }
-
-                MainViewModel.Log("Creating metadata for " + filename);
-                JObject metadata = new JObject(new JProperty("id", id), new JProperty("hash", hash));
-
-                ZipArchiveEntry entry = archive.CreateEntry("synthriderz.meta.json");
-                using (System.IO.StreamWriter writer = new System.IO.StreamWriter(entry.Open()))
-                {
-                    writer.Write(metadata.ToString(Formatting.None));
-                }
-
-                return ms;
-            }
+            });
         }
     }
 

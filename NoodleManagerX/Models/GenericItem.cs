@@ -86,10 +86,7 @@ namespace NoodleManagerX.Models
 
             UpdateBlacklisted();
 
-            Task.Run(() =>
-            {
-                updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
-            });
+            updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
 
             downloadCommand = ReactiveCommand.Create((() =>
             {
@@ -201,7 +198,7 @@ namespace NoodleManagerX.Models
                 {
                     if (downloaded)
                     {//remove from local items
-                            MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this) == false).ToList();
+                        MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this) == false).ToList();
                     }
 
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
@@ -214,8 +211,8 @@ namespace NoodleManagerX.Models
                     {
                         string url = "https://synthriderz.com" + download_url;
 
-                            //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                            if (String.IsNullOrEmpty(filename))
+                        //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        if (String.IsNullOrEmpty(filename))
                         {
                             webClient.OpenRead(url);
                             string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
@@ -228,9 +225,9 @@ namespace NoodleManagerX.Models
 
                         WebRequest request = WebRequest.Create(new Uri(url));
 
-                        using (WebResponse response = request.GetResponse())
+                        using (WebResponse response = await request.GetResponseAsync())
                         using (Stream stream = response.GetResponseStream())
-                        using (MemoryStream str = FixMetadata(stream))
+                        using (MemoryStream str = await FixMetadata(stream))
                         {
                             await StorageAbstraction.WriteFile(str, path);
                         }
@@ -245,7 +242,7 @@ namespace NoodleManagerX.Models
                 {
                     if (updatedAt != new DateTime())
                     {
-                        StorageAbstraction.SetLastWriteTime(updatedAt, path);
+                        _ = StorageAbstraction.SetLastWriteTime(updatedAt, path);
                     }
 
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
@@ -267,13 +264,16 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public virtual MemoryStream FixMetadata(Stream stream)
+        public virtual Task<MemoryStream> FixMetadata(Stream stream)
         {
-            MemoryStream ms = new MemoryStream();
-            stream.CopyTo(ms);
-            stream.Flush();
-            stream.Close();
-            return ms;
+            return Task.Run(async () =>
+            {
+                MemoryStream ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                stream.Flush();
+                stream.Close();
+                return ms;
+            });
         }
 
         public void Delete()

@@ -36,21 +36,47 @@ namespace NoodleManagerX.Models
         public async Task<bool> LoadLocalItems()
         {
             List<LocalItem> tmp = new List<LocalItem>();
-            foreach (string file in StorageAbstraction.GetFilesInDirectory(folder))
+            foreach (string path in await StorageAbstraction.GetFilesInDirectory(folder))
             {
-                if (extensions.Contains(Path.GetExtension(file)))
+                string filename = Path.GetFileName(path);
+
+                if (extensions.Contains(Path.GetExtension(filename)))
                 {
-                    await GetLocalItem(file, tmp);
+                    List<LocalItem> existingEntries = MainViewModel.s_instance.localItems.Where(x => x.filename == filename).ToList();
+                    if (existingEntries.Count() == 0)
+                    {
+                        Console.WriteLine("Missing from db " + filename);
+                        await GetLocalItem(path, tmp);
+                    }
+                    else
+                    {
+                        if (existingEntries.Count() > 1)//duplicates in database, take the latest one
+                        {
+                            MainViewModel.Log("Duplicates in database of: " + filename);
+                            existingEntries = existingEntries.OrderByDescending(x => x).ToList();
+                            foreach (var entry in existingEntries.Skip(1))
+                            {
+                                MainViewModel.s_instance.localItems.Remove(entry);
+                            }
+                        }
+                    }
                 }
             }
             MainViewModel.s_instance.localItems.AddRange(tmp);
             return true;
         }
 
-        public virtual Task<bool> GetLocalItem(string file, List<LocalItem> list)
+        public virtual Task<bool> GetLocalItem(string path, List<LocalItem> list)
         {
-            list.Add(new LocalItem(-1, "", Path.GetFileName(file), StorageAbstraction.GetLastWriteTime(file), itemType));
-            return Task.FromResult(true);
+            return Task.Run(async () =>
+            {
+                if (await StorageAbstraction.FileExists(path))
+                {
+                    list.Add(new LocalItem(-1, "", Path.GetFileName(path), await StorageAbstraction.GetLastWriteTime(path), itemType));
+                    return true;
+                }
+                else return false;
+            });
         }
 
         public void GetPage()

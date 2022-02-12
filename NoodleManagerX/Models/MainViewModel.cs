@@ -306,9 +306,28 @@ namespace NoodleManagerX.Models
 
             Task.Run(async () =>
             {
-                Log("Loading local items");
                 updatingLocalItems = true;
                 localItems.Clear();
+
+                try
+                {
+                    string path = "NmDataBase.json";
+                    MainViewModel.Log("Loading Database");
+                    if (await StorageAbstraction.FileExists(path))
+                    {
+                        List<LocalItem> tmp = new List<LocalItem>();
+                        using (Stream stream = await StorageAbstraction.ReadFile(path))
+                        using (System.IO.StreamReader file = new System.IO.StreamReader(stream))
+                        {
+                            JsonSerializer serializer = new JsonSerializer();
+                            tmp = (List<LocalItem>)serializer.Deserialize(file, typeof(List<LocalItem>));
+                        }
+                        localItems.AddRange(tmp);
+                    }
+                }
+                catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+
+                Log("Loading local items");
 
                 await mapHandler.LoadLocalItems();
                 await playlistHandler.LoadLocalItems();
@@ -324,6 +343,30 @@ namespace NoodleManagerX.Models
 
                 updatingLocalItems = false;
                 pruning = false;
+
+                _ = SaveLocalItems();
+            });
+        }
+
+        public Task SaveLocalItems()
+        {
+            return Task.Run(async () =>
+            {
+                try
+                {
+                    if (StorageAbstraction.CanDownload(true))
+                    {
+                        Log("Saving Database");
+                        string output = JsonConvert.SerializeObject(localItems);
+
+                        MemoryStream stream = new MemoryStream();
+                        System.IO.StreamWriter sw = new System.IO.StreamWriter(stream);
+                        await sw.WriteAsync(output);
+                        sw.Flush();
+                        await StorageAbstraction.WriteFile(stream, "NmDatabase.json");
+                    }
+                }
+                catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
             });
         }
 
@@ -377,7 +420,7 @@ namespace NoodleManagerX.Models
                 }
             }
         }
-       
+
         public void OpenErrorDialog(string text)
         {
             _ = Dispatcher.UIThread.InvokeAsync(async () =>
@@ -491,16 +534,16 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public void LoadBlacklist()
+        public async void LoadBlacklist()
         {
             try
             {
                 blacklist.Clear();
                 string path = "NmBlacklist.json";
                 MainViewModel.Log("Loading Blacklist");
-                if (StorageAbstraction.FileExists(path))
+                if (await StorageAbstraction.FileExists(path))
                 {
-                    using (Stream stream = StorageAbstraction.ReadFile(path))
+                    using (Stream stream = await StorageAbstraction.ReadFile(path))
                     using (System.IO.StreamReader file = new System.IO.StreamReader(stream))
                     {
                         JsonSerializer serializer = new JsonSerializer();
@@ -554,8 +597,7 @@ namespace NoodleManagerX.Models
             }
             if (!e.Cancel == true)
             {
-                //cleanup
-                MtpDevice.Disconnect();
+                Close();
             }
         }
 
@@ -579,12 +621,21 @@ namespace NoodleManagerX.Models
                       {
                           await Task.Delay(500);
                       }
+
+                      Close();
+
                       _ = Dispatcher.UIThread.InvokeAsync(() =>
                           {
                               MainWindow.s_instance.Close();
                           });
                   });
             }
+        }
+
+        private void Close()
+        {
+            SaveLocalItems().Wait();
+            MtpDevice.Disconnect();
         }
 
         public static void Log(MethodBase m, Exception e)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NoodleManagerX.Models
@@ -13,9 +14,9 @@ namespace NoodleManagerX.Models
         {
             return Task.Run(async () =>
             {
-                if (DirectoryExists(Path.GetDirectoryName(path)))
+                if (await DirectoryExists(Path.GetDirectoryName(path)))
                 {
-                    if (FileExists(path))
+                    if (await FileExists(path))
                     {
                         await DeleteFile(path);
                     }
@@ -48,43 +49,50 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public static Stream ReadFile(string path)
+        public static Task<Stream> ReadFile(string path)
         {
-            if (MtpDevice.connected)
+            return Task.Run(() =>
             {
-                lock (MtpDeviceLock)
+                if (MtpDevice.connected)
                 {
-                    Stream ms = new MemoryStream();
-                    MtpDevice.device.DownloadFile(Path.Combine(MtpDevice.path, path), ms);
-                    return ms;
+                    lock (MtpDeviceLock)
+                    {
+                        Stream ms = new MemoryStream();
+                        MtpDevice.device.DownloadFile(Path.Combine(MtpDevice.path, path), ms);
+                        ms.Position = 0;
+                        return ms;
+                    }
                 }
-            }
-            else
-            {
-                return new FileStream(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), FileMode.Open, FileAccess.Read);
-            }
+                else
+                {
+                    return new FileStream(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), FileMode.Open, FileAccess.Read);
+                }
+            });
         }
 
-        public static bool FileExists(string path)
+        public static Task<bool> FileExists(string path)
         {
-            if (MtpDevice.connected)
+            return Task.Run(() =>
             {
-                lock (MtpDeviceLock)
+                if (MtpDevice.connected)
                 {
-                    return MtpDevice.device.FileExists(Path.Combine(MtpDevice.path, path));
+                    lock (MtpDeviceLock)
+                    {
+                        return MtpDevice.device.FileExists(Path.Combine(MtpDevice.path, path));
+                    }
                 }
-            }
-            else
-            {
-                return File.Exists(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
-            }
+                else
+                {
+                    return File.Exists(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                }
+            });
         }
 
         public static Task DeleteFile(string path)
         {
             return Task.Run(() =>
             {
-                if (FileExists(path))
+                try
                 {
                     if (MtpDevice.connected)
                     {
@@ -98,76 +106,91 @@ namespace NoodleManagerX.Models
                         File.Delete(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
                     }
                 }
+                catch { }
             });
         }
 
-        public static bool DirectoryExists(string path)
+        public static Task<bool> DirectoryExists(string path)
         {
-            if (MtpDevice.connected)
-            {
-                lock (MtpDeviceLock)
-                {
-                    return MtpDevice.device.DirectoryExists(Path.Combine(MtpDevice.path, path));
-                }
-            }
-            else
-            {
-                return Directory.Exists(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
-            }
-        }
-
-        public static string[] GetFilesInDirectory(string path)
-        {
-            Console.WriteLine("getting files in " + path);
-            if (DirectoryExists(path))
+            return Task.Run(() =>
             {
                 if (MtpDevice.connected)
                 {
                     lock (MtpDeviceLock)
                     {
-                        return MtpDevice.device.GetFiles(Path.Combine(MtpDevice.path, path));
+                        return MtpDevice.device.DirectoryExists(Path.Combine(MtpDevice.path, path));
                     }
                 }
                 else
                 {
-                    return Directory.GetFiles(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                    return Directory.Exists(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
                 }
-            }
-            else return new string[0];
+            });
         }
 
-        public static DateTime GetLastWriteTime(string path)
+        public static Task<string[]> GetFilesInDirectory(string path)
         {
-            if (FileExists(path))
+            return Task.Run(async () =>
             {
-                if (MtpDevice.connected)
+                Console.WriteLine("getting files in " + path);
+                if (await DirectoryExists(path))
                 {
-                    lock (MtpDeviceLock)
+                    if (MtpDevice.connected)
                     {
-                        return MtpDevice.device.GetFileInfo(Path.Combine(MtpDevice.path, path)).LastWriteTime.Value;
+                        lock (MtpDeviceLock)
+                        {
+                            return MtpDevice.device.GetFiles(Path.Combine(MtpDevice.path, path)).Select(x => Path.Combine(path, Path.GetFileName(x))).ToArray();
+                        }
+                    }
+                    else
+                    {
+                        return Directory.GetFiles(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path)).Select(x => Path.Combine(path, Path.GetFileName(x))).ToArray();
                     }
                 }
-                else
-                {
-                    return File.GetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
-                }
-            }
-            else return new DateTime();
+                else return new string[0];
+            });
         }
 
-        public static void SetLastWriteTime(DateTime timestamp, string path)
+        public static Task<DateTime> GetLastWriteTime(string path)
         {
-            if (FileExists(path))
+            return Task.Run(() =>
             {
-                if (MtpDevice.connected)
+                try
                 {
-                    //no idea how to change timestamp over mtp
+                    if (MtpDevice.connected)
+                    {
+                        lock (MtpDeviceLock)
+                        {
+                            return MtpDevice.device.GetFileInfo(Path.Combine(MtpDevice.path, path)).LastWriteTime.Value;
+                        }
+                    }
+                    else
+                    {
+                        return File.GetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                    }
                 }
-                else
+                catch { }
+                return new DateTime();
+            });
+        }
+
+        public static Task SetLastWriteTime(DateTime timestamp, string path)
+        {
+            return Task.Run(() =>
+            {
+                try
                 {
-                    File.SetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), timestamp);
+                    if (MtpDevice.connected)
+                    {
+                        //no idea how to change timestamp over mtp
+                    }
+                    else
+                    {
+                        File.SetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), timestamp);
+                    }
                 }
-            }
+                catch { }
+            });
         }
 
         public static bool CanDownload(bool silent = false)
