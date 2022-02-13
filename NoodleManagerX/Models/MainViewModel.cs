@@ -37,18 +37,17 @@ namespace NoodleManagerX.Models
 
         //Todo:
         //check which dispatchers should be awaited
-        //possibly remove unnecessary flags from function parameters
+        //better task structure in general
+        //possibly remove unnecessary flags from function parameters, use state machine/individual parameters
         //context menu for description
-        //multiple files
-        //use state machine
         //get description when rightclicking an item
-        //reload local items when quest connects/disconnects
-        //check devices that connect
+        //multiple files
+        //figure out how to detect quest connection
         //update reminder
-        //optimize storage abstraction with async multitasking
         //make sure all streams are closed when no longer needed
         //don't leave thread safety up to luck
         //get a updated at timestamp for updating, published at is fine for filesystem timestamp
+        //window unmoveable when dialog is launched during startup
 
 
 
@@ -116,136 +115,138 @@ namespace NoodleManagerX.Models
         {
             s_instance = this;
 
-            MainWindow.s_instance.Closing += ClosingEvent;
-
-            MtpDevice.Connect();
-
-            LoadSettings();
-
-            settings.Changed.Subscribe(x => { SaveSettings(); LoadLocalItems(); LoadBlacklist(); });//save the settings when they change
-            this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
+            Task.Run(() =>
             {
-                directoryValid = CheckDirectory(synthDirectory);
-                if (settings.synthDirectory != synthDirectory && directoryValid)
+                MainWindow.s_instance.Closing += ClosingEvent;
+
+                MtpDevice.Connect();
+
+                LoadSettings();
+
+                settings.Changed.Subscribe(x => { SaveSettings(); });//save the settings when they change
+                this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
                 {
-                    settings.synthDirectory = synthDirectory;
-                }
-            });
-
-            if (!CheckDirectory(settings.synthDirectory))
-            {
-                settings.synthDirectory = "";
-                GetDirectoryFromRegistry();
-            }
-            else
-            {
-                synthDirectory = settings.synthDirectory;
-            }
-
-            LoadBlacklist();
-
-            minimizeCommand = ReactiveCommand.Create(() =>
-            {
-                if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                {
-                    desktop.MainWindow.WindowState = WindowState.Minimized;
-                }
-            });
-
-            toggleFullscreenCommand = ReactiveCommand.Create(() =>
-            {
-                if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                {
-                    if (desktop.MainWindow.WindowState != WindowState.Maximized)
+                    directoryValid = CheckDirectory(synthDirectory);
+                    if (settings.synthDirectory != synthDirectory && directoryValid)
                     {
-                        desktop.MainWindow.WindowState = WindowState.Maximized;
+                        settings.synthDirectory = synthDirectory;
+                        ReloadLocalSources(true);
                     }
-                    else if (desktop.MainWindow.WindowState != WindowState.Normal)
-                    {
-                        desktop.MainWindow.WindowState = WindowState.Normal;
-                    }
-                }
-            });
+                });
 
-            closeCommand = ReactiveCommand.Create(() =>
-            {
-                if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                if (!CheckDirectory(settings.synthDirectory))
                 {
-                    desktop.MainWindow.Close();
+                    settings.synthDirectory = "";
+                    GetDirectoryFromRegistry();
                 }
-            });
+                else
+                {
+                    synthDirectory = settings.synthDirectory;
+                }
 
-            tabSelectCommand = ReactiveCommand.Create<string>((x =>
-            {
-                selectedTabIndex = Int32.Parse(x);
-                currentPage = 1;
-                numberOfPages = 1;
-                searchText = lastSearchText = "";
-                selectedSearchParameterIndex = 0;
-                selectedDifficultyIndex = 0;
-                selectedSortMethodIndex = 0;
-                selectedSortOrderIndex = 0;
+                minimizeCommand = ReactiveCommand.Create(() =>
+                {
+                    if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                    {
+                        desktop.MainWindow.WindowState = WindowState.Minimized;
+                    }
+                });
+
+                toggleFullscreenCommand = ReactiveCommand.Create(() =>
+                {
+                    if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                    {
+                        if (desktop.MainWindow.WindowState != WindowState.Maximized)
+                        {
+                            desktop.MainWindow.WindowState = WindowState.Maximized;
+                        }
+                        else if (desktop.MainWindow.WindowState != WindowState.Normal)
+                        {
+                            desktop.MainWindow.WindowState = WindowState.Normal;
+                        }
+                    }
+                });
+
+                closeCommand = ReactiveCommand.Create(() =>
+                {
+                    if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                    {
+                        desktop.MainWindow.Close();
+                    }
+                });
+
+                tabSelectCommand = ReactiveCommand.Create<string>((x =>
+                {
+                    selectedTabIndex = Int32.Parse(x);
+                    currentPage = 1;
+                    numberOfPages = 1;
+                    searchText = lastSearchText = "";
+                    selectedSearchParameterIndex = 0;
+                    selectedDifficultyIndex = 0;
+                    selectedSortMethodIndex = 0;
+                    selectedSortOrderIndex = 0;
+                    GetPage();
+                }));
+
+                pageUpCommand = ReactiveCommand.Create((() =>
+                {
+                    if (currentPage < numberOfPages)
+                    {
+                        currentPage++;
+                    }
+                }));
+
+                pageDownCommand = ReactiveCommand.Create((() =>
+                {
+                    if (currentPage > 1)
+                    {
+                        currentPage--;
+                    }
+                }));
+
+                searchCommand = ReactiveCommand.Create((() =>
+                {
+                    GetPage();
+                }));
+
+                getAllCommand = ReactiveCommand.Create((() =>
+                {
+                    GetAll();
+                }));
+
+                getPageCommand = ReactiveCommand.Create((() =>
+                {
+                    if (!updatingLocalItems)
+                    {
+                        downloadPage = true;
+                        foreach (GenericItem item in items.Where(x => !x.downloaded && !x.downloading))
+                        {
+                            DownloadScheduler.Download(item);
+                        }
+                    }
+                }));
+
+                selectDirectoryCommand = ReactiveCommand.Create((() =>
+                {
+                    selectDirectory();
+                }));
+
+                //the correct number of events needs to be skipped in ordere to avoid duplication
+                //1 for properties that get initialized
+                //2 for properties that get declared and are initialized via bindings
+
+                this.WhenAnyValue(x => x.currentPage).Skip(1).Subscribe(x => GetPage());//reload maps when the current page changes
+                this.WhenAnyValue(x => x.selectedSearchParameter).Skip(2).Subscribe(x => GetPage());//reload maps when the search parameter changes
+                this.WhenAnyValue(x => x.selectedDifficulty).Skip(2).Subscribe(x => GetPage());//reload maps when the search difficulty changes
+                this.WhenAnyValue(x => x.selectedSortMethod).Skip(2).Subscribe(x => GetPage());//reload maps when the sort method changes
+                this.WhenAnyValue(x => x.selectedSortOrder).Skip(2).Subscribe(x => GetPage());//reload maps when the sort order changes
+
+                items.CollectionChanged += ItemsCollectionChanged;
+                blacklist.CollectionChanged += BlacklistCollectionChanged;
+
+                ReloadLocalSources();
                 GetPage();
-            }));
-
-            pageUpCommand = ReactiveCommand.Create((() =>
-            {
-                if (currentPage < numberOfPages)
-                {
-                    currentPage++;
-                }
-            }));
-
-            pageDownCommand = ReactiveCommand.Create((() =>
-            {
-                if (currentPage > 1)
-                {
-                    currentPage--;
-                }
-            }));
-
-            searchCommand = ReactiveCommand.Create((() =>
-            {
-                GetPage();
-            }));
-
-            getAllCommand = ReactiveCommand.Create((() =>
-            {
-                GetAll();
-            }));
-
-            getPageCommand = ReactiveCommand.Create((() =>
-            {
-                if (!updatingLocalItems)
-                {
-                    downloadPage = true;
-                    foreach (GenericItem item in items.Where(x => !x.downloaded && !x.downloading))
-                    {
-                        DownloadScheduler.Download(item);
-                    }
-                }
-            }));
-
-            selectDirectoryCommand = ReactiveCommand.Create((() =>
-            {
-                selectDirectory();
-            }));
-
-            //the correct number of events needs to be skipped in ordere to avoid duplication
-            //1 for properties that get initialized
-            //2 for properties that get declared and are initialized via bindings
-
-            this.WhenAnyValue(x => x.currentPage).Skip(1).Subscribe(x => GetPage());//reload maps when the current page changes
-            this.WhenAnyValue(x => x.selectedSearchParameter).Skip(2).Subscribe(x => GetPage());//reload maps when the search parameter changes
-            this.WhenAnyValue(x => x.selectedDifficulty).Skip(2).Subscribe(x => GetPage());//reload maps when the search difficulty changes
-            this.WhenAnyValue(x => x.selectedSortMethod).Skip(2).Subscribe(x => GetPage());//reload maps when the sort method changes
-            this.WhenAnyValue(x => x.selectedSortOrder).Skip(2).Subscribe(x => GetPage());//reload maps when the sort order changes
-
-            items.CollectionChanged += ItemsCollectionChanged;
-            blacklist.CollectionChanged += BlacklistCollectionChanged;
-
-            LoadLocalItems();
-            GetPage();
+            });
         }
 
         private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -256,6 +257,15 @@ namespace NoodleManagerX.Models
         private void BlacklistCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             SaveBlacklist();
+        }
+
+        public void ReloadLocalSources(bool directoryChanged = false)
+        {
+            if (!(directoryChanged && MtpDevice.connected))//don't reload when directory changes and quest is connected
+            {
+                LoadLocalItems();
+                LoadBlacklist();
+            }
         }
 
         public void UpdateCollections()
@@ -295,10 +305,11 @@ namespace NoodleManagerX.Models
             {
                 updatingLocalItems = true;
                 localItems.Clear();
+                bool dbExists = false;
 
                 try
                 {
-                    string path = "NmDataBase.json";
+                    string path = "NmDatabase.json";
                     MainViewModel.Log("Loading Database");
                     if (await StorageAbstraction.FileExists(path))
                     {
@@ -310,20 +321,22 @@ namespace NoodleManagerX.Models
                             tmp = (List<LocalItem>)serializer.Deserialize(file, typeof(List<LocalItem>));
                         }
                         localItems.AddRange(tmp);
-                    }
-                    else
-                    {
-                        await Dispatcher.UIThread.InvokeAsync(async () =>
-                        {
-                            var res = await MessageBox.Show(MainWindow.s_instance, "Maps that have the wrong metadata or were not downloaded from synthriderz.com will be DELETED" + Environment.NewLine + "This will only happen once when loading a new game directory", "Warning", MessageBox.MessageBoxButtons.OkCancel);
-                            if (res == MessageBox.MessageBoxResult.Ok)
-                            {
-                                pruning = true;
-                            }
-                        });
+                        dbExists = true;
                     }
                 }
                 catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+
+                if (!dbExists)
+                {
+                    await Dispatcher.UIThread.InvokeAsync(async () =>
+                    {
+                        var res = await MessageBox.Show(null, "Click OK to delete maps without metadata e.g. if they were not downloaded from synthriderz.com" + Environment.NewLine + "This will only happen once when loading a new game directory" + Environment.NewLine + "Choosing to cancel might lead to duplicate maps" + Environment.NewLine + "Building the database for the first time can take some minutes", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+                        if (res == MessageBox.MessageBoxResult.Ok)
+                        {
+                            pruning = true;
+                        }
+                    });
+                }
 
                 Log("Loading local items");
 
@@ -532,28 +545,31 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public async void LoadBlacklist()
+        public void LoadBlacklist()
         {
-            try
+            Task.Run(async () =>
             {
-                blacklist.Clear();
-                string path = "NmBlacklist.json";
-                MainViewModel.Log("Loading Blacklist");
-                if (await StorageAbstraction.FileExists(path))
+                try
                 {
-                    using (Stream stream = await StorageAbstraction.ReadFile(path))
-                    using (System.IO.StreamReader file = new System.IO.StreamReader(stream))
+                    blacklist.Clear();
+                    string path = "NmBlacklist.json";
+                    MainViewModel.Log("Loading Blacklist");
+                    if (await StorageAbstraction.FileExists(path))
                     {
-                        JsonSerializer serializer = new JsonSerializer();
-                        blacklist.AddRange((List<string>)serializer.Deserialize(file, typeof(List<string>)));
+                        using (Stream stream = await StorageAbstraction.ReadFile(path))
+                        using (System.IO.StreamReader file = new System.IO.StreamReader(stream))
+                        {
+                            JsonSerializer serializer = new JsonSerializer();
+                            blacklist.AddRange((List<string>)serializer.Deserialize(file, typeof(List<string>)));
+                        }
+                    }
+                    foreach (GenericItem item in items)
+                    {
+                        item.UpdateBlacklisted();
                     }
                 }
-                foreach (GenericItem item in items)
-                {
-                    item.UpdateBlacklisted();
-                }
-            }
-            catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+                catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+            });
         }
 
         public void SaveBlacklist()
@@ -606,6 +622,7 @@ namespace NoodleManagerX.Models
             if (res == MessageBox.MessageBoxResult.Ok)
             {
                 DownloadScheduler.queue.Clear();
+                await SaveLocalItems();
                 closing = true;
 
                 _ = Task.Run(async () =>

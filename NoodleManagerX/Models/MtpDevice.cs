@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using MediaDevices;
 using Path = System.IO.Path;
+using System.Threading.Tasks;
 
 namespace NoodleManagerX.Models
 {
@@ -33,6 +34,7 @@ namespace NoodleManagerX.Models
                                 device = d;
                                 path = subsubdirectory;
                                 connected = true;
+                                d.DeviceRemoved += DeviceRemoved;
                                 return;
                             }
                         }
@@ -41,6 +43,12 @@ namespace NoodleManagerX.Models
                 }
                 catch { }
             }
+        }
+
+        private static void DeviceRemoved(object sender, MediaDeviceEventArgs e)
+        {
+            connected = false;
+            MainViewModel.s_instance.ReloadLocalSources();
         }
 
         public static void Disconnect()

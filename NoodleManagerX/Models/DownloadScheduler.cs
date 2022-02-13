@@ -49,7 +49,7 @@ namespace NoodleManagerX.Models
         public static void Remove(GenericItem item)
         {
             downloading.Remove(item);
-            if (downloading.Count == 0)
+            if (downloading.Count == 0 && !MainViewModel.s_instance.closing)//if the database is saved while closing it gets corrupted
             {
                 _ = MainViewModel.s_instance.SaveLocalItems();
                 _ = Dispatcher.UIThread.InvokeAsync(() =>

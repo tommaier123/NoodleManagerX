@@ -77,7 +77,7 @@ namespace NoodleManagerX.Models
                             if (existingEntries.Count() > 1)//duplicates in database, take the latest one
                             {
                                 MainViewModel.Log("Duplicates in database of: " + filename);
-                                existingEntries = existingEntries.OrderByDescending(x => x).ToList();
+                                existingEntries = existingEntries.OrderByDescending(x => x.modifiedTime).ToList();
                                 foreach (var entry in existingEntries.Skip(1))
                                 {
                                     MainViewModel.s_instance.localItems.Remove(entry);
