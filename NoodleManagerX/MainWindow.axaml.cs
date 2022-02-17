@@ -72,6 +72,7 @@ namespace NoodleManagerX
                         lastleftclick = true;
                         lastclickposition = mouseonclient;
                         lastHandled = x.Handled;
+                        mouse = (MouseDevice)x.Device;
                     }
                     else if (lastleftclick && leftclick)//hold
                     {
