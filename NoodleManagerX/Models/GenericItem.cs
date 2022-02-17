@@ -193,7 +193,7 @@ namespace NoodleManagerX.Models
             Task.Run(async () =>
             {
                 string path = "";
-
+                MainViewModel.Log("Downloading " + display_title);
                 try
                 {
                     if (downloaded)
@@ -207,30 +207,20 @@ namespace NoodleManagerX.Models
                         downloading = true;
                     });
 
-                    using (WebClient webClient = new WebClient())
+                    string url = "https://synthriderz.com" + download_url;
+                    WebRequest request = WebRequest.Create(new Uri(url));
+                    using (WebResponse response = await request.GetResponseAsync())
+                    using (Stream stream = response.GetResponseStream())
+                    using (MemoryStream str = await FixMetadata(stream))
                     {
-                        string url = "https://synthriderz.com" + download_url;
-
-                        //remove once filename is in the api!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                         if (String.IsNullOrEmpty(filename))
                         {
-                            webClient.OpenRead(url);
-                            string header_contentDisposition = webClient.ResponseHeaders["content-disposition"];
-                            filename = HttpUtility.UrlDecode(new ContentDisposition(header_contentDisposition).FileName);
+                            string contentDisposition = response.Headers["content-disposition"];
+                            filename = HttpUtility.UrlDecode(new ContentDisposition(contentDisposition).FileName);
                         }
-
-                        MainViewModel.Log("Downloading " + filename);
 
                         path = Path.Combine(target, filename);
-
-                        WebRequest request = WebRequest.Create(new Uri(url));
-
-                        using (WebResponse response = await request.GetResponseAsync())
-                        using (Stream stream = response.GetResponseStream())
-                        using (MemoryStream str = await FixMetadata(stream))
-                        {
-                            await StorageAbstraction.WriteFile(str, path);
-                        }
+                        await StorageAbstraction.WriteFile(str, path);
                     }
                 }
                 catch (Exception e)
@@ -238,29 +228,33 @@ namespace NoodleManagerX.Models
                     MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
                 }
 
-                if (await handler.GetLocalItem(path))
+                try
                 {
-                    if (updatedAt != new DateTime())
+                    if (await handler.GetLocalItem(path))
                     {
-                        _ = StorageAbstraction.SetLastWriteTime(updatedAt, path);
+                        if (updatedAt != new DateTime())
+                        {
+                            _ = StorageAbstraction.SetLastWriteTime(updatedAt, path);
+                        }
+
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            downloaded = true;
+                        });
+                    }
+                    else
+                    {
+                        DownloadScheduler.Requeue(this);
                     }
 
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        downloaded = true;
+                        downloading = false;
                     });
-                }
-                else
-                {
-                    DownloadScheduler.Requeue(this);
-                }
 
-                _ = Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    downloading = false;
-                });
-
-                DownloadScheduler.Remove(this);
+                    DownloadScheduler.Remove(this);
+                }
+                catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
             });
         }
 
@@ -287,14 +281,18 @@ namespace NoodleManagerX.Models
             {
                 if (!String.IsNullOrEmpty(filename))
                 {
-                    await StorageAbstraction.DeleteFile(Path.Combine(target, filename));
-
-                    MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && x.itemType == itemType && x.filename == filename).ToList();
-
-                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    try
                     {
-                        downloaded = false;
-                    });
+                        await StorageAbstraction.DeleteFile(Path.Combine(target, filename));
+
+                        MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && x.itemType == itemType && x.filename == filename).ToList();
+
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            downloaded = false;
+                        });
+                    }
+                    catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
                 }
             });
         }

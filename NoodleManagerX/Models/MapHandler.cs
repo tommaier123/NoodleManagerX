@@ -65,7 +65,8 @@ namespace NoodleManagerX.Models
                 {
                     MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
                     MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(path));
-                    await StorageAbstraction.DeleteFile(path);
+                    try { await StorageAbstraction.DeleteFile(path); }
+                    catch (Exception ee) { MainViewModel.Log(MethodBase.GetCurrentMethod(), ee); }
                 }
 
                 return false;

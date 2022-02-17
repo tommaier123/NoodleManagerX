@@ -24,18 +24,19 @@ namespace NoodleManagerX.Models
                     stream.Position = 0;
 
                     if (MtpDevice.connected)
-                    {
-                        try
+                    {//remove temp file once media devices works properely with memory stream
+                        string tempFile = Path.GetTempFileName();
+                        using (FileStream fs = new FileStream(tempFile, FileMode.Create, FileAccess.ReadWrite))
                         {
+                            await stream.CopyToAsync(fs);
+                            fs.Position = 0;
+
                             lock (MtpDeviceLock)
                             {
-                                MtpDevice.device.UploadFile(stream, Path.Combine(MtpDevice.path, path));
+                                MtpDevice.device.UploadFile(fs, Path.Combine(MtpDevice.path, path));
                             }
                         }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Error writing to " + path + ": " + e.Message);
-                        }
+                        try { File.Delete(tempFile); } catch { }//really doesn't matter if something goes wrong, windows will clean temp files automatically
                     }
                     else
                     {
@@ -92,21 +93,17 @@ namespace NoodleManagerX.Models
         {
             return Task.Run(() =>
             {
-                try
+                if (MtpDevice.connected)
                 {
-                    if (MtpDevice.connected)
+                    lock (MtpDeviceLock)
                     {
-                        lock (MtpDeviceLock)
-                        {
-                            MtpDevice.device.DeleteFile(Path.Combine(MtpDevice.path, path));
-                        }
-                    }
-                    else
-                    {
-                        File.Delete(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                        MtpDevice.device.DeleteFile(Path.Combine(MtpDevice.path, path));
                     }
                 }
-                catch { }
+                else
+                {
+                    File.Delete(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                }
             });
         }
 
@@ -132,7 +129,6 @@ namespace NoodleManagerX.Models
         {
             return Task.Run(async () =>
             {
-                Console.WriteLine("getting files in " + path);
                 if (await DirectoryExists(path))
                 {
                     if (MtpDevice.connected)
@@ -155,22 +151,17 @@ namespace NoodleManagerX.Models
         {
             return Task.Run(() =>
             {
-                try
+                if (MtpDevice.connected)
                 {
-                    if (MtpDevice.connected)
+                    lock (MtpDeviceLock)
                     {
-                        lock (MtpDeviceLock)
-                        {
-                            return MtpDevice.device.GetFileInfo(Path.Combine(MtpDevice.path, path)).LastWriteTime.Value;
-                        }
-                    }
-                    else
-                    {
-                        return File.GetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                        return MtpDevice.device.GetFileInfo(Path.Combine(MtpDevice.path, path)).LastWriteTime.Value;
                     }
                 }
-                catch { }
-                return new DateTime();
+                else
+                {
+                    return File.GetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                }
             });
         }
 
@@ -178,18 +169,14 @@ namespace NoodleManagerX.Models
         {
             return Task.Run(() =>
             {
-                try
+                if (MtpDevice.connected)
                 {
-                    if (MtpDevice.connected)
-                    {
-                        //no idea how to change timestamp over mtp
-                    }
-                    else
-                    {
-                        File.SetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), timestamp);
-                    }
+                    //no idea how to change timestamp over mtp
                 }
-                catch { }
+                else
+                {
+                    File.SetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), timestamp);
+                }
             });
         }
 

@@ -412,6 +412,7 @@ namespace NoodleManagerX.Models
         {
             if (StorageAbstraction.CanDownload() && !updatingLocalItems)
             {
+                progress = 1;
                 DownloadScheduler.toDownload = DownloadScheduler.queue.Count;
 
                 switch (selectedTabIndex)
@@ -478,7 +479,7 @@ namespace NoodleManagerX.Models
                     }
                 }
             }
-            catch { }
+            catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
         }
 
         public void GetDirectoryFromRegistry()

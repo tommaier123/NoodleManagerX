@@ -35,74 +35,81 @@ namespace NoodleManagerX.Models
 
         public Task LoadLocalItems()
         {
-            return Task.Run(async () =>//if not working return bool again
+            return Task.Run((Func<Task>)(async () =>//if not working return bool again
             {
-                List<LocalItem> remove = new List<LocalItem>();
-                string[] localItems = await StorageAbstraction.GetFilesInDirectory(folder);
-
-                foreach (LocalItem item in MainViewModel.s_instance.localItems)
+                try
                 {
-                    if (item.itemType == itemType)
+                    List<LocalItem> remove = new List<LocalItem>();
+                    string[] localFilenames = (await StorageAbstraction.GetFilesInDirectory(folder)).Select(x => Path.GetFileName(x)).ToArray();
+
+                    foreach (LocalItem item in MainViewModel.s_instance.localItems)
                     {
-                        if (!localItems.Select(x => Path.GetFileName(x)).Contains(item.filename))
+                        if (item.itemType == itemType)
                         {
-                            Console.WriteLine("Missing from files " + item.filename);
-                            remove.Add(item);
+                            if (!localFilenames.Contains(item.filename))
+                            {
+                                MainViewModel.Log("Missing from files " + item.filename);
+                                remove.Add(item);
+                            }
                         }
                     }
-                }
-                MainViewModel.s_instance.localItems.Remove(remove);
+                    MainViewModel.s_instance.localItems.Remove(remove);
 
-                int i = 0;
-                foreach (string path in localItems)
-                {
-                    i++;
-                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+
+                    int i = 0;
+                    foreach (string filename in localFilenames)
                     {
-                        MainViewModel.s_instance.progress = (int)(i / (localItems.Length * 0.01f));
-                    });
-
-                    string filename = Path.GetFileName(path);
-
-                    if (extensions.Contains(Path.GetExtension(filename)))
-                    {
-                        List<LocalItem> existingEntries = MainViewModel.s_instance.localItems.Where(x => x.filename == filename).ToList();
-                        if (existingEntries.Count() == 0)
+                        i++;
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            Console.WriteLine("Missing from db " + filename);
-                            await GetLocalItem(path);
-                        }
-                        else
+                            MainViewModel.s_instance.progress = (int)(i / (localFilenames.Length * 0.01f));
+                        });
+
+                        if (extensions.Contains(Path.GetExtension(filename)))
                         {
-                            if (existingEntries.Count() > 1)//duplicates in database, take the latest one
+                            List<LocalItem> existingEntries = MainViewModel.s_instance.localItems.Where(x => x.filename == filename).ToList();
+                            if (existingEntries.Count() == 0)
                             {
-                                MainViewModel.Log("Duplicates in database of: " + filename);
-                                existingEntries = existingEntries.OrderByDescending(x => x.modifiedTime).ToList();
-                                foreach (var entry in existingEntries.Skip(1))
+                                MainViewModel.Log("Missing from db " + filename);
+                                await GetLocalItem(Path.Combine(folder, filename));
+                            }
+                            else
+                            {
+                                if (existingEntries.Count() > 1)//duplicates in database, take the latest one
                                 {
-                                    MainViewModel.s_instance.localItems.Remove(entry);
+                                    MainViewModel.Log("Duplicates in database of: " + filename);
+                                    existingEntries = existingEntries.OrderByDescending(x => x.modifiedTime).ToList();
+                                    foreach (var entry in existingEntries.Skip(1))
+                                    {
+                                        MainViewModel.s_instance.localItems.Remove(entry);
+                                    }
                                 }
                             }
                         }
                     }
+                    _ = Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        MainViewModel.s_instance.progress = 0;
+                    });
                 }
-                _ = Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    MainViewModel.s_instance.progress = 0;
-                });
-            });
+                catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+            }));
         }
 
         public virtual Task<bool> GetLocalItem(string path)
         {
             return Task.Run(async () =>
             {
-                if (await StorageAbstraction.FileExists(path))
+                try
                 {
-                    MainViewModel.s_instance.localItems.Add(new LocalItem(-1, "", Path.GetFileName(path), await StorageAbstraction.GetLastWriteTime(path), itemType));
-                    return true;
+                    if (await StorageAbstraction.FileExists(path))
+                    {
+                        MainViewModel.s_instance.localItems.Add(new LocalItem(-1, "", Path.GetFileName(path), await StorageAbstraction.GetLastWriteTime(path), itemType));
+                        return true;
+                    }
                 }
-                else return false;
+                catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+                return false;
             });
         }
 

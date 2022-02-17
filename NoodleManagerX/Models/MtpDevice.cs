@@ -25,18 +25,15 @@ namespace NoodleManagerX.Models
                     var directories = d.GetDirectories(@"\");
                     foreach (string directory in directories)
                     {
-                        var subdirectories = d.GetDirectories(directory);
-                        foreach (string subsubdirectory in subdirectories)
+                        string dir = Path.Combine(directory, "SynthRidersUC");
+                        if (d.DirectoryExists(dir))
                         {
-                            if (Path.GetFileName(subsubdirectory) == "SynthRidersUC")
-                            {
-                                MainViewModel.Log("Synth Riders device found " + d.Description);
-                                device = d;
-                                path = subsubdirectory;
-                                connected = true;
-                                d.DeviceRemoved += DeviceRemoved;
-                                return;
-                            }
+                            MainViewModel.Log("Synth Riders device found " + d.Description);
+                            device = d;
+                            path = dir;
+                            connected = true;
+                            d.DeviceRemoved += DeviceRemoved;
+                            return;
                         }
                     }
                     d.Disconnect();
