@@ -44,14 +44,12 @@ namespace NoodleManagerX.Models
         //multiple files
         //figure out how to detect quest connection
         //update reminder
-        //make sure all streams are closed when no longer needed
         //don't leave thread safety up to luck
         //get a updated at timestamp for updating, published at is fine for filesystem timestamp
-        //window unmoveable when dialog is launched during startup
 
 
 
-        [Reactive] private string version { get; set; } = "V0.5.0";
+        [Reactive] private string version { get; set; } = "V0.6.0";
 
         public static MainViewModel s_instance;
 

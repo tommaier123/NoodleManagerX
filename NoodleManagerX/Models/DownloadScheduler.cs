@@ -73,8 +73,6 @@ namespace NoodleManagerX.Models
                 if (queue.Count > 0 && !running)
                 {
                     running = true;
-                    System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
-                    stopWatch.Start();
                     await Task.Delay(100);//not sure why this is necessary for requeueing. Seems like queuecount is !=0 but the queue is empty?
                     MainViewModel.Log("Started queue check");
                     while (queue.Count > 0)
@@ -96,8 +94,6 @@ namespace NoodleManagerX.Models
                         }
                     }
                     running = false;
-                    stopWatch.Stop();
-                    Console.WriteLine("Time taken " + stopWatch.Elapsed.Minutes + ":" + stopWatch.Elapsed.Seconds);
                     MainViewModel.Log("Stopped queue check");
                 }
             });
