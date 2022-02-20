@@ -2,21 +2,21 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="icons.svg"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    id="svg8"
    version="1.1"
    viewBox="0 0 210 297"
    height="297mm"
-   width="210mm">
+   width="210mm"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs2">
     <linearGradient
@@ -275,9 +275,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.70710678"
-     inkscape:cx="1050.203"
-     inkscape:cy="833.45949"
+     inkscape:zoom="0.35355339"
+     inkscape:cx="-192.33304"
+     inkscape:cy="654.78088"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -297,7 +297,8 @@
      inkscape:snap-nodes="true"
      showguides="false"
      inkscape:snap-bbox-edge-midpoints="true"
-     inkscape:bbox-paths="true">
+     inkscape:bbox-paths="true"
+     inkscape:pagecheckerboard="0">
     <inkscape:grid
        type="xygrid"
        id="grid2841" />
@@ -1397,5 +1398,41 @@
        d="M 224.35303,0.54590296 V -10.831292 l 11.3772,5.6885975 z"
        id="path1091-2"
        inkscape:connector-curvature="0" />
+    <g
+       id="g2868"
+       transform="translate(37.570833,-7.14375)">
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:1.85208;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1072-03"
+         width="19.314587"
+         height="11.377167"
+         x="130.83641"
+         y="21.828083"
+         ry="5.0270834" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:1.85208;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 138.6747,24.473918 h 3.63802"
+         id="path2061" />
+    </g>
+    <g
+       id="g3136"
+       transform="translate(37.041667,-7.14375)">
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:1.85208;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1072-03-5-1"
+         width="19.314587"
+         height="8.4006042"
+         x="132.1593"
+         y="42.994709"
+         ry="0.95231038" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:1.85208;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 138.98946,54.371877 h 5.65427"
+         id="path2061-6" />
+      <path
+         style="fill:#ffffff;stroke:#ffffff;stroke-width:1.85208;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 141.8166,51.395312 -1e-5,2.976565"
+         id="path2905" />
+    </g>
   </g>
 </svg>

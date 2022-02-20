@@ -187,7 +187,7 @@ namespace NoodleManagerX
         }
     }
 
-    public class DifficultyPathConverter : IValueConverter
+    public class BoolPathConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -198,7 +198,7 @@ namespace NoodleManagerX
             string[] paths = ((string)parameter).Split("|");
             if (paths.Length > 1)
             {
-                return ((bool)value) ? paths[0] : paths[1];
+                return ((bool)value) ? paths[1] : paths[0];
             }
             else
             {

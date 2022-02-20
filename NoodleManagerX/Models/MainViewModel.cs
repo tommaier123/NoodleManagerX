@@ -72,6 +72,7 @@ namespace NoodleManagerX.Models
         [Reactive] private string synthDirectory { get; set; }
         [Reactive] public bool directoryValid { get; set; }
         [Reactive] public int progress { get; set; } = 0;
+        [Reactive] public bool questConnected { get; set; } = false;
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
@@ -83,6 +84,7 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> getAllCommand { get; set; }
         public ReactiveCommand<Unit, Unit> getPageCommand { get; set; }
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> connectQuestCommand { get; set; }
 
         public ObservableCollection<GenericItem> items { get; set; } = new ObservableCollection<GenericItem>();
         public ObservableCollection<string> blacklist { get; set; } = new ObservableCollection<string>();
@@ -227,6 +229,18 @@ namespace NoodleManagerX.Models
                 selectDirectoryCommand = ReactiveCommand.Create((() =>
                 {
                     selectDirectory();
+                }));
+
+                connectQuestCommand = ReactiveCommand.Create((() =>
+                {
+                    if (MtpDevice.connected)
+                    {
+                        MtpDevice.Disconnect();
+                    }
+                    else
+                    {
+                        MtpDevice.Connect(true);
+                    }
                 }));
 
                 //the correct number of events needs to be skipped in ordere to avoid duplication

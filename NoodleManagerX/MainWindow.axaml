@@ -16,7 +16,7 @@
 		<local:EqualsConverter x:Key="EqualsConverter"/>
 		<local:TabHilightConverter x:Key="TabHilightConverter"/>
 		<local:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
-		<local:DifficultyPathConverter x:Key="DifficultyPathConverter"/>
+		<local:BoolPathConverter x:Key="BoolPathConverter"/>
 		<local:TwoParameterPathConverter x:Key="TwoParameterPathConverter"/>
 		<local:BoolColorConverter x:Key="BoolColorConverter"/>
 		<local:StringToBoolConverter x:Key="StringToBoolConverter"/>
@@ -211,17 +211,25 @@
 								<Grid Grid.Column="1" RowDefinitions="auto,auto,auto" ColumnDefinitions="*,auto" VerticalAlignment="Center">
 									<TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding upvote_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
 									<Svg Grid.Column="1" Grid.Row="0" Height="10"
-										 Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket_g.svg|resm:NoodleManagerX.Assets.icons.bracket.svg}"/>
+										 Path="{Binding Path=downloaded, Converter={StaticResource BoolPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket.svg|resm:NoodleManagerX.Assets.icons.bracket_g.svg}"/>
 									<TextBlock Grid.Column="0" Grid.Row="1" Text="{Binding downvote_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
 									<Svg Grid.Column="1" Grid.Row="1" Height="10"
-										 Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket_g.svg|resm:NoodleManagerX.Assets.icons.bracket.svg}">
+										 Path="{Binding Path=downloaded, Converter={StaticResource BoolPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket.svg|resm:NoodleManagerX.Assets.icons.bracket_g.svg}">
 										<Svg.RenderTransform>
 											<RotateTransform Angle="180"/>
 										</Svg.RenderTransform>
 									</Svg>
 									<TextBlock Grid.Column="0" Grid.Row="2" Text="{Binding download_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
 									<Button Grid.Column="1" Grid.Row="2" Classes="BlankButton" Height="30" Margin="10,0,10,0" Command="{Binding downloadCommand}">
-										<Svg Path="{Binding Path=downloaded, Converter={StaticResource DifficultyPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.download_g.svg|resm:NoodleManagerX.Assets.icons.download.svg}"/>
+										<Svg>
+											<Svg.Path>
+												<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
+															  ConverterParameter="resm:NoodleManagerX.Assets.icons.download.svg|resm:NoodleManagerX.Assets.icons.download_g.svg|resm:NoodleManagerX.Assets.icons.download_g.svg|resm:NoodleManagerX.Assets.icons.download_g.svg">
+													<Binding Path="downloaded"/>
+													<Binding Path="downloading"/>
+												</MultiBinding>
+											</Svg.Path>
+										</Svg>
 									</Button>
 								</Grid>
 								<!--v buttons v-->
@@ -303,6 +311,11 @@
 		<Grid Grid.Row="1" Height="50" Background="{StaticResource ControlHeaderColor}" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}"
 			  ColumnDefinitions="135,auto,auto,auto,*,auto">
 
+			<Button Grid.Column="0" Classes="BlankButton" Command="{Binding connectQuestCommand}" Height="22" HorizontalAlignment="Left" Margin="32,0,0,0">
+				<Svg Path="{Binding Path=questConnected, Converter={StaticResource BoolPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.pc.svg|resm:NoodleManagerX.Assets.icons.quest.svg}"/>
+			</Button>
+			
+			
 			<!--Search-->
 			<Grid Grid.Column="1" ColumnDefinitions="auto,auto">
 				<StackPanel Grid.Column="0" VerticalAlignment="Center">
