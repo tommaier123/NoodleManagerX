@@ -78,7 +78,10 @@ namespace NoodleManagerX.Models
             {
                 MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
             }
-            StopPlaying(currentlyPlaying);
+            finally
+            {
+                StopPlaying(currentlyPlaying);
+            }
         }
 
         private static void StopPlaying(MapItem playing)

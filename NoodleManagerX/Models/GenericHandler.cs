@@ -322,9 +322,11 @@ namespace NoodleManagerX.Models
 
                     }
                     catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
-                    MainViewModel.Log("Get All Done");
-
-                    MainViewModel.s_instance.getAllRunning = false;
+                    finally
+                    {
+                        MainViewModel.Log("Get All Done");
+                        MainViewModel.s_instance.getAllRunning = false;
+                    }
                 });
             }
         }

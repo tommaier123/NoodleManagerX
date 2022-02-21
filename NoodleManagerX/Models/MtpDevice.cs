@@ -54,7 +54,7 @@ namespace NoodleManagerX.Models
 
         private static void Disconnected()
         {
-            Console.WriteLine("disconnected");
+            MainViewModel.Log("Quest disconnected");
             device.DeviceRemoved -= DeviceRemoved;
             connected = false;
             MainViewModel.s_instance.questConnected = false;
@@ -65,7 +65,6 @@ namespace NoodleManagerX.Models
         {
             if (connected)
             {
-                Console.WriteLine("disconnecting");
                 device.Disconnect();
                 Disconnected();
             }

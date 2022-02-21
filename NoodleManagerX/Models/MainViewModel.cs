@@ -39,13 +39,12 @@ namespace NoodleManagerX.Models
         //check which dispatchers should be awaited
         //better task structure in general
         //possibly remove unnecessary flags from function parameters, use state machine/individual parameters
-        //context menu for description
-        //get description when rightclicking an item
+        //get description when rightclicking an item and display in context menu
         //multiple files
-        //figure out how to detect quest connection
         //update reminder
         //don't leave thread safety up to luck
         //get a updated at timestamp for updating, published at is fine for filesystem timestamp
+        //look at exception handling with tasks
 
 
 
@@ -103,6 +102,9 @@ namespace NoodleManagerX.Models
         public bool updatingLocalItems = false;
         public bool getAllRunning = false;
         public bool pruning = false;//maps without metadata should be deleted
+        public bool savingDB = false;
+        public bool savingBlacklist = false;
+        public bool savingSettings = false;
 
         public int apiRequestCounter = 0;
 
@@ -115,15 +117,14 @@ namespace NoodleManagerX.Models
         {
             s_instance = this;
 
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 MainWindow.s_instance.Closing += ClosingEvent;
-
-                MtpDevice.Connect();
 
                 LoadSettings();
 
                 settings.Changed.Subscribe(x => { SaveSettings(); });//save the settings when they change
+
                 this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
                 {
                     directoryValid = CheckDirectory(synthDirectory);
@@ -134,15 +135,18 @@ namespace NoodleManagerX.Models
                     }
                 });
 
-                if (!CheckDirectory(settings.synthDirectory))
+                _= Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    settings.synthDirectory = "";
-                    GetDirectoryFromRegistry();
-                }
-                else
-                {
-                    synthDirectory = settings.synthDirectory;
-                }
+                    if (!CheckDirectory(settings.synthDirectory))
+                    {
+                        settings.synthDirectory = "";
+                        GetDirectoryFromRegistry();
+                    }
+                    else
+                    {
+                        synthDirectory = settings.synthDirectory;
+                    }
+                });
 
                 minimizeCommand = ReactiveCommand.Create(() =>
                 {
@@ -233,14 +237,30 @@ namespace NoodleManagerX.Models
 
                 connectQuestCommand = ReactiveCommand.Create((() =>
                 {
-                    if (MtpDevice.connected)
+                    Task.Run(async () =>
                     {
-                        MtpDevice.Disconnect();
-                    }
-                    else
-                    {
-                        MtpDevice.Connect(true);
-                    }
+                        while (savingBlacklist || savingDB)
+                        {
+                            await Task.Delay(100);
+                        }
+
+
+                        if (DownloadScheduler.downloading.Count == 0 && DownloadScheduler.queue.Count == 0)
+                        {
+                            if (MtpDevice.connected)
+                            {
+                                MtpDevice.Disconnect();
+                            }
+                            else
+                            {
+                                MtpDevice.Connect(true);
+                            }
+                        }
+                        else
+                        {
+                            OpenErrorDialog("Can't disconnect while downloads are running");
+                        }
+                    });
                 }));
 
                 //the correct number of events needs to be skipped in ordere to avoid duplication
@@ -256,6 +276,7 @@ namespace NoodleManagerX.Models
                 items.CollectionChanged += ItemsCollectionChanged;
                 blacklist.CollectionChanged += BlacklistCollectionChanged;
 
+                MtpDevice.Connect();
                 ReloadLocalSources();
                 GetPage();
             });
@@ -303,93 +324,6 @@ namespace NoodleManagerX.Models
                         avatars.AddRange(items.Where(x => x.itemType == ItemType.Avatar).Select(x => (AvatarItem)x));
                         break;
                 }
-            });
-        }
-
-        public void LoadLocalItems()
-        {
-            if (updatingLocalItems)
-            {
-                return;//prevent issues with multithreading
-            }
-
-            Task.Run(async () =>
-            {
-                updatingLocalItems = true;
-                localItems.Clear();
-                bool dbExists = false;
-
-                try
-                {
-                    string path = "NmDatabase.json";
-                    MainViewModel.Log("Loading Database");
-                    if (await StorageAbstraction.FileExists(path))
-                    {
-                        List<LocalItem> tmp = new List<LocalItem>();
-                        using (Stream stream = await StorageAbstraction.ReadFile(path))
-                        using (System.IO.StreamReader file = new System.IO.StreamReader(stream))
-                        {
-                            JsonSerializer serializer = new JsonSerializer();
-                            tmp = (List<LocalItem>)serializer.Deserialize(file, typeof(List<LocalItem>));
-                        }
-                        localItems.AddRange(tmp);
-                        dbExists = true;
-                    }
-                }
-                catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
-
-                if (!dbExists)
-                {
-                    await Dispatcher.UIThread.InvokeAsync(async () =>
-                    {
-                        var res = await MessageBox.Show(null, "Click OK to delete maps without metadata e.g. if they were not downloaded from synthriderz.com" + Environment.NewLine + "This will only happen once when loading a new game directory" + Environment.NewLine + "Choosing to cancel might lead to duplicate maps" + Environment.NewLine + "Building the database for the first time can take some minutes", "Warning", MessageBox.MessageBoxButtons.OkCancel);
-                        if (res == MessageBox.MessageBoxResult.Ok)
-                        {
-                            pruning = true;
-                        }
-                    });
-                }
-
-                Log("Loading local items");
-
-                await mapHandler.LoadLocalItems();
-                await playlistHandler.LoadLocalItems();
-                await stageHandler.LoadLocalItems();
-                await avatarHandler.LoadLocalItems();
-
-                Log("Local items loaded");
-
-                foreach (GenericItem item in items)
-                {
-                    _ = item.UpdateDownloaded();
-                }
-
-                updatingLocalItems = false;
-                pruning = false;
-
-                _ = SaveLocalItems();
-            });
-        }
-
-        public Task SaveLocalItems()
-        {
-            return Task.Run(async () =>
-            {
-                try
-                {
-                    if (StorageAbstraction.CanDownload(true))
-                    {
-                        Log("Saving Database");
-                        string output = JsonConvert.SerializeObject(localItems);
-
-                        MemoryStream stream = new MemoryStream();
-                        System.IO.StreamWriter sw = new System.IO.StreamWriter(stream);
-                        await sw.WriteAsync(output);
-                        sw.Flush();
-                        await StorageAbstraction.WriteFile(stream, "NmDatabase.json");
-                    }
-                }
-                catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
             });
         }
 
@@ -453,7 +387,7 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public bool CheckDirectory(string path, bool dialog = false)
+        public bool CheckDirectory(string path, bool showDialog = false)
         {
             bool ret = false;
 
@@ -462,7 +396,7 @@ namespace NoodleManagerX.Models
                 if (System.IO.Directory.Exists(path) && System.IO.File.Exists(Path.Combine(path, "SynthRiders.exe"))) ret = true;
             }
 
-            if (dialog && !ret)
+            if (showDialog && !ret)
             {
                 OpenErrorDialog("Invalid Synth Riders Directory");
             }
@@ -515,6 +449,107 @@ namespace NoodleManagerX.Models
             catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
         }
 
+        public void LoadLocalItems()
+        {
+            if (updatingLocalItems)
+            {
+                return;//prevent issues with multithreading
+            }
+
+            Task.Run(async () =>
+            {
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    progress = 1;
+
+                });
+
+                updatingLocalItems = true;
+                localItems.Clear();
+                bool dbExists = false;
+
+                try
+                {
+                    string path = "NmDatabase.json";
+                    MainViewModel.Log("Loading Database");
+                    if (await StorageAbstraction.FileExists(path))
+                    {
+                        List<LocalItem> tmp = new List<LocalItem>();
+                        using (Stream stream = await StorageAbstraction.ReadFile(path))
+                        using (System.IO.StreamReader file = new System.IO.StreamReader(stream))
+                        {
+                            JsonSerializer serializer = new JsonSerializer();
+                            tmp = (List<LocalItem>)serializer.Deserialize(file, typeof(List<LocalItem>));
+                        }
+                        localItems.AddRange(tmp);
+                        dbExists = true;
+                    }
+                }
+                catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+
+                if (!dbExists)
+                {
+                    await Dispatcher.UIThread.InvokeAsync(async () =>
+                    {
+                        var res = await MessageBox.Show(null, "Click OK to delete maps without metadata e.g. if they were not downloaded from synthriderz.com" + Environment.NewLine + "This will only happen once when loading a new game directory" + Environment.NewLine + "Choosing to cancel might lead to duplicate maps" + Environment.NewLine + "Building the database for the first time can take some minutes", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+                        if (res == MessageBox.MessageBoxResult.Ok)
+                        {
+                            pruning = true;
+                        }
+                    });
+                }
+
+                Log("Loading local items");
+
+                await mapHandler.LoadLocalItems();
+                await playlistHandler.LoadLocalItems();
+                await stageHandler.LoadLocalItems();
+                await avatarHandler.LoadLocalItems();
+
+                Log("Local items loaded");
+
+                foreach (GenericItem item in items)
+                {
+                    _ = item.UpdateDownloaded();
+                }
+
+                updatingLocalItems = false;
+                pruning = false;
+
+                await SaveLocalItems();
+
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                 {
+                     progress = 0;
+
+                 });
+            });
+        }
+
+        public Task SaveLocalItems()
+        {
+            return Task.Run(async () =>
+            {
+                try
+                {
+                    if (StorageAbstraction.CanDownload(true))
+                    {
+                        savingDB = true;
+                        Log("Saving Database");
+                        string output = JsonConvert.SerializeObject(localItems);
+
+                        MemoryStream stream = new MemoryStream();
+                        System.IO.StreamWriter sw = new System.IO.StreamWriter(stream);
+                        await sw.WriteAsync(output);
+                        sw.Flush();
+                        await StorageAbstraction.WriteFile(stream, "NmDatabase.json");
+                    }
+                }
+                catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+                finally { savingDB = false; }
+            });
+        }
+
         public void LoadSettings()
         {
             try
@@ -540,6 +575,7 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
+                    savingSettings = true;
                     MainViewModel.Log("Saving Settings");
                     string output = JsonConvert.SerializeObject(settings);
 
@@ -555,6 +591,7 @@ namespace NoodleManagerX.Models
                     }
                 }
                 catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+                finally { savingSettings = false; }
             });
         }
 
@@ -593,6 +630,7 @@ namespace NoodleManagerX.Models
                 {
                     if (StorageAbstraction.CanDownload(true))
                     {
+                        savingBlacklist = true;
                         Log("Saving Blacklist");
                         string output = JsonConvert.SerializeObject(blacklist.ToList());
 
@@ -604,6 +642,7 @@ namespace NoodleManagerX.Models
                     }
                 }
                 catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+                finally { savingBlacklist = false; }
             });
         }
 
@@ -624,6 +663,11 @@ namespace NoodleManagerX.Models
             }
             if (!e.Cancel == true)
             {
+                while (savingDB || savingSettings || savingSettings)
+                {
+                    Task.Delay(100).Wait();
+                }
+
                 MtpDevice.Disconnect();
             }
         }
