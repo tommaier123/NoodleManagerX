@@ -66,7 +66,7 @@ namespace NoodleManagerX.Models
             if (connected)
             {
                 device.Disconnect();
-                Disconnected();
+                if (!MainViewModel.s_instance.closing) Disconnected();
             }
         }
     }

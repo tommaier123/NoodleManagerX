@@ -72,6 +72,7 @@ namespace NoodleManagerX.Models
         [Reactive] public bool directoryValid { get; set; }
         [Reactive] public int progress { get; set; } = 0;
         [Reactive] public bool questConnected { get; set; } = false;
+        [Reactive] public bool updatingLocalItems { get; set; } = false;
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
@@ -99,7 +100,6 @@ namespace NoodleManagerX.Models
 
         public bool closing = false;
         public bool downloadPage = false;//so that loading maps get downloaded when using get page
-        public bool updatingLocalItems = false;
         public bool getAllRunning = false;
         public bool pruning = false;//maps without metadata should be deleted
         public bool savingDB = false;
@@ -476,13 +476,12 @@ namespace NoodleManagerX.Models
 
             return Task.Run(async () =>
             {
-                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     progress = 1;
-
+                    updatingLocalItems = true;
                 });
-
-                updatingLocalItems = true;
+                
                 localItems.Clear();
                 bool dbExists = false;
 
@@ -531,13 +530,13 @@ namespace NoodleManagerX.Models
                     _ = item.UpdateDownloaded();
                 }
 
-                updatingLocalItems = false;
-                pruning = false;
-
                 await SaveLocalItems();
+
+                pruning = false;
 
                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                  {
+                     updatingLocalItems = false;
                      progress = 0;
 
                  });
@@ -757,7 +756,7 @@ namespace NoodleManagerX.Models
 
         public static void Log(MethodBase m, Exception e)
         {
-            Log("Error " + m.Name + " " + e.Message + " --- " + e.StackTrace + " " + e.TargetSite);
+            Log("Error " + m.Name + " " + e.Message + Environment.NewLine + e.TargetSite + Environment.NewLine + e.StackTrace);
         }
 
         public static void Log(string message)

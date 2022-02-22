@@ -310,9 +310,18 @@
 		<!--Control Header-->
 		<Grid Grid.Row="1" Height="50" Background="{StaticResource ControlHeaderColor}" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}"
 			  ColumnDefinitions="135,auto,auto,auto,*,auto">
-
-			<Button Grid.Column="0" Classes="BlankButton" Command="{Binding connectQuestCommand}" Height="22" HorizontalAlignment="Left" Margin="32,0,0,0">
-				<Svg Path="{Binding Path=questConnected, Converter={StaticResource BoolPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.pc.svg|resm:NoodleManagerX.Assets.icons.quest.svg}"/>
+			
+			<!--Connect Button-->
+			<Button Grid.Column="0" Classes="BlankButton" Command="{Binding connectQuestCommand}" Height="22" HorizontalAlignment="Left" Margin="32,5,0,0">
+				<Svg>
+					<Svg.Path>
+						<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
+									  ConverterParameter="resm:NoodleManagerX.Assets.icons.pc.svg|resm:NoodleManagerX.Assets.icons.pc_g.svg|resm:NoodleManagerX.Assets.icons.quest.svg|resm:NoodleManagerX.Assets.icons.quest_g.svg">
+							<Binding Path="updatingLocalItems"/>
+							<Binding Path="questConnected"/>
+						</MultiBinding>
+					</Svg.Path>
+				</Svg>
 			</Button>
 			
 			
