@@ -24,7 +24,7 @@ namespace NoodleManagerX.Models
                     try
                     {
                         d.Connect();
-                        var directories = d.GetDirectories(@"\");
+                        string[] directories = d.GetDirectories(@"\");
                         foreach (string directory in directories)
                         {
                             string dir = Path.Combine(directory, "SynthRidersUC");

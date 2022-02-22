@@ -10,174 +10,150 @@ namespace NoodleManagerX.Models
     {
         static object MtpDeviceLock = new object();
 
-        public static Task WriteFile(MemoryStream stream, string path)
+        public static async Task WriteFile(MemoryStream stream, string path)
         {
-            return Task.Run(async () =>
+            if (DirectoryExists(Path.GetDirectoryName(path)))
             {
-                if (await DirectoryExists(Path.GetDirectoryName(path)))
+                if (FileExists(path))
                 {
-                    if (await FileExists(path))
-                    {
-                        await DeleteFile(path);
-                    }
-
-                    stream.Position = 0;
-
-                    if (MtpDevice.connected)
-                    {//remove temp file once media devices works properely with memory stream
-                        string tempFile = Path.GetTempFileName();
-                        using (FileStream fs = new FileStream(tempFile, FileMode.Create, FileAccess.ReadWrite))
-                        {
-                            await stream.CopyToAsync(fs);
-                            fs.Position = 0;
-
-                            lock (MtpDeviceLock)
-                            {
-                                MtpDevice.device.UploadFile(fs, Path.Combine(MtpDevice.path, path));
-                            }
-                        }
-                        try { File.Delete(tempFile); } catch { }//really doesn't matter if something goes wrong, windows will clean temp files automatically
-                    }
-                    else
-                    {
-                        using (FileStream file = new FileStream(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), FileMode.Create, FileAccess.Write))
-                        {
-                            await stream.CopyToAsync(file);
-                        }
-                    }
-                    stream.Close();
+                    DeleteFile(path);
                 }
-            });
-        }
 
-        public static Task<Stream> ReadFile(string path)
-        {
-            return Task.Run(() =>
-            {
+                stream.Position = 0;
+
                 if (MtpDevice.connected)
-                {
-                    lock (MtpDeviceLock)
+                {//remove temp file once media devices works properely with memory stream
+                    string tempFile = Path.GetTempFileName();
+                    using (FileStream fs = new FileStream(tempFile, FileMode.Create, FileAccess.ReadWrite))
                     {
-                        Stream ms = new MemoryStream();
-                        MtpDevice.device.DownloadFile(Path.Combine(MtpDevice.path, path), ms);
-                        ms.Position = 0;
-                        return ms;
-                    }
-                }
-                else
-                {
-                    return new FileStream(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), FileMode.Open, FileAccess.Read);
-                }
-            });
-        }
+                        await stream.CopyToAsync(fs);
+                        fs.Position = 0;
 
-        public static Task<bool> FileExists(string path)
-        {
-            return Task.Run(() =>
-            {
-                if (MtpDevice.connected)
-                {
-                    lock (MtpDeviceLock)
-                    {
-                        return MtpDevice.device.FileExists(Path.Combine(MtpDevice.path, path));
-                    }
-                }
-                else
-                {
-                    return File.Exists(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
-                }
-            });
-        }
-
-        public static Task DeleteFile(string path)
-        {
-            return Task.Run(() =>
-            {
-                if (MtpDevice.connected)
-                {
-                    lock (MtpDeviceLock)
-                    {
-                        MtpDevice.device.DeleteFile(Path.Combine(MtpDevice.path, path));
-                    }
-                }
-                else
-                {
-                    File.Delete(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
-                }
-            });
-        }
-
-        public static Task<bool> DirectoryExists(string path)
-        {
-            return Task.Run(() =>
-            {
-                if (MtpDevice.connected)
-                {
-                    lock (MtpDeviceLock)
-                    {
-                        return MtpDevice.device.DirectoryExists(Path.Combine(MtpDevice.path, path));
-                    }
-                }
-                else
-                {
-                    return Directory.Exists(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
-                }
-            });
-        }
-
-        public static Task<string[]> GetFilesInDirectory(string path)
-        {
-            return Task.Run(async () =>
-            {
-                if (await DirectoryExists(path))
-                {
-                    if (MtpDevice.connected)
-                    {
                         lock (MtpDeviceLock)
                         {
-                            return MtpDevice.device.GetFiles(Path.Combine(MtpDevice.path, path)).Select(x => Path.Combine(path, Path.GetFileName(x))).ToArray();
+                            MtpDevice.device.UploadFile(fs, Path.Combine(MtpDevice.path, path));
                         }
                     }
-                    else
+                    try { File.Delete(tempFile); } catch { }//really doesn't matter if something goes wrong, windows will clean temp files automatically
+                }
+                else
+                {
+                    using (FileStream file = new FileStream(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), FileMode.Create, FileAccess.Write))
                     {
-                        return Directory.GetFiles(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path)).Select(x => Path.Combine(path, Path.GetFileName(x))).ToArray();
+                        await stream.CopyToAsync(file);
                     }
                 }
-                else return new string[0];
-            });
+                stream.Close();
+            }
         }
 
-        public static Task<DateTime> GetLastWriteTime(string path)
+        public static Stream ReadFile(string path)
         {
-            return Task.Run(() =>
+            if (MtpDevice.connected)
+            {
+                lock (MtpDeviceLock)
+                {
+                    Stream ms = new MemoryStream();
+                    MtpDevice.device.DownloadFile(Path.Combine(MtpDevice.path, path), ms);
+                    ms.Position = 0;
+                    return ms;
+                }
+            }
+            else
+            {
+                return new FileStream(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), FileMode.Open, FileAccess.Read);
+            }
+        }
+
+        public static bool FileExists(string path)
+        {
+            if (MtpDevice.connected)
+            {
+                lock (MtpDeviceLock)
+                {
+                    return MtpDevice.device.FileExists(Path.Combine(MtpDevice.path, path));
+                }
+            }
+            else
+            {
+                return File.Exists(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+            }
+        }
+
+        public static void DeleteFile(string path)
+        {
+            if (MtpDevice.connected)
+            {
+                lock (MtpDeviceLock)
+                {
+                    MtpDevice.device.DeleteFile(Path.Combine(MtpDevice.path, path));
+                }
+            }
+            else
+            {
+                File.Delete(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+            }
+        }
+
+        public static bool DirectoryExists(string path)
+        {
+            if (MtpDevice.connected)
+            {
+                lock (MtpDeviceLock)
+                {
+                    return MtpDevice.device.DirectoryExists(Path.Combine(MtpDevice.path, path));
+                }
+            }
+            else
+            {
+                return Directory.Exists(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+            }
+        }
+
+        public static string[] GetFilesInDirectory(string path)
+        {
+            if (DirectoryExists(path))
             {
                 if (MtpDevice.connected)
                 {
                     lock (MtpDeviceLock)
                     {
-                        return MtpDevice.device.GetFileInfo(Path.Combine(MtpDevice.path, path)).LastWriteTime.Value;
+                        return MtpDevice.device.GetFiles(Path.Combine(MtpDevice.path, path)).Select(x => Path.Combine(path, Path.GetFileName(x))).ToArray();
                     }
                 }
                 else
                 {
-                    return File.GetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+                    return Directory.GetFiles(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path)).Select(x => Path.Combine(path, Path.GetFileName(x))).ToArray();
                 }
-            });
+            }
+            else return new string[0];
         }
 
-        public static Task SetLastWriteTime(DateTime timestamp, string path)
+        public static DateTime GetLastWriteTime(string path)
         {
-            return Task.Run(() =>
+            if (MtpDevice.connected)
             {
-                if (MtpDevice.connected)
+                lock (MtpDeviceLock)
                 {
-                    //no idea how to change timestamp over mtp
+                    return MtpDevice.device.GetFileInfo(Path.Combine(MtpDevice.path, path)).LastWriteTime.Value;
                 }
-                else
-                {
-                    File.SetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), timestamp);
-                }
-            });
+            }
+            else
+            {
+                return File.GetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
+            }
+        }
+
+        public static void SetLastWriteTime(DateTime timestamp, string path)
+        {
+            if (MtpDevice.connected)
+            {
+                //no idea how to change timestamp over mtp
+            }
+            else
+            {
+                File.SetLastWriteTime(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path), timestamp);
+            }
         }
 
         public static bool CanDownload(bool silent = false)

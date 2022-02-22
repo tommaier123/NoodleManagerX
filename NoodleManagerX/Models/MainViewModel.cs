@@ -121,7 +121,7 @@ namespace NoodleManagerX.Models
             {
                 MainWindow.s_instance.Closing += ClosingEvent;
 
-                LoadSettings();
+                await LoadSettings();
 
                 settings.Changed.Subscribe(x => { SaveSettings(); });//save the settings when they change
 
@@ -135,18 +135,18 @@ namespace NoodleManagerX.Models
                     }
                 });
 
-                _= Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    if (!CheckDirectory(settings.synthDirectory))
-                    {
-                        settings.synthDirectory = "";
-                        GetDirectoryFromRegistry();
-                    }
-                    else
-                    {
-                        synthDirectory = settings.synthDirectory;
-                    }
-                });
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                 {
+                     if (!CheckDirectory(settings.synthDirectory))
+                     {
+                         settings.synthDirectory = "";
+                         GetDirectoryFromRegistry();
+                     }
+                     else
+                     {
+                         synthDirectory = settings.synthDirectory;
+                     }
+                 });
 
                 minimizeCommand = ReactiveCommand.Create(() =>
                 {
@@ -220,14 +220,26 @@ namespace NoodleManagerX.Models
 
                 getPageCommand = ReactiveCommand.Create((() =>
                 {
-                    if (!updatingLocalItems)
+                    Task.Run(() =>
                     {
-                        downloadPage = true;
-                        foreach (GenericItem item in items.Where(x => !x.downloaded && !x.downloading))
+                        if (!updatingLocalItems)
                         {
-                            DownloadScheduler.Download(item);
+                            downloadPage = true;//download items that are still being requested from the server
+                            var toDownload = items.Where(x => !x.downloaded && !x.downloading);
+                            if (toDownload.Count() > 0)
+                            {
+                                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                                {
+                                    progress = 1;
+
+                                });
+                                foreach (GenericItem item in toDownload)
+                                {
+                                    DownloadScheduler.Download(item);
+                                }
+                            }
                         }
-                    }
+                    });
                 }));
 
                 selectDirectoryCommand = ReactiveCommand.Create((() =>
@@ -243,7 +255,6 @@ namespace NoodleManagerX.Models
                         {
                             await Task.Delay(100);
                         }
-
 
                         if (DownloadScheduler.downloading.Count == 0 && DownloadScheduler.queue.Count == 0)
                         {
@@ -278,7 +289,7 @@ namespace NoodleManagerX.Models
 
                 MtpDevice.Connect();
                 ReloadLocalSources();
-                GetPage();
+                _ = GetPage();
             });
         }
 
@@ -327,7 +338,7 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public void GetPage()
+        public Task GetPage()
         {
             if (lastSearchText != searchText)
             {
@@ -337,46 +348,53 @@ namespace NoodleManagerX.Models
             apiRequestCounter++;//invalidate all running requests
             downloadPage = false;
 
-            switch (selectedTabIndex)
+            return Task.Run(async () =>
             {
-                case 0:
-                    mapHandler.GetPage();
-                    break;
-                case 1:
-                    playlistHandler.GetPage();
-                    break;
-                case 2:
-                    stageHandler.GetPage();
-                    break;
-                case 3:
-                    avatarHandler.GetPage();
-                    break;
-            }
+                switch (selectedTabIndex)
+                {
+                    case 0:
+                        await mapHandler.GetPage();
+                        break;
+                    case 1:
+                        await playlistHandler.GetPage();
+                        break;
+                    case 2:
+                        await stageHandler.GetPage();
+                        break;
+                    case 3:
+                        await avatarHandler.GetPage();
+                        break;
+                }
+            });
         }
 
-        public void GetAll()
+        public Task GetAll()
         {
             if (StorageAbstraction.CanDownload() && !updatingLocalItems)
             {
                 progress = 1;
                 DownloadScheduler.toDownload = DownloadScheduler.queue.Count;
 
-                switch (selectedTabIndex)
+                return Task.Run(async () =>
                 {
-                    case 0:
-                        mapHandler.GetAll();
-                        break;
-                    case 1:
-                        playlistHandler.GetAll();
-                        break;
-                    case 2:
-                        stageHandler.GetAll();
-                        break;
-                    case 3:
-                        avatarHandler.GetAll();
-                        break;
-                }
+                    switch (selectedTabIndex)
+                    {
+                        case 0:
+                            await mapHandler.GetAll();
+                            break;
+                        case 1:
+                            await playlistHandler.GetAll();
+                            break;
+                        case 2:
+                            await stageHandler.GetAll();
+                            break;
+                        case 3:
+                            await avatarHandler.GetAll();
+                            break;
+                    }
+                });
             }
+            return Task.CompletedTask;
         }
 
         public void OpenErrorDialog(string text)
@@ -449,14 +467,14 @@ namespace NoodleManagerX.Models
             catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
         }
 
-        public void LoadLocalItems()
+        public Task LoadLocalItems()
         {
             if (updatingLocalItems)
             {
-                return;//prevent issues with multithreading
+                return Task.CompletedTask;//prevent issues with multithreading
             }
 
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -472,10 +490,10 @@ namespace NoodleManagerX.Models
                 {
                     string path = "NmDatabase.json";
                     MainViewModel.Log("Loading Database");
-                    if (await StorageAbstraction.FileExists(path))
+                    if (StorageAbstraction.FileExists(path))
                     {
                         List<LocalItem> tmp = new List<LocalItem>();
-                        using (Stream stream = await StorageAbstraction.ReadFile(path))
+                        using (Stream stream = StorageAbstraction.ReadFile(path))
                         using (System.IO.StreamReader file = new System.IO.StreamReader(stream))
                         {
                             JsonSerializer serializer = new JsonSerializer();
@@ -550,28 +568,31 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public void LoadSettings()
+        public Task LoadSettings()
         {
-            try
+            return Task.Run(() =>
             {
-                string path = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX", "Settings.json");
-                MainViewModel.Log("Loading Settings from " + path);
-
-                if (System.IO.File.Exists(path))
+                try
                 {
-                    using (System.IO.StreamReader file = System.IO.File.OpenText(path))
+                    string path = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX", "Settings.json");
+                    MainViewModel.Log("Loading Settings from " + path);
+
+                    if (System.IO.File.Exists(path))
                     {
-                        JsonSerializer serializer = new JsonSerializer();
-                        settings = (Settings)serializer.Deserialize(file, typeof(Settings));
+                        using (System.IO.StreamReader file = System.IO.File.OpenText(path))
+                        {
+                            JsonSerializer serializer = new JsonSerializer();
+                            settings = (Settings)serializer.Deserialize(file, typeof(Settings));
+                        }
                     }
                 }
-            }
-            catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+                catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+            });
         }
 
-        public void SaveSettings()
+        public Task SaveSettings()
         {
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 try
                 {
@@ -595,18 +616,18 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public void LoadBlacklist()
+        public Task LoadBlacklist()
         {
-            Task.Run(async () =>
+            return Task.Run(() =>
             {
                 try
                 {
                     blacklist.Clear();
                     string path = "NmBlacklist.json";
                     MainViewModel.Log("Loading Blacklist");
-                    if (await StorageAbstraction.FileExists(path))
+                    if (StorageAbstraction.FileExists(path))
                     {
-                        using (Stream stream = await StorageAbstraction.ReadFile(path))
+                        using (Stream stream = StorageAbstraction.ReadFile(path))
                         using (System.IO.StreamReader file = new System.IO.StreamReader(stream))
                         {
                             JsonSerializer serializer = new JsonSerializer();
@@ -622,9 +643,9 @@ namespace NoodleManagerX.Models
             });
         }
 
-        public void SaveBlacklist()
+        public Task SaveBlacklist()
         {
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 try
                 {
@@ -650,25 +671,28 @@ namespace NoodleManagerX.Models
         {
             if (!closing)
             {
-                if (getAllRunning)
+                e.Cancel = true;
+                Task.Run(() =>
                 {
-                    e.Cancel = true;
-                    ShowClosingDialog("Get All is still running." + Environment.NewLine + "Abort?");
-                }
-                else if (DownloadScheduler.downloading.Count > 0)
-                {
-                    e.Cancel = true;
-                    ShowClosingDialog("There are still " + DownloadScheduler.downloading.Count + " running downloads." + Environment.NewLine + "Abort?");
-                }
-            }
-            if (!e.Cancel == true)
-            {
-                while (savingDB || savingSettings || savingSettings)
-                {
-                    Task.Delay(100).Wait();
-                }
-
-                MtpDevice.Disconnect();
+                    if (getAllRunning)
+                    {
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            ShowClosingDialog("Get All is still running." + Environment.NewLine + "Abort?");
+                        });
+                    }
+                    else if (DownloadScheduler.downloading.Count > 0)
+                    {
+                        _ = Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            ShowClosingDialog("There are still " + DownloadScheduler.downloading.Count + " running downloads." + Environment.NewLine + "Abort?");
+                        });
+                    }
+                    else
+                    {
+                        CloseSafely();
+                    }
+                });
             }
         }
 
@@ -678,33 +702,62 @@ namespace NoodleManagerX.Models
 
             if (res == MessageBox.MessageBoxResult.Ok)
             {
-                DownloadScheduler.queue.Clear();
-                await SaveLocalItems();
-                closing = true;
+                CloseSafely();
+            }
+        }
 
-                _ = Task.Run(async () =>
+        private async void CloseSafely()
+        {
+            DownloadScheduler.queue.Clear();
+            await SaveLocalItems();
+            closing = true;
+
+            _ = Task.Run(async () =>
+              {
+                  _ = Dispatcher.UIThread.InvokeAsync(() =>
                   {
-                      _ = Dispatcher.UIThread.InvokeAsync(() =>
-                      {
-                          MainWindow.s_instance.Hide();
-                      });
-
-                      while (DownloadScheduler.downloading.Count != 0)
-                      {
-                          await Task.Delay(500);
-                      }
-
-                      _ = Dispatcher.UIThread.InvokeAsync(() =>
-                          {
-                              MainWindow.s_instance.Close();
-                          });
+                      MainWindow.s_instance.Hide();
                   });
+
+                  while (DownloadScheduler.downloading.Count != 0)
+                  {
+                      await Task.Delay(500);
+                  }
+
+                  while (savingDB || savingSettings || savingSettings)
+                  {
+                      await Task.Delay(100);
+                  }
+
+                  //cleanup
+                  MtpDevice.Disconnect();
+
+                  _ = Dispatcher.UIThread.InvokeAsync(() =>
+                  {
+                      MainWindow.s_instance.Close();
+                  });
+              });
+        }
+
+        public static void CheckUiThread(string message)
+        {
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("UiThread " + message);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("BackgroundThread " + message);
+                Console.ForegroundColor = ConsoleColor.White;
             }
         }
 
         public static void Log(MethodBase m, Exception e)
         {
-            Log("Error " + m.ReflectedType.Name + " " + e.Message);
+            Log("Error " + m.Name + " " + e.Message + " --- " + e.StackTrace + " " + e.TargetSite);
         }
 
         public static void Log(string message)

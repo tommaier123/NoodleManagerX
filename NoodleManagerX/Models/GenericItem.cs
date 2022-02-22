@@ -82,219 +82,214 @@ namespace NoodleManagerX.Models
         [OnDeserialized]
         private void OnDeserializedMethod(StreamingContext context)
         {
-            LoadBitmap();
-
-            UpdateBlacklisted();
-
-            updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
-
-            downloadCommand = ReactiveCommand.Create((() =>
+            Task.Run(() =>
             {
-                if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
+                LoadBitmap();
+
+                UpdateBlacklisted();
+
+                updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
+
+                downloadCommand = ReactiveCommand.Create((() =>
                 {
-                    blacklisted = false;
-                    DownloadScheduler.Download(this);
-                }
-            }));
-
-            deleteCommand = ReactiveCommand.Create((() =>
-            {
-                if (!MainViewModel.s_instance.updatingLocalItems)
-                {
-                    if (downloaded)
+                    if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
                     {
-                        Delete();
-                    }
-                    else
-                    {
-                        blacklisted = !blacklisted;
-
-                        if (blacklisted)
-                        {
-                            MainViewModel.s_instance.blacklist.Add(filename);
-                        }
-                        else
-                        {
-                            MainViewModel.s_instance.blacklist.Remove(filename);
-                        }
-                    }
-                }
-            }));
-        }
-
-        public Task UpdateDownloaded(bool forceUpdate = false)
-        {
-            return Task.Run(async () =>
-            {
-                List<LocalItem> tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
-                await Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    if (tmp.Count() > 0)
-                    {
-                        if (tmp.Count() > 1)
-                        {
-                            tmp = tmp.Where(x => x.itemType == itemType).OrderByDescending(x => x.modifiedTime).ToList();
-                            foreach (LocalItem l in tmp.Skip(1))
-                            {
-                                MainViewModel.Log("Old version deleted of " + l.filename);
-                                Delete(l.filename);
-                            }
-                        }
-
-                        downloaded = true;
-                        filename = tmp[0].filename;
-                        if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
-                        {
-                            needsUpdate = tmp[0].hash != ((MapItem)this).hash;
-                            if (needsUpdate) MainViewModel.Log("Hash difference detected for " + this.filename);
-                        }
-                        else
-                        {
-                            needsUpdate = DateTime.Compare(updatedAt, tmp[0].modifiedTime) > 0;
-                            if (needsUpdate) MainViewModel.Log("Date difference detected for " + this.filename);
-                        }
-                    }
-                    else
-                    {
-                        downloaded = false;
-                        needsUpdate = false;
-                    }
-                    if (needsUpdate || forceUpdate)
-                    {
+                        blacklisted = false;
                         DownloadScheduler.Download(this);
                     }
-                });
+                }));
+
+                deleteCommand = ReactiveCommand.Create((() =>
+                {
+                    if (!MainViewModel.s_instance.updatingLocalItems)
+                    {
+                        if (downloaded)
+                        {
+                            Task.Run(Delete);
+                        }
+                        else
+                        {
+                            blacklisted = !blacklisted;
+
+                            if (blacklisted)
+                            {
+                                MainViewModel.s_instance.blacklist.Add(filename);
+                            }
+                            else
+                            {
+                                MainViewModel.s_instance.blacklist.Remove(filename);
+                            }
+                        }
+                    }
+                }));
             });
+        }
+
+        public async Task UpdateDownloaded(bool forceUpdate = false)
+        {
+            List<LocalItem> tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
+
+            if (tmp.Count() > 0)
+            {
+                if (tmp.Count() > 1)
+                {
+                    tmp = tmp.Where(x => x.itemType == itemType).OrderByDescending(x => x.modifiedTime).ToList();
+                    foreach (LocalItem l in tmp.Skip(1))
+                    {
+                        MainViewModel.Log("Old version deleted of " + l.filename);
+                        _ = Delete(l.filename);
+                    }
+                }
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    downloaded = true;
+                });
+
+                filename = tmp[0].filename;
+                if (itemType == ItemType.Map && !string.IsNullOrEmpty(tmp[0].hash))
+                {
+                    needsUpdate = tmp[0].hash != ((MapItem)this).hash;
+                    if (needsUpdate) MainViewModel.Log("Hash difference detected for " + this.filename);
+                }
+                else
+                {
+                    needsUpdate = DateTime.Compare(updatedAt, tmp[0].modifiedTime) > 0;
+                    if (needsUpdate) MainViewModel.Log("Date difference detected for " + this.filename);
+                }
+            }
+            else
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    downloaded = false;
+                    needsUpdate = false;
+                });
+            }
+            if (needsUpdate || forceUpdate)
+            {
+                DownloadScheduler.Download(this);
+            }
         }
 
         public void UpdateBlacklisted()
         {
-            Task.Run(() =>
+            if (!String.IsNullOrEmpty(filename) && MainViewModel.s_instance.blacklist.Contains(filename))
             {
-                if (!String.IsNullOrEmpty(filename) && MainViewModel.s_instance.blacklist.Contains(filename))
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
                 {
+                    blacklisted = true;
+                });
+            }
+            else
+            {
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    blacklisted = false;
+                });
+            }
+        }
+
+        public async Task Download()
+        {
+            string path = "";
+            MainViewModel.Log("Downloading " + display_title);
+            try
+            {
+                if (downloaded)
+                {//remove from local items
+                    MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this) == false).ToList();
+                }
+
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    downloaded = false;
+                    downloading = true;
+                });
+
+                string url = "https://synthriderz.com" + download_url;
+                WebRequest request = WebRequest.Create(new Uri(url));
+                using (WebResponse response = await request.GetResponseAsync())
+                using (Stream stream = response.GetResponseStream())
+                using (MemoryStream str = await FixMetadata(stream))
+                {
+                    if (String.IsNullOrEmpty(filename))
+                    {
+                        string contentDisposition = response.Headers["content-disposition"];
+                        filename = HttpUtility.UrlDecode(new ContentDisposition(contentDisposition).FileName);
+                    }
+
+                    path = Path.Combine(target, filename);
+                    await StorageAbstraction.WriteFile(str, path);
+                }
+            }
+            catch (Exception e)
+            {
+                MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+            }
+
+            try
+            {
+                if (await handler.GetLocalItem(path))
+                {
+                    if (updatedAt != new DateTime())
+                    {
+                        _ = Task.Run(() => StorageAbstraction.SetLastWriteTime(updatedAt, path));
+                    }
+
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        blacklisted = true;
+                        downloaded = true;
                     });
                 }
                 else
                 {
-                    _ = Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        blacklisted = false;
-                    });
+                    DownloadScheduler.Requeue(this);
                 }
-            });
+
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    downloading = false;
+                });
+
+                DownloadScheduler.Remove(this);
+            }
+            catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
         }
 
-        public void Download()
+        public virtual async Task<MemoryStream> FixMetadata(Stream stream)
         {
-            Task.Run(async () =>
-            {
-                string path = "";
-                MainViewModel.Log("Downloading " + display_title);
-                try
-                {
-                    if (downloaded)
-                    {//remove from local items
-                        MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this) == false).ToList();
-                    }
-
-                    _ = Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        downloaded = false;
-                        downloading = true;
-                    });
-
-                    string url = "https://synthriderz.com" + download_url;
-                    WebRequest request = WebRequest.Create(new Uri(url));
-                    using (WebResponse response = await request.GetResponseAsync())
-                    using (Stream stream = response.GetResponseStream())
-                    using (MemoryStream str = await FixMetadata(stream))
-                    {
-                        if (String.IsNullOrEmpty(filename))
-                        {
-                            string contentDisposition = response.Headers["content-disposition"];
-                            filename = HttpUtility.UrlDecode(new ContentDisposition(contentDisposition).FileName);
-                        }
-
-                        path = Path.Combine(target, filename);
-                        await StorageAbstraction.WriteFile(str, path);
-                    }
-                }
-                catch (Exception e)
-                {
-                    MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
-                }
-
-                try
-                {
-                    if (await handler.GetLocalItem(path))
-                    {
-                        if (updatedAt != new DateTime())
-                        {
-                            _ = StorageAbstraction.SetLastWriteTime(updatedAt, path);
-                        }
-
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            downloaded = true;
-                        });
-                    }
-                    else
-                    {
-                        DownloadScheduler.Requeue(this);
-                    }
-
-                    _ = Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        downloading = false;
-                    });
-
-                    DownloadScheduler.Remove(this);
-                }
-                catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
-            });
-        }
-
-        public virtual Task<MemoryStream> FixMetadata(Stream stream)
-        {
-            return Task.Run(async () =>
-            {
-                MemoryStream ms = new MemoryStream();
-                await stream.CopyToAsync(ms);
-                stream.Flush();
-                stream.Close();
-                return ms;
-            });
+            MemoryStream ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            stream.Flush();
+            stream.Close();
+            return ms;
         }
 
         public void Delete()
         {
-            Delete(filename);
+            if (Delete(filename))
+            {
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    downloaded = false;
+                });
+            }
         }
 
-        public void Delete(string filename)
+        public bool Delete(string filename)
         {
-            Task.Run(async () =>
+            if (!String.IsNullOrEmpty(filename))
             {
-                if (!String.IsNullOrEmpty(filename))
+                try
                 {
-                    try
-                    {
-                        await StorageAbstraction.DeleteFile(Path.Combine(target, filename));
-
-                        MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && x.itemType == itemType && x.filename == filename).ToList();
-
-                        _ = Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            downloaded = false;
-                        });
-                    }
-                    catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+                    StorageAbstraction.DeleteFile(Path.Combine(target, filename));
+                    MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && x.itemType == itemType && x.filename == filename).ToList();
+                    return true;
                 }
-            });
+                catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+            }
+            return false;
         }
 
         public void LoadBitmap()

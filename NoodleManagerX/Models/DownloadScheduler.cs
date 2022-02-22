@@ -81,7 +81,7 @@ namespace NoodleManagerX.Models
                         {
                             if (queue[0] != null && !queue[0].downloading)
                             {
-                                queue[0].Download();
+                                _ = Task.Run(queue[0].Download);
                                 downloading.Add(queue[0]);
                             }
                             queue.Remove(queue[0]);
