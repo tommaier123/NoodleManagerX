@@ -28,7 +28,6 @@ namespace NoodleManagerX
         public static Brush difficultyInactiveBrush;
 
         private Grid blackBar;
-        public MouseDevice mouse;
         private bool lastleftclick = false;
         private bool lastHandled = false;
         private Point lastclickposition;
@@ -57,12 +56,9 @@ namespace NoodleManagerX
 #pragma warning disable 0618
             Application.Current.InputManager.Process.Subscribe(x =>
             {
-                if (mouse == null)
-                {
-                    mouse = (MouseDevice)x.Device;
-                }
                 if (x is RawPointerEventArgs rawpointerevent)
                 {
+                    MouseDevice mouse = (MouseDevice)x.Device;
                     bool leftclick = rawpointerevent.InputModifiers == RawInputModifiers.LeftMouseButton;
 
                     Point mouseonclient = this.PointToClient(mouse.Position);

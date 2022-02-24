@@ -433,7 +433,7 @@
 			</Grid>
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
 				<!--Path, Quest Enabled, Auto Update Content, Disable NM Update Notification-->
-				<Grid RowDefinitions="auto,auto,*,auto">
+				<Grid RowDefinitions="auto,auto,auto,auto,*,auto">
 					<Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Margin="10,10,10,10">
 						<TextBlock Grid.Column="0" Text="Synth Riders Directory" VerticalAlignment="Center"/>
 						<Border Grid.Column="1" Margin="20,0,0,0" BorderBrush="{Binding Path=directoryValid, Converter={StaticResource BoolColorConverter}, ConverterParameter=#aaaaaa|#ff0000}" BorderThickness="1">
@@ -444,10 +444,18 @@
 						</Button>
 					</Grid>
 					<Grid Grid.Row="1" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10">
-						<TextBlock Grid.Column="0" Text="Allow Converts" VerticalAlignment="Center"/>
-						<CheckBox Grid.Column="1" Margin="16,0,0,0" IsChecked="{Binding settings.allowConverts}"/>
+						<CheckBox Grid.Column="0" IsChecked="{Binding settings.allowConverts}"/>
+						<TextBlock Grid.Column="1" Text="Allow Converts" Margin="16,0,0,0" VerticalAlignment="Center"/>
 					</Grid>
-					<TextBlock Grid.Row="4" Text="{Binding version}" VerticalAlignment="Center" Foreground="Gray"/>
+					<Grid Grid.Row="2" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10">
+						<CheckBox Grid.Column="0" IsChecked="{Binding settings.ignoreUpdates}"/>
+						<TextBlock Grid.Column="1" Text="Ignore Updates" Margin="16,0,0,0" VerticalAlignment="Center"/>
+					</Grid>
+					<Grid Grid.Row="3" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10">
+						<CheckBox Grid.Column="0" IsChecked="{Binding settings.getBetas}"/>
+						<TextBlock Grid.Column="1" Text="Update to Beta Versions" Margin="16,0,0,0" VerticalAlignment="Center"/>
+					</Grid>
+					<TextBlock Grid.Row="6" Text="{Binding version}" VerticalAlignment="Center" Foreground="Gray"/>
 				</Grid>
 			</Grid>
 		</Grid>

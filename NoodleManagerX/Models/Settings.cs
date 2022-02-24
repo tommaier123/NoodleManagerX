@@ -12,5 +12,7 @@ namespace NoodleManagerX.Models
     {
         [Reactive] [DataMember] public string synthDirectory { get; set; } = "";
         [Reactive] [DataMember] public bool allowConverts { get; set; } = false;
+        [Reactive] [DataMember] public bool ignoreUpdates { get; set; } = false;
+        [Reactive] [DataMember] public bool getBetas { get; set; } = true;
     }
 }

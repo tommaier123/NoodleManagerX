@@ -24,7 +24,8 @@ using static System.Environment;
 using Path = System.IO.Path;
 using Stream = System.IO.Stream;
 using MemoryStream = System.IO.MemoryStream;
-
+using System.Net;
+using System.Diagnostics;
 
 namespace NoodleManagerX.Models
 {
@@ -36,19 +37,16 @@ namespace NoodleManagerX.Models
 
 
         //Todo:
-        //check which dispatchers should be awaited
-        //better task structure in general
         //possibly remove unnecessary flags from function parameters, use state machine/individual parameters
         //get description when rightclicking an item and display in context menu
         //multiple files
         //update reminder
         //don't leave thread safety up to luck
         //get a updated at timestamp for updating, published at is fine for filesystem timestamp
-        //look at exception handling with tasks
 
 
 
-        [Reactive] private string version { get; set; } = "V0.6.0";
+        [Reactive] private string version { get; set; } = "V0.7.0";
 
         public static MainViewModel s_instance;
 
@@ -120,33 +118,6 @@ namespace NoodleManagerX.Models
             Task.Run(async () =>
             {
                 MainWindow.s_instance.Closing += ClosingEvent;
-
-                await LoadSettings();
-
-                settings.Changed.Subscribe(x => { SaveSettings(); });//save the settings when they change
-
-                this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
-                {
-                    directoryValid = CheckDirectory(synthDirectory);
-                    if (settings.synthDirectory != synthDirectory && directoryValid)
-                    {
-                        settings.synthDirectory = synthDirectory;
-                        ReloadLocalSources(true);
-                    }
-                });
-
-                _ = Dispatcher.UIThread.InvokeAsync(() =>
-                 {
-                     if (!CheckDirectory(settings.synthDirectory))
-                     {
-                         settings.synthDirectory = "";
-                         GetDirectoryFromRegistry();
-                     }
-                     else
-                     {
-                         synthDirectory = settings.synthDirectory;
-                     }
-                 });
 
                 minimizeCommand = ReactiveCommand.Create(() =>
                 {
@@ -274,6 +245,100 @@ namespace NoodleManagerX.Models
                     });
                 }));
 
+                await LoadSettings();
+
+                if (!settings.ignoreUpdates)
+                {
+                    try
+                    {
+                        Octokit.GitHubClient github = new Octokit.GitHubClient(new Octokit.ProductHeaderValue("NoodleManagerX"));
+                        var all = github.Repository.Release.GetAll("tommaier123", "NoodleManagerX").Result;
+                        if (!settings.getBetas) all = all.Where(x => x.Prerelease == false).ToList();
+                        var latest = all.OrderByDescending(x => Int32.Parse(x.TagName.Substring(1).Replace(".", ""))).FirstOrDefault();
+
+                        if (latest != null)
+                        {
+                            if (Int32.Parse(version.Substring(1).Replace(".", "")) < Int32.Parse(latest.TagName.Substring(1).Replace(".", "")))
+                            {
+                                Log("Update available to: " + latest.TagName);
+
+                                string beta = "";
+                                if (latest.Prerelease) beta = "Note: This is a beta version and may contain bugs" + Environment.NewLine;
+
+                                var res = await Dispatcher.UIThread.InvokeAsync(async () =>
+                                {
+                                    return await MessageBox.Show(MainWindow.s_instance, "New Update to " + latest.TagName + " available:" + Environment.NewLine + beta + Environment.NewLine + latest.Body + Environment.NewLine + Environment.NewLine + "Do you want to Download it?", "Update Available", MessageBox.MessageBoxButtons.OkCancel);
+                                });
+
+                                if (res == MessageBox.MessageBoxResult.Ok)
+                                {
+                                    using (var client = new WebClient())
+                                    {
+                                        client.DownloadProgressChanged += (object sender, DownloadProgressChangedEventArgs e) =>
+                                        {
+                                            _ = Dispatcher.UIThread.InvokeAsync(() =>
+                                         {
+                                             progress = e.ProgressPercentage;
+                                         });
+                                        };
+                                        string temp = Path.GetTempPath();
+                                        string location = Path.Combine(temp, "NoodleManagerX.exe");
+                                        string locationHelper = Path.Combine(temp, "UpdateHelper.exe");
+                                        Log("Writing update files to " + temp);
+                                        if (System.IO.File.Exists(location)) System.IO.File.Delete(location);
+                                        await client.DownloadFileTaskAsync("https://github.com/tommaier123/NoodleManagerX/releases/download/" + latest.TagName + "/NoodleManagerX.exe", location);
+
+                                        using (Stream resourceFile = Assembly.GetExecutingAssembly().GetManifestResourceStream("NoodleManagerX.Resources.UpdateHelper.exe"))
+                                        using (System.IO.FileStream fs = System.IO.File.Open(locationHelper, System.IO.FileMode.Create))
+                                        {
+                                            resourceFile.CopyTo(fs);
+                                        }
+
+                                        Process proc = new Process();
+                                        proc.StartInfo.FileName = locationHelper;
+                                        proc.StartInfo.Arguments = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+                                        proc.StartInfo.UseShellExecute = true;
+                                        proc.StartInfo.Verb = "runas";
+                                        proc.Start();
+
+                                        await Dispatcher.UIThread.InvokeAsync(() =>
+                                        {
+                                            closing = true;
+                                            MainWindow.s_instance.Close();
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
+                }
+
+                settings.Changed.Subscribe(x => { SaveSettings(); });//save the settings when they change
+
+                this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
+                {
+                    directoryValid = CheckDirectory(synthDirectory);
+                    if (settings.synthDirectory != synthDirectory && directoryValid)
+                    {
+                        settings.synthDirectory = synthDirectory;
+                        ReloadLocalSources(true);
+                    }
+                });
+
+                _ = Dispatcher.UIThread.InvokeAsync(() =>
+                 {
+                     if (!CheckDirectory(settings.synthDirectory))
+                     {
+                         settings.synthDirectory = "";
+                         GetDirectoryFromRegistry();
+                     }
+                     else
+                     {
+                         synthDirectory = settings.synthDirectory;
+                     }
+                 });
+
                 //the correct number of events needs to be skipped in ordere to avoid duplication
                 //1 for properties that get initialized
                 //2 for properties that get declared and are initialized via bindings
@@ -284,23 +349,13 @@ namespace NoodleManagerX.Models
                 this.WhenAnyValue(x => x.selectedSortMethod).Skip(2).Subscribe(x => GetPage());//reload maps when the sort method changes
                 this.WhenAnyValue(x => x.selectedSortOrder).Skip(2).Subscribe(x => GetPage());//reload maps when the sort order changes
 
-                items.CollectionChanged += ItemsCollectionChanged;
-                blacklist.CollectionChanged += BlacklistCollectionChanged;
+                items.CollectionChanged += (object sender, NotifyCollectionChangedEventArgs e) => UpdateCollections();
+                blacklist.CollectionChanged += (object sender, NotifyCollectionChangedEventArgs e) => SaveBlacklist();
 
                 MtpDevice.Connect();
                 ReloadLocalSources();
                 _ = GetPage();
             });
-        }
-
-        private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            UpdateCollections();
-        }
-
-        private void BlacklistCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            SaveBlacklist();
         }
 
         public void ReloadLocalSources(bool directoryChanged = false)
@@ -481,7 +536,7 @@ namespace NoodleManagerX.Models
                     progress = 1;
                     updatingLocalItems = true;
                 });
-                
+
                 localItems.Clear();
                 bool dbExists = false;
 
@@ -508,7 +563,7 @@ namespace NoodleManagerX.Models
                 {
                     await Dispatcher.UIThread.InvokeAsync(async () =>
                     {
-                        var res = await MessageBox.Show(null, "Click OK to delete maps without metadata e.g. if they were not downloaded from synthriderz.com" + Environment.NewLine + "This will only happen once when loading a new game directory" + Environment.NewLine + "Choosing to cancel might lead to duplicate maps" + Environment.NewLine + "Building the database for the first time can take some minutes", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+                        var res = await MessageBox.Show(MainWindow.s_instance, "Click OK to delete maps without metadata e.g. if they were not downloaded from synthriderz.com" + Environment.NewLine + "This will only happen once when loading a new game directory" + Environment.NewLine + "Choosing to cancel might lead to duplicate maps" + Environment.NewLine + "Building the database for the first time can take some minutes", "Warning", MessageBox.MessageBoxButtons.OkCancel);
                         if (res == MessageBox.MessageBoxResult.Ok)
                         {
                             pruning = true;

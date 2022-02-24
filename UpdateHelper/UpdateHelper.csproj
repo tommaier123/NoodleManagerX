@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <OutputType>Exe</OutputType>
+	  <TargetFrameworks>net5.0-windows</TargetFrameworks>
+	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	  <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+	  <PublishTrimmed>true</PublishTrimmed>
+	  <TrimMode>link</TrimMode>
+	  <DebugType>embedded</DebugType>
+	  <Platforms>AnyCPU;x84</Platforms>
+	  <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+	<ItemGroup>
+		<RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
+	</ItemGroup>
+</Project>
