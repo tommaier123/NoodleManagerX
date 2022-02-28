@@ -55,13 +55,15 @@ namespace NoodleManagerX.Models
                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     MainViewModel.s_instance.progress = 0;
+                    MainViewModel.s_instance.progressText = null;
                 });
             }
             else
             {
                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    MainViewModel.s_instance.progress = 100 - (int)((queue.Count + downloading.Count) / (toDownload * 0.01f));
+                    MainViewModel.s_instance.progress = Math.Min(100 - (int)((queue.Count + downloading.Count) / (toDownload * 0.01f)), 1);
+                    MainViewModel.s_instance.progressText = "Downloading: " + MainViewModel.s_instance.progress + "% (" + (toDownload - queue.Count - downloading.Count) + "/" + toDownload + ")";
                 });
             }
         }

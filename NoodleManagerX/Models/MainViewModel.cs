@@ -40,13 +40,11 @@ namespace NoodleManagerX.Models
         //possibly remove unnecessary flags from function parameters, use state machine/individual parameters
         //get description when rightclicking an item and display in context menu
         //multiple files
-        //update reminder
         //don't leave thread safety up to luck
         //get a updated at timestamp for updating, published at is fine for filesystem timestamp
 
 
-
-        [Reactive] private string version { get; set; } = "V0.7.0";
+        [Reactive] private string version { get; set; } = "V0.7.2";
 
         public static MainViewModel s_instance;
 
@@ -69,6 +67,7 @@ namespace NoodleManagerX.Models
         [Reactive] private string synthDirectory { get; set; }
         [Reactive] public bool directoryValid { get; set; }
         [Reactive] public int progress { get; set; } = 0;
+        [Reactive] public string progressText { get; set; } = null;
         [Reactive] public bool questConnected { get; set; } = false;
         [Reactive] public bool updatingLocalItems { get; set; } = false;
 
@@ -202,6 +201,7 @@ namespace NoodleManagerX.Models
                                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                                 {
                                     progress = 1;
+                                    progressText = "Getting Page";
 
                                 });
                                 foreach (GenericItem item in toDownload)
@@ -279,6 +279,7 @@ namespace NoodleManagerX.Models
                                             _ = Dispatcher.UIThread.InvokeAsync(() =>
                                          {
                                              progress = e.ProgressPercentage;
+                                             progressText = "Updating: " + progress + "%";
                                          });
                                         };
                                         string temp = Path.GetTempPath();
@@ -428,6 +429,7 @@ namespace NoodleManagerX.Models
             if (StorageAbstraction.CanDownload() && !updatingLocalItems)
             {
                 progress = 1;
+                progressText = "Getting All";
                 DownloadScheduler.toDownload = DownloadScheduler.queue.Count;
 
                 return Task.Run(async () =>
@@ -534,6 +536,7 @@ namespace NoodleManagerX.Models
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     progress = 1;
+                    progressText = "Loading Database";
                     updatingLocalItems = true;
                 });
 
@@ -593,7 +596,7 @@ namespace NoodleManagerX.Models
                  {
                      updatingLocalItems = false;
                      progress = 0;
-
+                     progressText = null;
                  });
             });
         }

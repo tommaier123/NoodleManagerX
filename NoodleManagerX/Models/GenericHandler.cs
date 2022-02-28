@@ -61,6 +61,7 @@ namespace NoodleManagerX.Models
                     _ = Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         MainViewModel.s_instance.progress = (int)(i / (localFilenames.Length * 0.01f));
+                        MainViewModel.s_instance.progressText = "Loading Database: " + MainViewModel.s_instance.progress + "% (" + i + "/" + localFilenames.Length + ")";
                     });
 
                     if (extensions.Contains(Path.GetExtension(filename)))
@@ -88,6 +89,7 @@ namespace NoodleManagerX.Models
                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     MainViewModel.s_instance.progress = 0;
+                    MainViewModel.s_instance.progressText = null;
                 });
             }
             catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
@@ -290,17 +292,19 @@ namespace NoodleManagerX.Models
                             }
                             pageCountAll = page.pagecount;
 
-                            if (DownloadScheduler.queue.Count == 0)
+                            if (DownloadScheduler.queue.Count == 0 && DownloadScheduler.downloading.Count == 0)
                             {
                                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                                 {
                                     if (i < pageCountAll)
                                     {
                                         MainViewModel.s_instance.progress = (int)(i / (pageCountAll * 0.01f));
+                                        MainViewModel.s_instance.progressText = "Getting All (checking for new maps): " + MainViewModel.s_instance.progress + "% (" + i + "/" + pageCountAll + ")";
                                     }
                                     else
                                     {
                                         MainViewModel.s_instance.progress = 0;
+                                        MainViewModel.s_instance.progressText = null;
                                     }
                                 });
                             }

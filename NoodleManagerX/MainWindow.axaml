@@ -21,7 +21,18 @@
 		<local:BoolColorConverter x:Key="BoolColorConverter"/>
 		<local:StringToBoolConverter x:Key="StringToBoolConverter"/>
 		<local:NullToBoolConverter x:Key="NullToBoolConverter"/>
-		<SolidColorBrush x:Key = "ControlHeaderColor" Color = "#322680" />
+		<SolidColorBrush x:Key="ControlHeaderColor" Color="#322680"/>
+		<SolidColorBrush x:Key="BackgroundColor" Color="#1a1b1f"/>
+		<SolidColorBrush x:Key="SeparatorColor" Color="#999999"/>
+		<SolidColorBrush x:Key="NotDownloadedColor" Color="#ffffff"/>
+		<SolidColorBrush x:Key="DownloadedColor" Color="#888888"/>
+		<SolidColorBrush x:Key="TabActiveColor" Color="#f91c85"/>
+		<SolidColorBrush x:Key="TabInactiveColor" Color="#aa49e0"/>
+		<SolidColorBrush x:Key="DifficultyActiveColor" Color="#ffffff"/>
+		<SolidColorBrush x:Key="DifficultyInactiveColor" Color="#888888"/>
+		<SolidColorBrush x:Key="CaretColor" Color="#ffffff"/>
+		<SolidColorBrush x:Key="PathValidColor" Color="#aaaaaa"/>
+		<SolidColorBrush x:Key="PathInvalidColor" Color="#ff0000"/>
 	</Window.Resources>
 
 	<Window.Styles>
@@ -30,14 +41,21 @@
 			<Setter Property="FontFamily" Value="resm:NoodleManagerX.Assets.Fonts?assembly=NoodleManagerX#Noto Sans"/>
 		</Style>
 
-
+		<!--ToolTips-->
+		<Style Selector="Button">
+			<Setter Property="ToolTip.ShowDelay" Value="1000"/>
+		</Style>
+		<Style Selector="ComboBox">
+			<Setter Property="ToolTip.ShowDelay" Value="1000"/>
+		</Style>
+		
 		<!--Button without animations-->
 		<Style Selector="Button.BlankButton">
 			<Setter Property="Background" Value="Transparent"/>
 			<Setter Property="BorderThickness" Value="0"/>
 			<Setter Property="Padding" Value="0"/>
 		</Style>
-		<Style Selector="Button.BlankButton ContentPresenter">
+		<Style Selector="Button.BlankButton ContentPresenter:pointerover">
 			<Setter Property="Background" Value="Transparent"/>
 		</Style>
 
@@ -49,7 +67,7 @@
 			<Setter Property="Background" Value="Transparent"/>
 		</Style>
 
-
+		
 		<!--Style for the tab header-->
 		<Style Selector="Button.Tab">
 			<Setter Property="VerticalAlignment" Value="Center"/>
@@ -77,7 +95,7 @@
 			<Setter Property="BorderThickness" Value="0"/>
 		</Style>
 		<Style Selector="ListBox.MyListBox">
-			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Background" Value="{StaticResource BackgroundColor}"/>
 		</Style>
 		<Style Selector="ListBox.MyListBox ScrollViewer">
 			<Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
@@ -97,7 +115,7 @@
 			<Setter Property="FocusAdorner" Value="{x:Null}"/>
 			<Setter Property="ContextMenu">
 				<Setter.Value>
-					<ContextMenu Background="#1a1b1f" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}">
+					<ContextMenu Background="{StaticResource BackgroundColor}" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}">
 						<TextBlock Text="{Binding description}" TextWrapping="Wrap" Width="{Binding Source.Width}"/>
 					</ContextMenu>
 				</Setter.Value>
@@ -107,10 +125,10 @@
 			<Setter Property="Margin" Value="0"/>
 		</Style>
 		<Style Selector="ListBox.MyListBox ListBoxItem:pointerover ContentPresenter">
-			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Background" Value="{StaticResource BackgroundColor}"/>
 		</Style>
 		<Style Selector="ListBox.MyListBox ListBoxItem:selected ContentPresenter">
-			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Background" Value="{StaticResource BackgroundColor}"/>
 		</Style>
 
 		<!--Different List Boxes-->
@@ -156,7 +174,7 @@
 
 		<!--Change text color when downloaded-->
 		<Style Selector="TextBlock.Downloaded">
-			<Setter Property="Foreground" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=#888888|#ffffff}"/>
+			<Setter Property="Foreground" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=DownloadedColor|NotDownloadedColor}"/>
 		</Style>
 
 		<!--Make text overlap the next grid-->
@@ -230,11 +248,19 @@
 												</MultiBinding>
 											</Svg.Path>
 										</Svg>
+										<ToolTip.Tip>
+											<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
+															  ConverterParameter="Download|Downloaded|Downloading|Downloaded">
+												<Binding Path="downloaded"/>
+												<Binding Path="downloading"/>
+											</MultiBinding>
+										</ToolTip.Tip>
 									</Button>
 								</Grid>
 								<!--v buttons v-->
 								<Grid Grid.Column="2" RowDefinitions="auto,auto" VerticalAlignment="Center" Margin="10,0,10,0">
-									<Button Grid.Row="0" Classes="BlankButton" Height="20" Width="20" Margin="0,0,0,5" Command="{Binding playPreviewCommand}" IsVisible="{Binding Path=display_preview, Converter={StaticResource StringToBoolConverter}}">
+									<Button Grid.Row="0" Classes="BlankButton" Height="20" Width="20" Margin="0,0,0,5" Command="{Binding playPreviewCommand}" IsVisible="{Binding Path=display_preview, Converter={StaticResource StringToBoolConverter}}" 
+											ToolTip.Tip="{Binding Path=playing, Converter={StaticResource BoolPathConverter}, ConverterParameter=Play|Stop}">
 										<Svg>
 											<Svg.Path>
 												<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
@@ -255,6 +281,13 @@
 												</MultiBinding>
 											</Svg.Path>
 										</Svg>
+										<ToolTip.Tip>
+											<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
+															  ConverterParameter="Blacklist|Delete|Un-Blacklist|Un-Blacklist">
+												<Binding Path="downloaded"/>
+												<Binding Path="blacklisted"/>
+											</MultiBinding>
+										</ToolTip.Tip>
 									</Button>
 								</Grid>
 							</Grid>
@@ -262,7 +295,7 @@
 						<Canvas Grid.Row="1" >
 							<TextBlock Text="{Binding description}" TextWrapping="Wrap" Width="{Binding Source.Width}" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}"/>
 						</Canvas>
-						<Grid Grid.Row="2" Background="#999999" Height="2"/>
+						<Grid Grid.Row="2" Background="{StaticResource SeparatorColor}" Height="2"/>
 					</Grid>
 				</DataTemplate>
 			</Setter>
@@ -310,7 +343,7 @@
 		<!--Control Header-->
 		<Grid Grid.Row="1" Height="50" Background="{StaticResource ControlHeaderColor}" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}"
 			  ColumnDefinitions="135,auto,auto,auto,*,auto">
-			
+
 			<!--Connect Button-->
 			<Button Grid.Column="0" Classes="BlankButton" Command="{Binding connectQuestCommand}" Height="22" HorizontalAlignment="Left" Margin="32,5,0,0">
 				<Svg>
@@ -322,23 +355,30 @@
 						</MultiBinding>
 					</Svg.Path>
 				</Svg>
+				<ToolTip.Tip>
+					<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
+									  ConverterParameter="Connect Quest|Connecting PC...|Connect PC|Connecting Quest...">
+						<Binding Path="updatingLocalItems"/>
+						<Binding Path="questConnected"/>
+					</MultiBinding>
+				</ToolTip.Tip>
 			</Button>
-			
-			
+
+
 			<!--Search-->
 			<Grid Grid.Column="1" ColumnDefinitions="auto,auto">
 				<StackPanel Grid.Column="0" VerticalAlignment="Center">
-					<TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" Background="Transparent" BorderThickness="0" CaretBrush="#ffffff" Text="{Binding searchText}" Name="SearchBox"/>
+					<TextBox Watermark="Search" Width="200" FontSize="15" Margin="0,0,6,0" Background="{StaticResource ControlHeaderColor}" BorderThickness="0" CaretBrush="{StaticResource CaretColor}" Text="{Binding searchText}" Name="SearchBox"/>
 					<Svg Path="resm:NoodleManagerX.Assets.icons.searchbar.svg" Height="2" Width="200" Stretch="Fill"/>
 				</StackPanel>
-				<Button Grid.Column="1" Classes="BlankButton" Height="22" Command="{Binding searchCommand}">
+				<Button Grid.Column="1" Classes="BlankButton" Height="22" ToolTip.Tip="Search" Command="{Binding searchCommand}">
 					<Svg Path="resm:NoodleManagerX.Assets.icons.search.svg"/>
 				</Button>
 			</Grid>
 
 			<!--Filter-->
 			<Grid Grid.Column="2" ColumnDefinitions="70,70,95,50" Margin="50,0,0,0">
-				<ComboBox Grid.Column="0" Classes="BlankBox" SelectedIndex="{Binding selectedSearchParameterIndex}" SelectedItem="{Binding Path=selectedSearchParameter, Mode=OneWayToSource}">
+				<ComboBox Grid.Column="0" Classes="BlankBox" ToolTip.Tip="Search Parameter" SelectedIndex="{Binding selectedSearchParameterIndex}" SelectedItem="{Binding Path=selectedSearchParameter, Mode=OneWayToSource}">
 					<ComboBoxItem Name="all">All </ComboBoxItem>
 					<ComboBoxItem Name="title" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Title</ComboBoxItem>
 					<ComboBoxItem Name="name" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Title</ComboBoxItem>
@@ -346,7 +386,7 @@
 					<ComboBoxItem Name="mapper" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Mapper</ComboBoxItem>
 					<ComboBoxItem Name="user.username" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Creator</ComboBoxItem>
 				</ComboBox>
-				<ComboBox Grid.Column="1" Classes="BlankBox" SelectedIndex="{Binding selectedDifficultyIndex}" SelectedItem="{Binding Path=selectedDifficulty, Mode=OneWayToSource}"
+				<ComboBox Grid.Column="1" Classes="BlankBox" ToolTip.Tip="Song Difficulty" SelectedIndex="{Binding selectedDifficultyIndex}" SelectedItem="{Binding Path=selectedDifficulty, Mode=OneWayToSource}"
 						  IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
 					<ComboBoxItem Name="All">All</ComboBoxItem>
 					<ComboBoxItem Name="Easy">Easy</ComboBoxItem>
@@ -356,28 +396,28 @@
 					<ComboBoxItem Name="Master">Master</ComboBoxItem>
 					<ComboBoxItem Name="Custom">Custom</ComboBoxItem>
 				</ComboBox>
-				<ComboBox Grid.Column="2" Classes="BlankBox" SelectedIndex="{Binding selectedSortMethodIndex}" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
+				<ComboBox Grid.Column="2" Classes="BlankBox" ToolTip.Tip="Sorting Method" SelectedIndex="{Binding selectedSortMethodIndex}" SelectedItem="{Binding Path=selectedSortMethod, Mode=OneWayToSource}">
 					<ComboBoxItem Name="published_at">Upload Date</ComboBoxItem>
 					<ComboBoxItem Name="score">Hypefactor</ComboBoxItem>
 					<ComboBoxItem Name="rating">Rating</ComboBoxItem>
 					<ComboBoxItem Name="vote_diff">Vote</ComboBoxItem>
 					<ComboBoxItem Name="download_count">Downloads</ComboBoxItem>
 				</ComboBox>
-				<ComboBox Grid.Column="3" Classes="BlankBox" SelectedIndex="{Binding selectedSortOrderIndex}" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
-					<ComboBoxItem Name="DESC">DSC</ComboBoxItem>
-					<ComboBoxItem Name="ASC">ASC</ComboBoxItem>
+				<ComboBox Grid.Column="3" Classes="BlankBox" ToolTip.Tip="Sorting Order" SelectedIndex="{Binding selectedSortOrderIndex}" SelectedItem="{Binding Path=selectedSortOrder, Mode=OneWayToSource}">
+					<ComboBoxItem Name="DESC" ToolTip.Tip="Descending">DSC</ComboBoxItem>
+					<ComboBoxItem Name="ASC" ToolTip.Tip="Ascending">ASC</ComboBoxItem>
 				</ComboBox>
 			</Grid>
 
 			<!--Get-->
 			<Grid Grid.Column="3" ColumnDefinitions="auto,auto" Margin="50,0,0,0">
-				<Button Grid.Column="0" Classes="BlankButton" Command="{Binding getAllCommand}">
+				<Button Grid.Column="0" Classes="BlankButton" Command="{Binding getAllCommand}" ToolTip.Tip="Download all available songs">
 					<Grid RowDefinitions="auto,auto">
 						<TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Get"/>
 						<TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="All"/>
 					</Grid>
 				</Button>
-				<Button Grid.Column="1" Classes="BlankButton" Margin="16,0,0,0" Command="{Binding getPageCommand}">
+				<Button Grid.Column="1" Classes="BlankButton" Margin="16,0,0,0" Command="{Binding getPageCommand}" ToolTip.Tip="Download all songs on this page (max 60)">
 					<Grid RowDefinitions="auto,auto">
 						<TextBlock Grid.Row="0" HorizontalAlignment="Center" Text="Get"/>
 						<TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="Page"/>
@@ -387,7 +427,7 @@
 
 			<!--Pagination-->
 			<Grid Grid.Column="5" ColumnDefinitions="auto,auto,auto,auto,auto" Margin="0,0,20,0">
-				<Button Grid.Column="0" Classes="BlankButton" Command="{Binding pageDownCommand}" Width="12" Height="20" Margin="0,0,5,0">
+				<Button Grid.Column="0" Classes="BlankButton" ToolTip.Tip="Previous Page" Command="{Binding pageDownCommand}" Width="12" Height="20" Margin="0,0,5,0">
 					<Svg Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Width="20">
 						<Svg.RenderTransform>
 							<RotateTransform Angle="-90"/>
@@ -397,7 +437,7 @@
 				<TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding currentPage}"/>
 				<TextBlock Grid.Column="2" VerticalAlignment="Center" Text="/"/>
 				<TextBlock Grid.Column="3" VerticalAlignment="Center" Text="{Binding numberOfPages}"/>
-				<Button Grid.Column="4" Classes="BlankButton" Command="{Binding pageUpCommand}" Width="12" Height="20" Margin="5,0,0,0">
+				<Button Grid.Column="4" Classes="BlankButton" ToolTip.Tip="Next Page" Command="{Binding pageUpCommand}" Width="12" Height="20" Margin="5,0,0,0">
 					<Svg Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Width="20">
 						<Svg.RenderTransform>
 							<RotateTransform Angle="90"/>
@@ -408,12 +448,12 @@
 		</Grid>
 
 		<!--Progress bar-->
-		<Grid Grid.Row="2" Height="2" Background="Transparent" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}">
-			<ProgressBar Height="2" MinHeight="2" Foreground="green" Background="Transparent" Value="{Binding Path=progress}"/>
+		<Grid Grid.Row="2" Height="10" ToolTip.Tip="{Binding progressText}" ToolTip.VerticalOffset="-2" ToolTip.HorizontalOffset="16" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0-1-2-3-4}">
+			<ProgressBar Height="2" MinHeight="2" Foreground="green" Background="{StaticResource BackgroundColor}" Value="{Binding Path=progress}" VerticalAlignment="Top"/>
 		</Grid>
 
 		<!--Tab content-->
-		<Grid Grid.Row="3" Margin="10,8,10,10">
+		<Grid Grid.Row="3" Margin="10,0,10,10">
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
 				<ListBox Items="{Binding Path=maps}" Classes="MyListBox MyListBoxSmall ContentItem"/>
 			</Grid>
@@ -432,18 +472,17 @@
 				<!--<TextBlock Text="These are the tools (Sync to Quest, Sync to PC, Download Songs from Playlist, Setup Twitch Integration)"/>-->
 			</Grid>
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
-				<!--Path, Quest Enabled, Auto Update Content, Disable NM Update Notification-->
 				<Grid RowDefinitions="auto,auto,auto,auto,*,auto">
 					<Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Margin="10,10,10,10">
 						<TextBlock Grid.Column="0" Text="Synth Riders Directory" VerticalAlignment="Center"/>
-						<Border Grid.Column="1" Margin="20,0,0,0" BorderBrush="{Binding Path=directoryValid, Converter={StaticResource BoolColorConverter}, ConverterParameter=#aaaaaa|#ff0000}" BorderThickness="1">
+						<Border Grid.Column="1" Margin="20,0,0,0" BorderBrush="{Binding Path=directoryValid, Converter={StaticResource BoolColorConverter}, ConverterParameter=PathValidColor|PathInvalidColor}" BorderThickness="1">
 							<TextBox Text="{Binding synthDirectory}" BorderThickness="0"/>
 						</Border>
 						<Button Grid.Column="2" Margin="16,0,0,0" Command="{Binding selectDirectoryCommand}">
 							<TextBlock Text="Select"/>
 						</Button>
 					</Grid>
-					<Grid Grid.Row="1" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10">
+					<Grid Grid.Row="1" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10" ToolTip.Tip="Converted maps often have a lower mapping quality">
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.allowConverts}"/>
 						<TextBlock Grid.Column="1" Text="Allow Converts" Margin="16,0,0,0" VerticalAlignment="Center"/>
 					</Grid>
@@ -451,7 +490,7 @@
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.ignoreUpdates}"/>
 						<TextBlock Grid.Column="1" Text="Ignore Updates" Margin="16,0,0,0" VerticalAlignment="Center"/>
 					</Grid>
-					<Grid Grid.Row="3" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10">
+					<Grid Grid.Row="3" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10" ToolTip.Tip="Beta versions have the latest features but might contain bugs">
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.getBetas}"/>
 						<TextBlock Grid.Column="1" Text="Update to Beta Versions" Margin="16,0,0,0" VerticalAlignment="Center"/>
 					</Grid>

@@ -9,6 +9,7 @@
     <TrimMode>link</TrimMode>
     <DebugType>embedded</DebugType>
     <Platforms>AnyCPU;x64</Platforms>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />

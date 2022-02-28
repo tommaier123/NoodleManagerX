@@ -284,7 +284,7 @@ namespace NoodleManagerX.Models
                 try
                 {
                     StorageAbstraction.DeleteFile(Path.Combine(target, filename));
-                    MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && x.itemType == itemType && x.filename == filename).ToList();
+                    MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && !(x.itemType == itemType && x.filename == filename)).ToList();
                     return true;
                 }
                 catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
