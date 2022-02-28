@@ -55,7 +55,7 @@
 			<Setter Property="BorderThickness" Value="0"/>
 			<Setter Property="Padding" Value="0"/>
 		</Style>
-		<Style Selector="Button.BlankButton ContentPresenter:pointerover">
+		<Style Selector="Button.BlankButton:pointerover > ContentPresenter">
 			<Setter Property="Background" Value="Transparent"/>
 		</Style>
 
@@ -124,11 +124,11 @@
 		<Style Selector="ListBox.MyListBox ItemsPresenter">
 			<Setter Property="Margin" Value="0"/>
 		</Style>
-		<Style Selector="ListBox.MyListBox ListBoxItem:pointerover ContentPresenter">
-			<Setter Property="Background" Value="{StaticResource BackgroundColor}"/>
+		<Style Selector="ListBox.MyListBox ListBoxItem:pointerover > ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
 		</Style>
-		<Style Selector="ListBox.MyListBox ListBoxItem:selected ContentPresenter">
-			<Setter Property="Background" Value="{StaticResource BackgroundColor}"/>
+		<Style Selector="ListBox.MyListBox ListBoxItem:selected > ContentPresenter">
+			<Setter Property="Background" Value="Transparent"/>
 		</Style>
 
 		<!--Different List Boxes-->
