@@ -37,7 +37,6 @@ namespace NoodleManagerX.Models
 
 
         //Todo:
-        //possibly remove unnecessary flags from function parameters, use state machine/individual parameters
         //get description when rightclicking an item and display in context menu
         //multiple files
         //don't leave thread safety up to luck
@@ -82,6 +81,7 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> getPageCommand { get; set; }
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
         public ReactiveCommand<Unit, Unit> connectQuestCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> openLogsCommand { get; set; }
 
         public ObservableCollection<GenericItem> items { get; set; } = new ObservableCollection<GenericItem>();
         public ObservableCollection<string> blacklist { get; set; } = new ObservableCollection<string>();
@@ -149,7 +149,7 @@ namespace NoodleManagerX.Models
                     }
                 });
 
-                tabSelectCommand = ReactiveCommand.Create<string>((x =>
+                tabSelectCommand = ReactiveCommand.Create<string>(x =>
                 {
                     selectedTabIndex = Int32.Parse(x);
                     currentPage = 1;
@@ -160,35 +160,35 @@ namespace NoodleManagerX.Models
                     selectedSortMethodIndex = 0;
                     selectedSortOrderIndex = 0;
                     GetPage();
-                }));
+                });
 
-                pageUpCommand = ReactiveCommand.Create((() =>
+                pageUpCommand = ReactiveCommand.Create(() =>
                 {
                     if (currentPage < numberOfPages)
                     {
                         currentPage++;
                     }
-                }));
+                });
 
-                pageDownCommand = ReactiveCommand.Create((() =>
+                pageDownCommand = ReactiveCommand.Create(() =>
                 {
                     if (currentPage > 1)
                     {
                         currentPage--;
                     }
-                }));
+                });
 
-                searchCommand = ReactiveCommand.Create((() =>
+                searchCommand = ReactiveCommand.Create(() =>
                 {
                     GetPage();
-                }));
+                });
 
-                getAllCommand = ReactiveCommand.Create((() =>
+                getAllCommand = ReactiveCommand.Create(() =>
                 {
                     GetAll();
-                }));
+                });
 
-                getPageCommand = ReactiveCommand.Create((() =>
+                getPageCommand = ReactiveCommand.Create(() =>
                 {
                     Task.Run(() =>
                     {
@@ -211,14 +211,14 @@ namespace NoodleManagerX.Models
                             }
                         }
                     });
-                }));
+                });
 
-                selectDirectoryCommand = ReactiveCommand.Create((() =>
+                selectDirectoryCommand = ReactiveCommand.Create(() =>
                 {
                     selectDirectory();
-                }));
+                });
 
-                connectQuestCommand = ReactiveCommand.Create((() =>
+                connectQuestCommand = ReactiveCommand.Create(() =>
                 {
                     Task.Run(async () =>
                     {
@@ -243,7 +243,12 @@ namespace NoodleManagerX.Models
                             OpenErrorDialog("Can't disconnect while downloads are running");
                         }
                     });
-                }));
+                });
+
+                openLogsCommand = ReactiveCommand.Create(() =>
+                {
+                    Process.Start("explorer.exe", Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX"));
+                });
 
                 await LoadSettings();
 
@@ -468,7 +473,7 @@ namespace NoodleManagerX.Models
 
             if (!String.IsNullOrEmpty(path))
             {
-                if (System.IO.Directory.Exists(path) && System.IO.File.Exists(Path.Combine(path, "SynthRiders.exe"))) ret = true;
+                ret = System.IO.Directory.Exists(path) && (settings.skipDirectoryCheck || System.IO.File.Exists(Path.Combine(path, "SynthRiders.exe")));
             }
 
             if (showDialog && !ret)

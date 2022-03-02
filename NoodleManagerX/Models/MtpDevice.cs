@@ -48,7 +48,7 @@ namespace NoodleManagerX.Models
                 {
                     if (devices.Count() > 0)
                     {
-                        MainViewModel.s_instance.OpenErrorDialog("Found " + devices.Count() + " MTP devices but none of them had the SynthRidersUC folder" + Environment.NewLine + String.Join(Environment.NewLine, devices.Select(x => x.FriendlyName)));
+                        MainViewModel.s_instance.OpenErrorDialog("Found " + devices.Count() + " MTP devices but none of them had the SynthRidersUC folder:" + Environment.NewLine + String.Join(Environment.NewLine, devices.Select(x => x.FriendlyName + " (" + x.Description + ")")) + Environment.NewLine + "If your device is not listed above make sure to allow storage access on the headset");
                     }
                     else
                     {

@@ -10,9 +10,10 @@ namespace NoodleManagerX.Models
     [DataContract]
     class Settings : ReactiveObject
     {
-        [Reactive] [DataMember] public string synthDirectory { get; set; } = "";
-        [Reactive] [DataMember] public bool allowConverts { get; set; } = false;
-        [Reactive] [DataMember] public bool ignoreUpdates { get; set; } = false;
-        [Reactive] [DataMember] public bool getBetas { get; set; } = true;
+        [Reactive][DataMember] public string synthDirectory { get; set; } = "";
+        [Reactive][DataMember] public bool skipDirectoryCheck { get; set; } = false;
+        [Reactive][DataMember] public bool allowConverts { get; set; } = false;
+        [Reactive][DataMember] public bool ignoreUpdates { get; set; } = false;
+        [Reactive][DataMember] public bool getBetas { get; set; } = true;
     }
 }
