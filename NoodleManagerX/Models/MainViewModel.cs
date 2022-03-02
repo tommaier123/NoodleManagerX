@@ -82,6 +82,10 @@ namespace NoodleManagerX.Models
         public ReactiveCommand<Unit, Unit> selectDirectoryCommand { get; set; }
         public ReactiveCommand<Unit, Unit> connectQuestCommand { get; set; }
         public ReactiveCommand<Unit, Unit> openLogsCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> twitterCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> githubCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> twitchCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> youtubeCommand { get; set; }
 
         public ObservableCollection<GenericItem> items { get; set; } = new ObservableCollection<GenericItem>();
         public ObservableCollection<string> blacklist { get; set; } = new ObservableCollection<string>();
@@ -249,6 +253,11 @@ namespace NoodleManagerX.Models
                 {
                     Process.Start("explorer.exe", Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX"));
                 });
+
+                twitterCommand = ReactiveCommand.Create(() => { Process.Start(new ProcessStartInfo("https://twitter.com/Nova_Max_") { UseShellExecute = true }); });
+                githubCommand = ReactiveCommand.Create(() => { Process.Start(new ProcessStartInfo("https://github.com/tommaier123/NoodleManagerX") { UseShellExecute = true }); });
+                twitchCommand = ReactiveCommand.Create(() => { Process.Start(new ProcessStartInfo("https://www.twitch.tv/nova_max_") { UseShellExecute = true }); });
+                youtubeCommand = ReactiveCommand.Create(() => { Process.Start(new ProcessStartInfo("https://www.youtube.com/channel/UCMebdv6hmIddqPee9AtO6Nw") { UseShellExecute = true }); });
 
                 await LoadSettings();
 

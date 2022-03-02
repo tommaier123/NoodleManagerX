@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   fill="#000000"
+   viewBox="0 0 24 24"
+   width="24px"
+   height="24px"
+   version="1.1"
+   id="svg1000"
+   sodipodi:docname="twitch.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1004" />
+  <sodipodi:namedview
+     id="namedview1002"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="27.333333"
+     inkscape:cx="12"
+     inkscape:cy="11.945122"
+     inkscape:window-width="1920"
+     inkscape:window-height="1057"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1000"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-page="false" />
+  <path
+     d="m 6.748326,3.0000001 c -0.2742857,0 -0.5319375,0.1303795 -0.6930804,0.3532366 L 3.592634,6.7500001 C 3.4863483,6.8965716 3.4285715,7.0730492 3.4285715,7.2539064 V 17.571429 c 0,0.473142 0.384,0.857142 0.8571429,0.857142 h 3.428571 v 1.714286 C 7.7142854,20.616 8.0982854,21 8.5714284,21 h 1.359375 c 0.2271426,0 0.4448836,-0.08997 0.6060266,-0.251116 l 2.069196,-2.069196 c 0.160286,-0.161143 0.378884,-0.251117 0.606027,-0.251117 h 2.718751 c 0.227142,0 0.444883,-0.08997 0.606026,-0.251116 l 3.783482,-3.783482 c 0.161143,-0.160285 0.251116,-0.378883 0.251116,-0.606026 V 3.857143 c 0,-0.4731429 -0.384,-0.8571429 -0.857143,-0.8571429 z M 6.8571434,4.7142858 H 18.857142 V 12.428571 L 16.285714,15 H 12 L 9.4285715,17.571429 V 15 H 6.8571435 Z M 12,7.2857144 c -0.473143,0 -0.857144,0.384 -0.857144,0.8571429 v 2.5714287 c 0,0.473143 0.384001,0.857143 0.857144,0.857143 0.473142,0 0.857142,-0.384 0.857142,-0.857143 V 8.1428573 c 0,-0.4731429 -0.384,-0.8571429 -0.857142,-0.8571429 z m 4.285714,0 c -0.473143,0 -0.857143,0.384 -0.857143,0.8571429 v 2.5714287 c 0,0.473143 0.384,0.857143 0.857143,0.857143 0.473143,0 0.857143,-0.384 0.857143,-0.857143 V 8.1428573 c 0,-0.4731429 -0.384,-0.8571429 -0.857143,-0.8571429 z"
+     id="path998"
+     style="fill:#888888;fill-opacity:1;stroke-width:1" />
+</svg>

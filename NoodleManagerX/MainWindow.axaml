@@ -190,6 +190,18 @@
 			<Setter Property="UseLayoutRounding" Value="True"/>
 		</Style>
 
+		<!--Settings-->
+		<Style Selector="Grid.SettingsGrid">
+			<Setter Property="Margin" Value="10,10,10,10"/>
+		</Style>
+		<Style Selector="TextBlock.SettingsLabel">
+			<Setter Property="Margin" Value="16,0,0,0"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="Button.Socials">
+			<Setter Property="Margin" Value="2,0,2,0"/>
+		</Style>
+
 		<!--Template for listbox items of maps, playlists, stages and avatars-->
 		<Style Selector="ListBox.ContentItem" >
 			<Setter Property="ItemTemplate">
@@ -473,7 +485,7 @@
 			</Grid>
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
 				<Grid RowDefinitions="auto,auto,auto,auto,auto,auto,*,auto">
-					<Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Margin="10,10,10,10" ToolTip.Tip="You probably don't need to change this, it is automatic for PC and unused for Quest">
+					<Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Classes="SettingsGrid" ToolTip.Tip="You probably don't need to change this, it is automatic for PC and unused for Quest">
 						<TextBlock Grid.Column="0" Text="Synth Riders Directory" VerticalAlignment="Center"/>
 						<Border Grid.Column="1" Margin="20,0,0,0" BorderBrush="{Binding Path=directoryValid, Converter={StaticResource BoolColorConverter}, ConverterParameter=PathValidColor|PathInvalidColor}" BorderThickness="1">
 							<TextBox Text="{Binding synthDirectory}" BorderThickness="0"/>
@@ -482,26 +494,40 @@
 							<TextBlock Text="Select"/>
 						</Button>
 					</Grid>
-					<Grid Grid.Row="1" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10" ToolTip.Tip="Ony enable this if you know what you are doing">
+					<Grid Grid.Row="1" ColumnDefinitions="auto,auto,*" Classes="SettingsGrid" ToolTip.Tip="Ony enable this if you know what you are doing">
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.skipDirectoryCheck}"/>
-						<TextBlock Grid.Column="1" Text="Skip Directory Check" Margin="16,0,0,0" VerticalAlignment="Center"/>
+						<TextBlock Grid.Column="1" Text="Skip Directory Check" Classes="SettingsLabel"/>
 					</Grid>
-					<Grid Grid.Row="2" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10" ToolTip.Tip="Converted maps often have a lower mapping quality">
+					<Grid Grid.Row="2" ColumnDefinitions="auto,auto,*" Classes="SettingsGrid" ToolTip.Tip="Converted maps often have a lower mapping quality">
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.allowConverts}"/>
-						<TextBlock Grid.Column="1" Text="Allow Converts" Margin="16,0,0,0" VerticalAlignment="Center"/>
+						<TextBlock Grid.Column="1" Text="Allow Converts" Classes="SettingsLabel"/>
 					</Grid>
-					<Grid Grid.Row="3" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10" ToolTip.Tip="Less annoying but you won't get bugfixes">
+					<Grid Grid.Row="3" ColumnDefinitions="auto,auto,*" Classes="SettingsGrid" ToolTip.Tip="Less annoying but you won't get bugfixes">
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.ignoreUpdates}"/>
-						<TextBlock Grid.Column="1" Text="Ignore Updates" Margin="16,0,0,0" VerticalAlignment="Center"/>
+						<TextBlock Grid.Column="1" Text="Ignore Updates" Classes="SettingsLabel"/>
 					</Grid>
-					<Grid Grid.Row="4" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10" ToolTip.Tip="Beta versions have the latest features but might contain bugs">
+					<Grid Grid.Row="4" ColumnDefinitions="auto,auto,*" Classes="SettingsGrid" ToolTip.Tip="Beta versions have the latest features but might contain bugs">
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.getBetas}"/>
-						<TextBlock Grid.Column="1" Text="Update to Beta Versions" Margin="16,0,0,0" VerticalAlignment="Center"/>
+						<TextBlock Grid.Column="1" Text="Update to Beta Versions" Classes="SettingsLabel"/>
 					</Grid>
-					<Grid Grid.Row="5" ColumnDefinitions="auto,auto,*" Margin="10,10,10,10" ToolTip.Tip="Open the log file location">
+					<Grid Grid.Row="5" ColumnDefinitions="auto" Classes="SettingsGrid" ToolTip.Tip="Open the log file location">
 						<Button Command="{Binding openLogsCommand}">Logs</Button>
 					</Grid>
-					<TextBlock Grid.Row="7" Text="{Binding version}" VerticalAlignment="Center" Foreground="Gray"/>
+					<Grid Grid.Row="7" ColumnDefinitions="auto,*,auto,auto,auto,auto">
+						<TextBlock Grid.Column="0" Text="{Binding version}" VerticalAlignment="Center" Foreground="{StaticResource DownloadedColor}"/>
+						<Button Grid.Column="2" Classes="BlankButton Socials" Command="{Binding twitterCommand}">
+							<Svg Path="resm:NoodleManagerX.Assets.icons.twitter.svg"/>
+						</Button>
+						<Button Grid.Column="3" Classes="BlankButton Socials" Command="{Binding githubCommand}">
+							<Svg Path="resm:NoodleManagerX.Assets.icons.github.svg"/>
+						</Button>
+						<Button Grid.Column="4" Classes="BlankButton Socials" Command="{Binding twitchCommand}">
+							<Svg Path="resm:NoodleManagerX.Assets.icons.twitch.svg"/>
+						</Button>
+						<Button Grid.Column="5" Classes="BlankButton Socials" Command="{Binding youtubeCommand}">
+							<Svg Path="resm:NoodleManagerX.Assets.icons.youtube.svg"/>
+						</Button>
+					</Grid>
 				</Grid>
 			</Grid>
 		</Grid>
