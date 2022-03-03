@@ -484,7 +484,7 @@
 				<!--<TextBlock Text="These are the tools (Sync to Quest, Sync to PC, Download Songs from Playlist, Setup Twitch Integration)"/>-->
 			</Grid>
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
-				<Grid RowDefinitions="auto,auto,auto,auto,auto,auto,*,auto">
+				<Grid RowDefinitions="auto,auto,auto,auto,auto,auto,auto,*,auto">
 					<Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Classes="SettingsGrid" ToolTip.Tip="You probably don't need to change this, it is automatic for PC and unused for Quest">
 						<TextBlock Grid.Column="0" Text="Synth Riders Directory" VerticalAlignment="Center"/>
 						<Border Grid.Column="1" Margin="20,0,0,0" BorderBrush="{Binding Path=directoryValid, Converter={StaticResource BoolColorConverter}, ConverterParameter=PathValidColor|PathInvalidColor}" BorderThickness="1">
@@ -510,10 +510,16 @@
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.getBetas}"/>
 						<TextBlock Grid.Column="1" Text="Update to Beta Versions" Classes="SettingsLabel"/>
 					</Grid>
-					<Grid Grid.Row="5" ColumnDefinitions="auto" Classes="SettingsGrid" ToolTip.Tip="Open the log file location">
+					<Grid Grid.Row="5" ColumnDefinitions="auto,auto,*" Classes="SettingsGrid">
+						<Slider Grid.Column="1" Width="150" Margin="5,0,0,0" Value="{Binding previewVolume}">
+
+						</Slider>
+						<TextBlock Grid.Column="0" Text="Preview Volume" VerticalAlignment="Center"/>
+					</Grid>
+					<Grid Grid.Row="6" ColumnDefinitions="auto" Classes="SettingsGrid" ToolTip.Tip="Open the log file location">
 						<Button Command="{Binding openLogsCommand}">Logs</Button>
 					</Grid>
-					<Grid Grid.Row="7" ColumnDefinitions="auto,*,auto,auto,auto,auto">
+					<Grid Grid.Row="8" ColumnDefinitions="auto,*,auto,auto,auto,auto">
 						<TextBlock Grid.Column="0" Text="{Binding version}" VerticalAlignment="Center" Foreground="{StaticResource DownloadedColor}"/>
 						<Button Grid.Column="2" Classes="BlankButton Socials" Command="{Binding twitterCommand}">
 							<Svg Path="resm:NoodleManagerX.Assets.icons.twitter.svg"/>

@@ -69,6 +69,7 @@ namespace NoodleManagerX.Models
         [Reactive] public string progressText { get; set; } = null;
         [Reactive] public bool questConnected { get; set; } = false;
         [Reactive] public bool updatingLocalItems { get; set; } = false;
+        [Reactive] public int previewVolume { get; set; } = 50;
 
         public ReactiveCommand<Unit, Unit> minimizeCommand { get; set; }
         public ReactiveCommand<Unit, Unit> toggleFullscreenCommand { get; set; }
@@ -99,15 +100,15 @@ namespace NoodleManagerX.Models
         public AdbServer adbServer = new AdbServer();
         public AdbClient adbClient = new AdbClient();
 
-        public bool closing = false;
-        public bool downloadPage = false;//so that loading maps get downloaded when using get page
-        public bool getAllRunning = false;
         public bool pruning = false;//maps without metadata should be deleted
-        public bool savingDB = false;
-        public bool savingBlacklist = false;
-        public bool savingSettings = false;
+        public bool downloadPage = false;//so that loading maps get downloaded when using get page
+        public volatile bool closing = false;
+        public volatile bool getAllRunning = false;
+        public volatile bool savingDB = false;
+        public volatile bool savingBlacklist = false;
+        public volatile bool savingSettings = false;
 
-        public int apiRequestCounter = 0;
+        public volatile int apiRequestCounter = 0;
 
         public MapHandler mapHandler = new MapHandler();
         public PlaylistHandler playlistHandler = new PlaylistHandler();
@@ -251,7 +252,7 @@ namespace NoodleManagerX.Models
 
                 openLogsCommand = ReactiveCommand.Create(() =>
                 {
-                    Process.Start("explorer.exe", Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX"));
+                    Process.Start(new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX")) { UseShellExecute = true });
                 });
 
                 twitterCommand = ReactiveCommand.Create(() => { Process.Start(new ProcessStartInfo("https://twitter.com/Nova_Max_") { UseShellExecute = true }); });
@@ -331,6 +332,19 @@ namespace NoodleManagerX.Models
 
                 settings.Changed.Subscribe(x => { SaveSettings(); });//save the settings when they change
 
+                if (!CheckDirectory(settings.synthDirectory))
+                {
+                    settings.synthDirectory = "";
+                    GetDirectoryFromRegistry();
+                }
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    synthDirectory = settings.synthDirectory;
+                    directoryValid = CheckDirectory(settings.synthDirectory);
+                    previewVolume = settings.previewVolume;
+                });
+
                 this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
                 {
                     directoryValid = CheckDirectory(synthDirectory);
@@ -341,18 +355,10 @@ namespace NoodleManagerX.Models
                     }
                 });
 
-                _ = Dispatcher.UIThread.InvokeAsync(() =>
-                 {
-                     if (!CheckDirectory(settings.synthDirectory))
-                     {
-                         settings.synthDirectory = "";
-                         GetDirectoryFromRegistry();
-                     }
-                     else
-                     {
-                         synthDirectory = settings.synthDirectory;
-                     }
-                 });
+                this.WhenAnyValue(x => x.previewVolume).Skip(1).Subscribe(x =>
+                {
+                    PlaybackHandler.SetVolume(previewVolume);
+                });
 
                 //the correct number of events needs to be skipped in ordere to avoid duplication
                 //1 for properties that get initialized
@@ -530,7 +536,7 @@ namespace NoodleManagerX.Models
                         directory = string.Concat(directory.Split(Path.GetInvalidPathChars()));
                         if (!String.IsNullOrEmpty(directory) && CheckDirectory(directory))
                         {
-                            synthDirectory = directory.Trim('\\');
+                            settings.synthDirectory = directory.Trim('\\');
                         }
                     }
                 }
@@ -621,6 +627,7 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
+                    if (savingDB) return;
                     if (StorageAbstraction.CanDownload(true))
                     {
                         savingDB = true;
@@ -667,8 +674,11 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
+                    if (savingSettings) return;
                     savingSettings = true;
                     MainViewModel.Log("Saving Settings");
+
+                    settings.previewVolume = previewVolume;
                     string output = JsonConvert.SerializeObject(settings);
 
                     string directory = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData), "NoodleManagerX");
@@ -720,6 +730,7 @@ namespace NoodleManagerX.Models
             {
                 try
                 {
+                    if (savingBlacklist) return;
                     if (StorageAbstraction.CanDownload(true))
                     {
                         savingBlacklist = true;
@@ -780,7 +791,8 @@ namespace NoodleManagerX.Models
         private async void CloseSafely()
         {
             DownloadScheduler.queue.Clear();
-            await SaveLocalItems();
+            //await SaveLocalItems(); //this will miss items that were deleted but they will be removed from the db on launch
+            await SaveSettings();
             closing = true;
 
             _ = Task.Run(async () =>

@@ -11,10 +11,9 @@ namespace NoodleManagerX.Models
 {
     static class PlaybackHandler
     {
-        private static MapItem currentlyPlaying;
+        public static MapItem currentlyPlaying;
         private static YoutubeClient youtubeClient = new YoutubeClient();
         private const string regex = @"^.*((youtu\.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*";
-        private static int requestCounter = 0;
         private static WaveOutEvent waveout;
 
         public static void Play(MapItem item)
@@ -39,9 +38,6 @@ namespace NoodleManagerX.Models
 
                     try
                     {
-                        requestCounter++;
-                        int requestID = requestCounter;
-
                         var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(id);
 
                         var streamInfo = streamManifest.GetAudioOnlyStreams().OrderBy(x => x.Bitrate).FirstOrDefault();
@@ -50,6 +46,7 @@ namespace NoodleManagerX.Models
                         using (waveout = new WaveOutEvent())
                         {
                             waveout.Init(mf);
+                            SetVolume(MainViewModel.s_instance.previewVolume);
                             waveout.Play();
                             while (waveout.PlaybackState == PlaybackState.Playing)
                             {
@@ -67,12 +64,23 @@ namespace NoodleManagerX.Models
             });
         }
 
+        public static void SetVolume(int volume)
+        {
+            if (waveout != null)
+            {
+                waveout.Volume = volume / 100f;
+            }
+        }
+
         public static void Stop()
         {
 
             try
             {
-                waveout.Stop();
+                if (waveout != null)
+                {
+                    waveout.Stop();
+                }
             }
             catch (Exception e)
             {
@@ -90,7 +98,6 @@ namespace NoodleManagerX.Models
             if (currentlyPlaying == playing)
             {
                 currentlyPlaying = null;
-                requestCounter++;
             }
         }
     }

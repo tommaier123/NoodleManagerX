@@ -15,7 +15,7 @@ namespace NoodleManagerX.Models
         public const int maxDownloadAttempts = 3;
         public static int toDownload = 0;
 
-        private static bool running = false;
+        private static volatile bool running = false;
 
         static DownloadScheduler()
         {

@@ -112,6 +112,12 @@ namespace NoodleManagerX.Models
         [OnDeserialized]
         private void OnDeserializedMethod(StreamingContext context)
         {
+            if (PlaybackHandler.currentlyPlaying?.filename == filename)
+            {
+                playing = PlaybackHandler.currentlyPlaying.playing;
+                PlaybackHandler.currentlyPlaying = this;
+            }
+
             playPreviewCommand = ReactiveCommand.Create((() =>
             {
                 PlaybackHandler.Play(this);
