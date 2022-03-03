@@ -43,7 +43,7 @@ namespace NoodleManagerX.Models
         //get a updated at timestamp for updating, published at is fine for filesystem timestamp
 
 
-        [Reactive] private string version { get; set; } = "V0.7.2";
+        [Reactive] private string version { get; set; } = "V1.0.0";
 
         public static MainViewModel s_instance;
 
@@ -360,15 +360,12 @@ namespace NoodleManagerX.Models
                     PlaybackHandler.SetVolume(previewVolume);
                 });
 
-                //the correct number of events needs to be skipped in ordere to avoid duplication
-                //1 for properties that get initialized
-                //2 for properties that get declared and are initialized via bindings
-
+                //the correct number of events needs to be skipped in ordere to avoid duplication, this depends on the initialization order of view and viewModel
                 this.WhenAnyValue(x => x.currentPage).Skip(1).Subscribe(x => GetPage());//reload maps when the current page changes
-                this.WhenAnyValue(x => x.selectedSearchParameter).Skip(2).Subscribe(x => GetPage());//reload maps when the search parameter changes
-                this.WhenAnyValue(x => x.selectedDifficulty).Skip(2).Subscribe(x => GetPage());//reload maps when the search difficulty changes
-                this.WhenAnyValue(x => x.selectedSortMethod).Skip(2).Subscribe(x => GetPage());//reload maps when the sort method changes
-                this.WhenAnyValue(x => x.selectedSortOrder).Skip(2).Subscribe(x => GetPage());//reload maps when the sort order changes
+                this.WhenAnyValue(x => x.selectedSearchParameter).Skip(1).Subscribe(x => GetPage());//reload maps when the search parameter changes
+                this.WhenAnyValue(x => x.selectedDifficulty).Skip(1).Subscribe(x => GetPage());//reload maps when the search difficulty changes
+                this.WhenAnyValue(x => x.selectedSortMethod).Skip(1).Subscribe(x => GetPage());//reload maps when the sort method changes
+                this.WhenAnyValue(x => x.selectedSortOrder).Skip(1).Subscribe(x => GetPage());//reload maps when the sort order changes
 
                 items.CollectionChanged += (object sender, NotifyCollectionChangedEventArgs e) => UpdateCollections();
                 blacklist.CollectionChanged += (object sender, NotifyCollectionChangedEventArgs e) => SaveBlacklist();
