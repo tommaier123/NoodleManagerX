@@ -307,14 +307,28 @@ namespace NoodleManagerX.Models
                                         using (Stream resourceFile = Assembly.GetExecutingAssembly().GetManifestResourceStream("NoodleManagerX.Resources.UpdateHelper.exe"))
                                         using (System.IO.FileStream fs = System.IO.File.Open(locationHelper, System.IO.FileMode.Create))
                                         {
-                                            resourceFile.CopyTo(fs);
+                                            await resourceFile.CopyToAsync(fs);
                                         }
 
+                                        string filename = Process.GetCurrentProcess().MainModule.FileName;
                                         Process proc = new Process();
                                         proc.StartInfo.FileName = locationHelper;
-                                        proc.StartInfo.Arguments = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+                                        proc.StartInfo.Arguments = "\"" + filename + "\"";
                                         proc.StartInfo.UseShellExecute = true;
-                                        proc.StartInfo.Verb = "runas";
+
+                                        string testfile = Path.Combine(Path.GetDirectoryName(filename), "NmUpdate_can_be_deleted");
+                                        try
+                                        {
+                                            using (System.IO.FileStream fs = System.IO.File.Open(testfile, System.IO.FileMode.Create)) { }
+                                        }
+                                        catch (UnauthorizedAccessException)
+                                        {
+                                            Log("Needs admin permissions to update");
+                                            proc.StartInfo.Verb = "runas";
+                                        }
+                                        catch { }
+                                        finally { try { System.IO.File.Delete(testfile); } catch { } }
+
                                         proc.Start();
 
                                         await Dispatcher.UIThread.InvokeAsync(() =>
