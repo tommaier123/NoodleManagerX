@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <OutputType>Exe</OutputType>
+	  <OutputType>WinExe</OutputType>
 	  <TargetFrameworks>net5.0-windows</TargetFrameworks>
 	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	  <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
