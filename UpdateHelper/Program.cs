@@ -2,8 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Threading;
 using System.Security.Principal;
+using System.Threading;
 using static System.Environment;
 
 namespace UpdateHelper

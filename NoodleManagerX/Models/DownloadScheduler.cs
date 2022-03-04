@@ -1,5 +1,5 @@
-﻿using System;
-using Avalonia.Threading;
+﻿using Avalonia.Threading;
+using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Threading.Tasks;

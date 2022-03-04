@@ -13,7 +13,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -21,11 +23,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Environment;
+using MemoryStream = System.IO.MemoryStream;
 using Path = System.IO.Path;
 using Stream = System.IO.Stream;
-using MemoryStream = System.IO.MemoryStream;
-using System.Net;
-using System.Diagnostics;
 
 namespace NoodleManagerX.Models
 {

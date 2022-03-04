@@ -1,7 +1,6 @@
-﻿using System.Threading.Tasks;
-using Avalonia.Controls;
-using Avalonia.Interactivity;
+﻿using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using System.Threading.Tasks;
 
 namespace MsgBox
 {
@@ -42,7 +41,8 @@ namespace MsgBox
             void AddButton(string caption, MessageBoxResult r, bool def = false)
             {
                 var btn = new Button { Content = caption };
-                btn.Click += (_, __) => {
+                btn.Click += (_, __) =>
+                {
                     res = r;
                     msgbox.Close();
                 };

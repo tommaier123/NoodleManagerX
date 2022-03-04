@@ -1,8 +1,7 @@
-﻿using System;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia;
 using Avalonia.ReactiveUI;
 using Avalonia.Svg.Skia;
+using System;
 
 namespace NoodleManagerX
 {
@@ -15,7 +14,8 @@ namespace NoodleManagerX
             .StartWithClassicDesktopLifetime(args);
 
         // Avalonia configuration, don't remove; also used by visual designer.
-        public static AppBuilder BuildAvaloniaApp() {
+        public static AppBuilder BuildAvaloniaApp()
+        {
 #if DEBUG
             //so the designer doesn't break
             GC.KeepAlive(typeof(SvgImageExtension).Assembly);
