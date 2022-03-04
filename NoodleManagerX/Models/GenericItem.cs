@@ -92,6 +92,12 @@ namespace NoodleManagerX.Models
 
                 downloadCommand = ReactiveCommand.Create((() =>
                 {
+                    if (MainViewModel.s_instance.selectedTabIndex != 0)
+                    {
+                        MainViewModel.s_instance.OpenErrorDialog("Currently only map downloading is supported");
+                        return;
+                    }
+
                     if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
                     {
                         blacklisted = false;

@@ -195,6 +195,12 @@ namespace NoodleManagerX.Models
 
                 getPageCommand = ReactiveCommand.Create(() =>
                 {
+                    if (selectedTabIndex != 0)
+                    {
+                        OpenErrorDialog("Currently only map downloading is supported");
+                        return;
+                    }
+
                     Task.Run(() =>
                     {
                         if (!updatingLocalItems)
@@ -457,6 +463,12 @@ namespace NoodleManagerX.Models
 
         public Task GetAll()
         {
+            if (selectedTabIndex != 0)
+            {
+                OpenErrorDialog("Currently only map downloading is supported");
+                return Task.CompletedTask;
+            }
+
             if (StorageAbstraction.CanDownload() && !updatingLocalItems)
             {
                 progress = 1;
