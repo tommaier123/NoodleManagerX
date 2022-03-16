@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="161.18964mm"
+   height="101.72403mm"
+   viewBox="0 0 161.18964 101.72403"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="QuestAccess.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="true"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:snap-midpoints="true"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:object-paths="true"
+     inkscape:snap-smooth-nodes="false"
+     inkscape:snap-intersection-paths="false"
+     inkscape:snap-object-midpoints="true"
+     inkscape:bbox-nodes="false"
+     inkscape:snap-global="true"
+     inkscape:zoom="0.82646577"
+     inkscape:cx="444.05953"
+     inkscape:cy="92.562817"
+     inkscape:window-width="1920"
+     inkscape:window-height="1057"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <pattern
+       id="EMFhbasepattern"
+       patternUnits="userSpaceOnUse"
+       width="6"
+       height="6"
+       x="0"
+       y="0" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-23.370094,-102.20405)">
+    <g
+       id="g41154">
+      <circle
+         style="fill:#000000;stroke:#888888;stroke-width:0;stroke-linecap:round;stroke-linejoin:round;paint-order:markers fill stroke"
+         id="path1088"
+         cx="103.9649"
+         cy="115.89005"
+         r="13.686" />
+      <rect
+         style="fill:#000000;stroke:#888888;stroke-width:0;stroke-linecap:round;stroke-linejoin:round;paint-order:markers fill stroke"
+         id="rect854"
+         width="161.18964"
+         height="88.038025"
+         x="23.370094"
+         y="115.89005"
+         ry="1.9127204" />
+      <circle
+         style="fill:#000000;stroke:#b3b3b3;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke"
+         id="path1210"
+         cx="103.9649"
+         cy="115.89005"
+         r="11.499999" />
+      <g
+         id="g40652"
+         transform="matrix(1,0,0,1.0942244,-40.067846,13.602799)"
+         style="stroke-width:0.955976">
+        <path
+           style="fill:#000000;stroke:#b3b3b3;stroke-width:1.14718;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 137.12101,97.509013 6.90079,-11.229851 6.90077,11.229851 z"
+           id="path40090" />
+        <g
+           id="g39703"
+           transform="matrix(1.0782458,0,0,1.0797944,31.372091,-30.42788)"
+           style="stroke-width:0.885966">
+          <path
+             style="fill:#ff0000;stroke:#b3b3b3;stroke-width:1.24035;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+             d="m 104.48513,111.62713 v 3.12352"
+             id="path2420" />
+          <circle
+             style="fill:#b3b3b3;stroke:#b3b3b3;stroke-width:0;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke"
+             id="path2626"
+             cx="104.46481"
+             cy="116.51002"
+             r="0.69999951" />
+        </g>
+      </g>
+      <g
+         id="g40340"
+         transform="translate(0.52916667)">
+        <rect
+           style="fill:#666666;stroke:#b3b3b3;stroke-width:0;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke"
+           id="rect2730"
+           width="70.401672"
+           height="13.582315"
+           x="29.859047"
+           y="180.29543"
+           ry="1.9127204" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+           x="59.025364"
+           y="188.40305"
+           id="text4588"><tspan
+             sodipodi:role="line"
+             id="tspan4586"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.29167px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#ffffff;stroke-width:0.264583"
+             x="59.025364"
+             y="188.40305">Deny</tspan></text>
+      </g>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:6.70278px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="104.71439"
+         y="162.43556"
+         id="text4588-9"><tspan
+           sodipodi:role="line"
+           id="tspan4586-6"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.70278px;font-family:Roboto;-inkscape-font-specification:Roboto;text-align:center;text-anchor:middle;fill:#ffffff;stroke-width:0.264583"
+           x="104.71439"
+           y="162.43556">The connected device will be able to access files on </tspan><tspan
+           sodipodi:role="line"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.70278px;font-family:Roboto;-inkscape-font-specification:Roboto;text-align:center;text-anchor:middle;fill:#ffffff;stroke-width:0.264583"
+           x="104.71439"
+           y="170.87949"
+           id="tspan30391">this headset</tspan></text>
+      <g
+         id="g40335"
+         transform="translate(-0.52916667)">
+        <rect
+           style="fill:#0053ff;fill-opacity:1;stroke:#ff0000;stroke-width:0;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke"
+           id="rect2730-8"
+           width="70.401672"
+           height="13.582315"
+           x="107.66904"
+           y="180.29543"
+           ry="1.9127204" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+           x="136.38835"
+           y="189.04512"
+           id="text4588-2"><tspan
+             sodipodi:role="line"
+             id="tspan4586-4"
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.29167px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#ffffff;stroke-width:0.264583"
+             x="136.38835"
+             y="189.04512">Allow</tspan></text>
+      </g>
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#00ff00;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke"
+         id="rect2730-8-0"
+         width="72.799362"
+         height="15.86653"
+         x="105.94102"
+         y="179.15332"
+         ry="0" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:9.525px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="60.002483"
+         y="144.38469"
+         id="text4588-2-4"><tspan
+           sodipodi:role="line"
+           id="tspan4586-4-4"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:9.525px;font-family:Roboto;-inkscape-font-specification:'Roboto Bold';fill:#ffffff;stroke-width:0.264583"
+           x="60.002483"
+           y="144.38469">Allow access to data</tspan></text>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="137.63416"
+       y="188.11508"
+       id="text15146"><tspan
+         sodipodi:role="line"
+         id="tspan15144"
+         style="stroke-width:0.264583"
+         x="137.63416"
+         y="188.11508"></tspan></text>
+  </g>
+</svg>
