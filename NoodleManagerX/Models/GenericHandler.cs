@@ -222,8 +222,8 @@ namespace NoodleManagerX.Models
                             MainViewModel.s_instance.items.AddRange(tmp);
                         });
 
-                        //parallel.foreach is not necessary but seems more robust against changing collections
-                        Parallel.ForEach(MainViewModel.s_instance.items, item =>
+                        //parallel.foreach is not necessary but seems more robust against changing collections, maybe with the list copy no more errors?
+                        Parallel.ForEach(new List<GenericItem>(MainViewModel.s_instance.items), item =>
                         {
                             _ = item.UpdateDownloaded(MainViewModel.s_instance.downloadPage);
                         });

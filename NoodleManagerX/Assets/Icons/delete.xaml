@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file is NOT compatible with Silverlight-->
+<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Stretch="Uniform">
+  <Canvas Name="svg3258" Width="11.906264" Height="13.229169">
+    <Canvas.RenderTransform>
+      <TranslateTransform X="0" Y="0"/>
+    </Canvas.RenderTransform>
+    <Canvas.Resources/>
+    <!--Unknown tag: sodipodi:namedview-->
+    <!--Unknown tag: metadata-->
+    <Canvas Name="layer1">
+      <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="rect292187148" Fill="#FF888888" StrokeThickness="0" Stroke="#FFFFFFFF" StrokeMiterLimit="4" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Opacity="1">
+        <Path.Data>
+          <PathGeometry Figures="m 4.3031366 2.5e-6 a 0.33180552 0.33053756 0 0 0 -0.331696 0.331245 0.33180552 0.33053756 0 0 0 0 0.0093 v 0.320911 h 0.331696 3.3045512 0.331696 v -0.330213 h -5.3e-4 A 0.33180552 0.33053756 0 0 0 7.6076748 5e-7 Z m 6.9284004 0.661458 a 0.65990719 0.66145833 0 0 0 -0.0067 5.29e-4 H 0.6860016 a 0.65990719 0.66145833 0 1 0 0 1.321882 H 11.224817 a 0.65990719 0.66145833 0 1 0 0.0067 -1.322397 z m -9.9048764 1.984374 v 0.938963 2.619477 6.0864495 c 0 0.519989 0.418372 0.938445 0.938254 0.938445 h 7.3815132 c 0.5198842 0 0.9387672 -0.418456 0.9387672 -0.938445 V 6.2042745 3.5847975 2.6458345 H 9.6464278 2.2649146 Z m 1.974672 1.322918 a 0.6613901 0.66033044 0 0 1 0.670108 0.668691 V 11.22309 a 0.6613901 0.66033044 0 1 1 -1.322132 0 V 4.6374435 a 0.6613901 0.66033044 0 0 1 0.652024 -0.668691 z m 2.645813 0 a 0.6613901 0.66033044 0 0 1 0.669591 0.668691 V 11.22309 a 0.6613901 0.66033044 0 1 1 -1.321614 0 V 4.6374435 a 0.6613901 0.66033044 0 0 1 0.652023 -0.668691 z m 2.6458122 0 a 0.6613901 0.66033044 0 0 1 0.66959 0.668691 V 11.22309 a 0.6613901 0.66033044 0 1 1 -1.322129 0 V 4.6374435 a 0.6613901 0.66033044 0 0 1 0.652539 -0.668691 z" FillRule="NonZero"/>
+        </Path.Data>
+      </Path>
+    </Canvas>
+  </Canvas>
+</Viewbox>

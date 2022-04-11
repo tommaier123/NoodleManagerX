@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file is NOT compatible with Silverlight-->
+<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Stretch="Uniform">
+  <Canvas Name="svg1742" Width="13.229168" Height="7.9375005">
+    <Canvas.RenderTransform>
+      <TranslateTransform X="0" Y="0"/>
+    </Canvas.RenderTransform>
+    <Canvas.Resources/>
+    <!--Unknown tag: sodipodi:namedview-->
+    <!--Unknown tag: metadata-->
+    <Canvas Name="layer1">
+      <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path1229" Fill="#FF888888" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+        <Path.Data>
+          <PathGeometry Figures="M 6.6152344 0 A 0.9261326 0.9261326 0 0 0 5.9375 0.29296875 L 0.25 6.3789062 A 0.92603999 0.92603999 0 0 0 0.29296875 7.6875 0.92603999 0.92603999 0 0 0 1.6035156 7.6445312 L 6.6152344 2.2832031 11.626953 7.6445312 A 0.92603999 0.92603999 0 0 0 12.935547 7.6875 0.92603999 0.92603999 0 0 0 12.980469 6.3789062 L 7.2910156 0.29296875 A 0.9261326 0.9261326 0 0 0 6.6152344 0 Z" FillRule="NonZero"/>
+        </Path.Data>
+      </Path>
+    </Canvas>
+  </Canvas>
+</Viewbox>

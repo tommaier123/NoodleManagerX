@@ -41,6 +41,9 @@ namespace NoodleManagerX.Models
         //multiple files
         //don't leave thread safety up to luck
         //get a updated at timestamp for updating, published at is fine for filesystem timestamp
+        //splitting into different lists isn't necessary
+        //using PathIcon will inherit button foreground
+        //blacklist mappers
 
 
         [Reactive] private string version { get; set; } = "V1.0.0";

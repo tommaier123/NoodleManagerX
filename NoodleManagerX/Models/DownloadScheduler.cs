@@ -63,7 +63,7 @@ namespace NoodleManagerX.Models
                 _ = Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     MainViewModel.s_instance.progress = Math.Min(100 - (int)((queue.Count + downloading.Count) / (toDownload * 0.01f)), 1);
-                    MainViewModel.s_instance.progressText = "Downloading: " + MainViewModel.s_instance.progress + "% (" + (toDownload - queue.Count - downloading.Count) + "/" + toDownload + ")";
+                    MainViewModel.s_instance.progressText = "Downloading: " + MainViewModel.s_instance.progress + "% [" + downloading.Count + 1 + "](" + (toDownload - queue.Count) + "/" + toDownload + ")";
                 });
             }
         }
@@ -87,8 +87,6 @@ namespace NoodleManagerX.Models
                                 downloading.Add(queue[0]);
                             }
                             queue.Remove(queue[0]);
-
-
                         }
                         else
                         {

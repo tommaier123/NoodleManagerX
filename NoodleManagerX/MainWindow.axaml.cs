@@ -18,11 +18,6 @@ namespace NoodleManagerX
         public static MainWindow s_instance;
         public static BrushConverter BrushConverter = new BrushConverter();
 
-        public static Brush TabActiveBrush;
-        public static Brush TabInactiveBrush;
-        public static Brush DifficultyActiveBrush;
-        public static Brush DifficultyInactiveBrush;
-
         private Grid blackBar;
         private bool lastleftclick = false;
         private bool lastHandled = false;
@@ -92,21 +87,15 @@ namespace NoodleManagerX
             AvaloniaXamlLoader.Load(this);
         }
 
-        public static Brush GetBrush(Brush brush, string colorResource)
+        public static Brush GetBrush(string colorResource)
         {
-            if (brush == null)
+            try
             {
-                try
-                {
-                    brush = MainWindow.s_instance.Resources[colorResource] as Brush;
-                }
-                catch
-                {
-                    brush = (Brush)BrushConverter.ConvertFromString("#ff00ff");
-                }
+                return s_instance.Resources[colorResource] as Brush;
             }
+            catch { }
 
-            return brush;
+            return (Brush)BrushConverter.ConvertFromString("#ff00ff");
         }
     }
 
@@ -114,10 +103,8 @@ namespace NoodleManagerX
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
+
             string val = value.ToString();
             var tmp = parameter.ToString().Split("-").Where(x => x == val);
 
@@ -134,12 +121,9 @@ namespace NoodleManagerX
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
-            return (value.ToString() == parameter.ToString()) ? MainWindow.GetBrush(MainWindow.TabActiveBrush, "TabActiveColor") : MainWindow.GetBrush(MainWindow.TabInactiveBrush, "TabInactiveColor");
+            return (value.ToString() == parameter.ToString()) ? MainWindow.GetBrush("TabActiveColor") : MainWindow.GetBrush("TabInactiveColor");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -148,17 +132,20 @@ namespace NoodleManagerX
         }
     }
 
-    public class DifficultyColorConverter : IValueConverter
+
+    public class DifficultyColorConverter : IMultiValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (parameter == null || values == null || values.Count != 2) throw new ArgumentNullException();
+
+            if (values[0].GetType() == typeof(Avalonia.UnsetValueType) || values[1].GetType() == typeof(Avalonia.UnsetValueType))
             {
-                return false;
+                return MainWindow.GetBrush("DifficultyInactiveDownloadedColor");
             }
 
             int index = Int32.Parse(parameter.ToString());
-            string[] difficulties = (string[])value;
+            string[] difficulties = (string[])values[0];
             bool present = false;
 
             switch (index)
@@ -182,10 +169,32 @@ namespace NoodleManagerX
                     present = difficulties.Contains("Custom");
                     break;
             }
-            return (present) ? MainWindow.GetBrush(MainWindow.DifficultyActiveBrush, "DifficultyActiveColor") : MainWindow.GetBrush(MainWindow.DifficultyInactiveBrush, "DifficultyInactiveColor");
+
+            if (present)
+            {
+                if ((bool)values[1])
+                {
+                    return MainWindow.GetBrush("DifficultyActiveDownloadedColor");
+                }
+                else
+                {
+                    return MainWindow.GetBrush("DifficultyActiveNotDownloadedColor");
+                }
+            }
+            else
+            {
+                if ((bool)values[1])
+                {
+                    return MainWindow.GetBrush("DifficultyInactiveDownloadedColor");
+                }
+                else
+                {
+                    return MainWindow.GetBrush("DifficultyInactiveNotDownloadedColor");
+                }
+            }
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(IList<object> values, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
@@ -195,10 +204,8 @@ namespace NoodleManagerX
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null || parameter == null)
-            {
-                throw new ArgumentNullException();
-            }
+            if (value == null || parameter == null) throw new ArgumentNullException();
+
             string[] paths = ((string)parameter).Split("|");
             if (paths.Length > 1)
             {
@@ -220,17 +227,10 @@ namespace NoodleManagerX
     {
         public object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (parameter == null || values == null || values.Count != 2)
-            {
-                throw new ArgumentNullException();
-            }
+            if (parameter == null || values == null || values.Count != 2) throw new ArgumentNullException();
 
             string[] paths = ((string)parameter).Split("|");
-
-            if (paths.Count() > 4)
-            {
-                return parameter;
-            }
+            if (paths.Length != 4) throw new ArgumentOutOfRangeException(nameof(paths));
 
             if (values[0].GetType() == typeof(Avalonia.UnsetValueType) || values[1].GetType() == typeof(Avalonia.UnsetValueType))
             {
@@ -265,10 +265,7 @@ namespace NoodleManagerX
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
-            {
-                return false;
-            }
+            if (value == null) return false;
             return !String.IsNullOrEmpty((string)value);
         }
 
@@ -283,21 +280,53 @@ namespace NoodleManagerX
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string par = parameter.ToString();
-            if (value == null || String.IsNullOrEmpty(par))
-            {
-                throw new ArgumentNullException();
-            }
+            if (value == null || String.IsNullOrEmpty(par)) throw new ArgumentNullException();
 
             string[] colors = ((string)parameter).Split("|");
-            if (colors.Length != 2)
-            {
-                throw new ArgumentOutOfRangeException(nameof(colors));
-            }
+            if (colors.Length != 2) throw new ArgumentOutOfRangeException(nameof(colors));
 
-            return ((bool)value) ? MainWindow.GetBrush(null, colors[0]) : MainWindow.GetBrush(null, colors[1]);
+            return ((bool)value) ? MainWindow.GetBrush(colors[0]) : MainWindow.GetBrush(colors[1]);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class TwoParameterColorConverter : IMultiValueConverter
+    {
+        public object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (parameter == null || values == null || values.Count != 2) throw new ArgumentNullException();
+
+            string[] colors = ((string)parameter).Split("|");
+            if (colors.Length != 4) throw new ArgumentOutOfRangeException(nameof(colors));
+
+            if (values[0].GetType() == typeof(Avalonia.UnsetValueType) || values[1].GetType() == typeof(Avalonia.UnsetValueType))
+            {
+                return MainWindow.GetBrush(colors[1]);
+            }
+
+            if ((bool)values[1])//blacklisted
+            {
+                if ((bool)values[0])//downloaded
+                {
+                    return MainWindow.GetBrush(colors[3]);
+                }
+                else
+                {
+                    return MainWindow.GetBrush(colors[2]);
+                }
+            }
+            if ((bool)values[0])//downloaded
+            {
+                return MainWindow.GetBrush(colors[1]);
+            }
+            return MainWindow.GetBrush(colors[0]);
+        }
+
+        public object ConvertBack(IList<object> values, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
@@ -308,6 +337,21 @@ namespace NoodleManagerX
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value != null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class NotConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (targetType != typeof(bool)) throw new InvalidOperationException("Not bool");
+
+            return !(bool)value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

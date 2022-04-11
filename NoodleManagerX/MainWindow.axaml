@@ -6,12 +6,15 @@
         xmlns:local="clr-namespace:NoodleManagerX"
         mc:Ignorable="d" d:DesignWidth="950" d:DesignHeight="622"
         Width="950" Height="622"
-        Background="#1a1b1f"
         x:Class="NoodleManagerX.MainWindow"
         HasSystemDecorations="False"
-        Icon="resm:NoodleManagerX.Assets.icon-nm.ico"
+        Icon="resm:NoodleManagerX.Assets.Included.icon-nm.ico"
         Title="NoodleManagerX">
-
+	<!--
+	<Window.Background>
+		<ImageBrush Source="C:\Users\Max\Downloads" Stretch="Fill" />
+	</Window.Background>
+-->
 	<Window.Resources>
 		<local:EqualsConverter x:Key="EqualsConverter"/>
 		<local:TabHilightConverter x:Key="TabHilightConverter"/>
@@ -19,8 +22,30 @@
 		<local:BoolPathConverter x:Key="BoolPathConverter"/>
 		<local:TwoParameterPathConverter x:Key="TwoParameterPathConverter"/>
 		<local:BoolColorConverter x:Key="BoolColorConverter"/>
+		<local:TwoParameterColorConverter x:Key="TwoParameterColorConverter"/>
 		<local:StringToBoolConverter x:Key="StringToBoolConverter"/>
 		<local:NullToBoolConverter x:Key="NullToBoolConverter"/>
+		<local:NotConverter x:Key="NotConverter"/>
+
+		<SolidColorBrush x:Key="ControlHeaderColor" Color="#322680"/>
+		<SolidColorBrush x:Key="BackgroundColor" Color="#1a1b1f"/>
+		<SolidColorBrush x:Key="SeparatorColor" Color="#999999"/>
+		<SolidColorBrush x:Key="DownloadedColor" Color="#888888"/>
+		<SolidColorBrush x:Key="NotDownloadedColor" Color="#ffffff"/>
+		<SolidColorBrush x:Key="TabActiveColor" Color="#f91c85"/>
+		<SolidColorBrush x:Key="TabInactiveColor" Color="#aa49e0"/>
+		<SolidColorBrush x:Key="CaretColor" Color="#ff00ff"/>
+		<SolidColorBrush x:Key="PathValidColor" Color="#aaaaaa"/>
+		<SolidColorBrush x:Key="PathInvalidColor" Color="#ff0000"/>
+		<SolidColorBrush x:Key="BackgroundDownloadedColor" Color="#303030"/>
+		<SolidColorBrush x:Key="BackgroundNotDownloadedColor" Color="#1a1b1f"/>
+		<SolidColorBrush x:Key="DifficultyActiveDownloadedColor" Color="#bbbbbb"/>
+		<SolidColorBrush x:Key="DifficultyInactiveDownloadedColor" Color="#888888"/>
+		<SolidColorBrush x:Key="DifficultyActiveNotDownloadedColor" Color="#ffffff"/>
+		<SolidColorBrush x:Key="DifficultyInactiveNotDownloadedColor" Color="#888888"/>
+		<SolidColorBrush x:Key="ConnectedColor" Color="#ffffff"/>
+		<SolidColorBrush x:Key="NotConnectedColor" Color="#888888"/>
+		<!--
 		<SolidColorBrush x:Key="ControlHeaderColor" Color="#322680"/>
 		<SolidColorBrush x:Key="BackgroundColor" Color="#1a1b1f"/>
 		<SolidColorBrush x:Key="SeparatorColor" Color="#999999"/>
@@ -33,12 +58,13 @@
 		<SolidColorBrush x:Key="CaretColor" Color="#ffffff"/>
 		<SolidColorBrush x:Key="PathValidColor" Color="#aaaaaa"/>
 		<SolidColorBrush x:Key="PathInvalidColor" Color="#ff0000"/>
+		-->
 	</Window.Resources>
 
 	<Window.Styles>
 		<!--Set font-->
 		<Style Selector="TextBlock">
-			<Setter Property="FontFamily" Value="resm:NoodleManagerX.Assets.Fonts?assembly=NoodleManagerX#Noto Sans"/>
+			<Setter Property="FontFamily" Value="resm:NoodleManagerX.Assets.Included?assembly=NoodleManagerX#Noto Sans"/>
 		</Style>
 
 		<!--ToolTips-->
@@ -48,7 +74,7 @@
 		<Style Selector="ComboBox">
 			<Setter Property="ToolTip.ShowDelay" Value="1000"/>
 		</Style>
-		
+
 		<!--Button without animations-->
 		<Style Selector="Button.BlankButton">
 			<Setter Property="Background" Value="Transparent"/>
@@ -67,7 +93,7 @@
 			<Setter Property="Background" Value="Transparent"/>
 		</Style>
 
-		
+
 		<!--Style for the tab header-->
 		<Style Selector="Button.Tab">
 			<Setter Property="VerticalAlignment" Value="Center"/>
@@ -124,12 +150,10 @@
 		<Style Selector="ListBox.MyListBox ItemsPresenter">
 			<Setter Property="Margin" Value="0"/>
 		</Style>
-		<Style Selector="ListBox.MyListBox ListBoxItem:pointerover > ContentPresenter">
-			<Setter Property="Background" Value="Transparent"/>
+		<Style Selector="ListBox.MyListBox ListBoxItem > ContentPresenter">
+			<Setter Property="Background" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=BackgroundDownloadedColor|BackgroundNotDownloadedColor}"/>
 		</Style>
-		<Style Selector="ListBox.MyListBox ListBoxItem:selected > ContentPresenter">
-			<Setter Property="Background" Value="Transparent"/>
-		</Style>
+
 
 		<!--Different List Boxes-->
 		<Style Selector="ListBox.MyListBoxSmall ListBoxItem">
@@ -190,6 +214,13 @@
 			<Setter Property="UseLayoutRounding" Value="True"/>
 		</Style>
 
+		<Style Selector="Path">
+			<Setter Property="Stretch" Value="Uniform"/>
+			<Setter Property="HorizontalAlignment" Value="Center"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="UseLayoutRounding" Value="True"/>
+		</Style>
+
 		<!--Settings-->
 		<Style Selector="Grid.SettingsGrid">
 			<Setter Property="Margin" Value="10,10,10,10"/>
@@ -222,44 +253,94 @@
 									<Grid Grid.Row="4" ColumnDefinitions="auto,*">
 										<TextBlock Grid.Column="0" Text="{Binding duration}" Classes="Downloaded DynamicText" FontSize="30" FontWeight="SemiBold" Width="77"/>
 										<Grid Grid.Column="1" ColumnDefinitions="*,auto,auto,auto,auto,auto,auto" HorizontalAlignment="Center" IsVisible="{Binding Path=display_difficulties, Converter={StaticResource NullToBoolConverter}}">
-											<TextBlock Grid.Column="1" Text="EASY" Classes="Difficulty"
-													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=0}"/>
-											<TextBlock Grid.Column="2" Text="NORMAL" Classes="Difficulty"
-													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=1}"/>
-											<TextBlock Grid.Column="3" Text="HARD" Classes="Difficulty"
-													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=2}"/>
-											<TextBlock Grid.Column="4" Text="EXPERT" Classes="Difficulty"
-													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=3}"/>
-											<TextBlock Grid.Column="5" Text="MASTER" Classes="Difficulty"
-													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=4}"/>
-											<TextBlock Grid.Column="6" Text="CUSTOM" Classes="Difficulty"
-													   Foreground="{Binding Path=display_difficulties, Converter={StaticResource DifficultyColorConverter}, ConverterParameter=5}"/>
+											<TextBlock Grid.Column="1" Text="EASY" Classes="Difficulty">
+												<TextBlock.Foreground>
+													<MultiBinding Converter="{StaticResource DifficultyColorConverter}"
+																  ConverterParameter="0">
+														<Binding Path="display_difficulties"/>
+														<Binding Path="downloaded"/>
+													</MultiBinding>
+												</TextBlock.Foreground>
+											</TextBlock>
+											<TextBlock Grid.Column="2" Text="NORMAL" Classes="Difficulty">
+												<TextBlock.Foreground>
+													<MultiBinding Converter="{StaticResource DifficultyColorConverter}"
+																  ConverterParameter="1">
+														<Binding Path="display_difficulties"/>
+														<Binding Path="downloaded"/>
+													</MultiBinding>
+												</TextBlock.Foreground>
+											</TextBlock>
+											<TextBlock Grid.Column="3" Text="HARD" Classes="Difficulty">
+												<TextBlock.Foreground>
+													<MultiBinding Converter="{StaticResource DifficultyColorConverter}"
+																  ConverterParameter="2">
+														<Binding Path="display_difficulties"/>
+														<Binding Path="downloaded"/>
+													</MultiBinding>
+												</TextBlock.Foreground>
+											</TextBlock>
+											<TextBlock Grid.Column="4" Text="EXPERT" Classes="Difficulty">
+												<TextBlock.Foreground>
+													<MultiBinding Converter="{StaticResource DifficultyColorConverter}"
+																  ConverterParameter="3">
+														<Binding Path="display_difficulties"/>
+														<Binding Path="downloaded"/>
+													</MultiBinding>
+												</TextBlock.Foreground>
+											</TextBlock>
+											<TextBlock Grid.Column="5" Text="MASTER" Classes="Difficulty">
+												<TextBlock.Foreground>
+													<MultiBinding Converter="{StaticResource DifficultyColorConverter}"
+																  ConverterParameter="4">
+														<Binding Path="display_difficulties"/>
+														<Binding Path="downloaded"/>
+													</MultiBinding>
+												</TextBlock.Foreground>
+											</TextBlock>
+											<TextBlock Grid.Column="6" Text="CUSTOM" Classes="Difficulty">
+												<TextBlock.Foreground>
+													<MultiBinding Converter="{StaticResource DifficultyColorConverter}"
+																  ConverterParameter="5">
+														<Binding Path="display_difficulties"/>
+														<Binding Path="downloaded"/>
+													</MultiBinding>
+												</TextBlock.Foreground>
+											</TextBlock>
 										</Grid>
 									</Grid>
 								</Grid>
 								<!--v stats, icons v-->
 								<Grid Grid.Column="1" RowDefinitions="auto,auto,auto" ColumnDefinitions="*,auto" VerticalAlignment="Center">
 									<TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding upvote_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
-									<Svg Grid.Column="1" Grid.Row="0" Height="10"
-										 Path="{Binding Path=downloaded, Converter={StaticResource BoolPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket.svg|resm:NoodleManagerX.Assets.icons.bracket_g.svg}"/>
+									<Path Grid.Column="1" Grid.Row="0" Height="10" Fill="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=DownloadedColor|NotDownloadedColor}">
+										<Path.Data>
+											<PathGeometry Figures="M 6.6152344 0 A 0.9261326 0.9261326 0 0 0 5.9375 0.29296875 L 0.25 6.3789062 A 0.92603999 0.92603999 0 0 0 0.29296875 7.6875 0.92603999 0.92603999 0 0 0 1.6035156 7.6445312 L 6.6152344 2.2832031 11.626953 7.6445312 A 0.92603999 0.92603999 0 0 0 12.935547 7.6875 0.92603999 0.92603999 0 0 0 12.980469 6.3789062 L 7.2910156 0.29296875 A 0.9261326 0.9261326 0 0 0 6.6152344 0 Z" FillRule="NonZero"/>
+										</Path.Data>
+									</Path>
 									<TextBlock Grid.Column="0" Grid.Row="1" Text="{Binding downvote_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
-									<Svg Grid.Column="1" Grid.Row="1" Height="10"
-										 Path="{Binding Path=downloaded, Converter={StaticResource BoolPathConverter}, ConverterParameter=resm:NoodleManagerX.Assets.icons.bracket.svg|resm:NoodleManagerX.Assets.icons.bracket_g.svg}">
-										<Svg.RenderTransform>
+									<Path Grid.Column="1" Grid.Row="1" Height="10" Fill="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=DownloadedColor|NotDownloadedColor}">
+										<Path.Data>
+											<PathGeometry Figures="M 6.6152344 0 A 0.9261326 0.9261326 0 0 0 5.9375 0.29296875 L 0.25 6.3789062 A 0.92603999 0.92603999 0 0 0 0.29296875 7.6875 0.92603999 0.92603999 0 0 0 1.6035156 7.6445312 L 6.6152344 2.2832031 11.626953 7.6445312 A 0.92603999 0.92603999 0 0 0 12.935547 7.6875 0.92603999 0.92603999 0 0 0 12.980469 6.3789062 L 7.2910156 0.29296875 A 0.9261326 0.9261326 0 0 0 6.6152344 0 Z" FillRule="NonZero"/>
+										</Path.Data>
+										<Path.RenderTransform>
 											<RotateTransform Angle="180"/>
-										</Svg.RenderTransform>
-									</Svg>
+										</Path.RenderTransform>
+									</Path>
 									<TextBlock Grid.Column="0" Grid.Row="2" Text="{Binding download_count}" Classes="Downloaded DynamicText" FontSize="20" TextAlignment="Right"/>
 									<Button Grid.Column="1" Grid.Row="2" Classes="BlankButton" Height="30" Margin="10,0,10,0" Command="{Binding downloadCommand}">
-										<Svg>
-											<Svg.Path>
-												<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
-															  ConverterParameter="resm:NoodleManagerX.Assets.icons.download.svg|resm:NoodleManagerX.Assets.icons.download_g.svg|resm:NoodleManagerX.Assets.icons.download_g.svg|resm:NoodleManagerX.Assets.icons.download_g.svg">
+										<Path>
+											<Path.Fill>
+												<MultiBinding Converter="{StaticResource TwoParameterColorConverter}"
+															  ConverterParameter="NotDownloadedColor|DownloadedColor|DownloadedColor|DownloadedColor">
 													<Binding Path="downloaded"/>
 													<Binding Path="downloading"/>
 												</MultiBinding>
-											</Svg.Path>
-										</Svg>
+											</Path.Fill>
+											<Path.Data>
+												<PathGeometry Figures="M 25.001953 -0.0078125 A 3.5000126 3.5000126 0 0 0 21.503906 3.4921875 L 21.503906 25.03125 L 15.863281 19.414062 A 3.5000126 3.5000126 0 0 0 13.382812 18.396484 A 3.5000126 3.5000126 0 0 0 10.910156 19.421875 A 3.5000126 3.5000126 0 0 0 10.925781 24.375 L 22.529297 35.935547 A 3.5003626 3.5003626 0 0 0 27.46875 35.935547 L 39.080078 24.375 A 3.5000126 3.5000126 0 0 0 39.087891 19.421875 A 3.5000126 3.5000126 0 0 0 34.134766 19.414062 L 28.501953 25.027344 L 28.501953 3.4921875 A 3.5000126 3.5000126 0 0 0 25.001953 -0.0078125 z M 3.5058594 30.634766 A 3.5000126 3.5000126 0 0 0 0.0078125 34.134766 L 0.0078125 46.455078 A 3.5003626 3.5003626 0 0 0 3.5058594 49.960938 L 46.490234 49.960938 A 3.5003626 3.5003626 0 0 0 49.990234 46.455078 L 49.990234 34.134766 A 3.5000126 3.5000126 0 0 0 46.490234 30.634766 A 3.5000126 3.5000126 0 0 0 42.992188 34.134766 L 42.992188 42.955078 L 7.0058594 42.955078 L 7.0058594 34.134766 A 3.5000126 3.5000126 0 0 0 3.5058594 30.634766 z " FillRule="NonZero"/>
+											</Path.Data>
+										</Path>
 										<ToolTip.Tip>
 											<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
 															  ConverterParameter="Download|Downloaded|Downloading|Downloaded">
@@ -271,28 +352,38 @@
 								</Grid>
 								<!--v buttons v-->
 								<Grid Grid.Column="2" RowDefinitions="auto,auto" VerticalAlignment="Center" Margin="10,0,10,0">
-									<Button Grid.Row="0" Classes="BlankButton" Height="20" Width="20" Margin="0,0,0,5" Command="{Binding playPreviewCommand}" IsVisible="{Binding Path=display_preview, Converter={StaticResource StringToBoolConverter}}" 
+									<Button Grid.Row="0" Classes="BlankButton" Height="20" Width="20" Margin="0,0,0,5" Command="{Binding playPreviewCommand}" IsVisible="{Binding Path=display_preview, Converter={StaticResource StringToBoolConverter}}"
 											ToolTip.Tip="{Binding Path=playing, Converter={StaticResource BoolPathConverter}, ConverterParameter=Play|Stop}">
-										<Svg>
-											<Svg.Path>
-												<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
-															  ConverterParameter="resm:NoodleManagerX.Assets.icons.play.svg|resm:NoodleManagerX.Assets.icons.play_g.svg|resm:NoodleManagerX.Assets.icons.stop.svg|resm:NoodleManagerX.Assets.icons.stop_g.svg">
-													<Binding Path="downloaded"/>
-													<Binding Path="playing"/>
-												</MultiBinding>
-											</Svg.Path>
-										</Svg>
+										<Grid>
+											<!--play-->
+											<Path IsVisible="{Binding Path=playing, Converter={StaticResource NotConverter}}" Fill="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=DownloadedColor|NotDownloadedColor}">
+												<Path.Data>
+													<PathGeometry Figures="M 1.3398437 0.09765625 C 0.7242703 -0.20969603 3.4690485e-4 0.23774352 0 0.92578125 V 12.302734 c 3.4690485e-4 0.688038 0.7242703 1.135477 1.3398437 0.828125 L 12.716797 7.4433594 c 0.681983 -0.3414715 0.681983 -1.3147785 0 -1.65625 z" FillRule="NonZero"/>
+												</Path.Data>
+											</Path>
+											<!--stop-->
+											<Path IsVisible="{Binding playing}" Fill="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=DownloadedColor|NotDownloadedColor}">
+												<Path.Data>
+													<PathGeometry Figures="M 0.92578125 0 C 0.41455758 1.7184324e-4 1.7184324e-4 0.41455758 0 0.92578125 V 12.302734 c 1.7142932e-4 0.511224 0.41455729 0.92561 0.92578125 0.925782 H 12.302734 c 0.511224 -1.71e-4 0.925611 -0.414558 0.925782 -0.925782 V 0.92578125 C 13.228344 0.41455729 12.813958 1.7142932e-4 12.302734 0 Z" FillRule="NonZero"/>
+												</Path.Data>
+											</Path>
+										</Grid>
 									</Button>
 									<Button Grid.Row="1" Classes="BlankButton" Height="30" Width="30" Margin="0,5,0,0" Command="{Binding deleteCommand}">
-										<Svg>
-											<Svg.Path>
-												<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
-															  ConverterParameter="resm:NoodleManagerX.Assets.icons.delete.svg|resm:NoodleManagerX.Assets.icons.delete_g.svg|resm:NoodleManagerX.Assets.icons.blacklist.svg|resm:NoodleManagerX.Assets.icons.blacklist_g.svg">
-													<Binding Path="downloaded"/>
-													<Binding Path="blacklisted"/>
-												</MultiBinding>
-											</Svg.Path>
-										</Svg>
+										<Grid>
+											<!--delete-->
+											<Path IsVisible="{Binding Path=blacklisted, Converter={StaticResource NotConverter}}" Fill="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=DownloadedColor|NotDownloadedColor}">
+												<Path.Data>
+													<PathGeometry Figures="m 4.3031366 2.5e-6 a 0.33180552 0.33053756 0 0 0 -0.331696 0.331245 0.33180552 0.33053756 0 0 0 0 0.0093 v 0.320911 h 0.331696 3.3045512 0.331696 v -0.330213 h -5.3e-4 A 0.33180552 0.33053756 0 0 0 7.6076748 5e-7 Z m 6.9284004 0.661458 a 0.65990719 0.66145833 0 0 0 -0.0067 5.29e-4 H 0.6860016 a 0.65990719 0.66145833 0 1 0 0 1.321882 H 11.224817 a 0.65990719 0.66145833 0 1 0 0.0067 -1.322397 z m -9.9048764 1.984374 v 0.938963 2.619477 6.0864495 c 0 0.519989 0.418372 0.938445 0.938254 0.938445 h 7.3815132 c 0.5198842 0 0.9387672 -0.418456 0.9387672 -0.938445 V 6.2042745 3.5847975 2.6458345 H 9.6464278 2.2649146 Z m 1.974672 1.322918 a 0.6613901 0.66033044 0 0 1 0.670108 0.668691 V 11.22309 a 0.6613901 0.66033044 0 1 1 -1.322132 0 V 4.6374435 a 0.6613901 0.66033044 0 0 1 0.652024 -0.668691 z m 2.645813 0 a 0.6613901 0.66033044 0 0 1 0.669591 0.668691 V 11.22309 a 0.6613901 0.66033044 0 1 1 -1.321614 0 V 4.6374435 a 0.6613901 0.66033044 0 0 1 0.652023 -0.668691 z m 2.6458122 0 a 0.6613901 0.66033044 0 0 1 0.66959 0.668691 V 11.22309 a 0.6613901 0.66033044 0 1 1 -1.322129 0 V 4.6374435 a 0.6613901 0.66033044 0 0 1 0.652539 -0.668691 z" FillRule="NonZero"/>
+												</Path.Data>
+											</Path>
+											<!--blacklist-->
+											<Path IsVisible="{Binding blacklisted}" Fill="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=DownloadedColor|NotDownloadedColor}">
+												<Path.Data>
+													<PathGeometry Figures="M 25.001953 0 C 11.236215 0 -2.3684758e-15 11.236215 0 25.001953 C 0 38.76769 11.236215 49.998047 25.001953 49.998047 C 38.76769 49.998047 49.998047 38.76769 49.998047 25.001953 C 49.998047 11.236215 38.76769 4.7369516e-15 25.001953 0 z M 25.001953 6.9980469 C 34.984614 6.9980469 43 15.019292 43 25.001953 C 43 28.721636 41.887276 32.168962 39.974609 35.029297 L 14.972656 10.025391 C 17.834318 8.1113525 21.28218 6.9980469 25.001953 6.9980469 z M 10.025391 14.972656 L 35.029297 39.974609 C 32.168962 41.887276 28.721636 43 25.001953 43 C 15.019292 43 6.9980469 34.984614 6.9980469 25.001953 C 6.9980469 21.28218 8.1113525 17.834318 10.025391 14.972656 z " FillRule="NonZero"/>
+												</Path.Data>
+											</Path>
+										</Grid>
 										<ToolTip.Tip>
 											<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
 															  ConverterParameter="Blacklist|Delete|Un-Blacklist|Un-Blacklist">
@@ -315,7 +406,7 @@
 	</Window.Styles>
 
 
-	<Grid RowDefinitions="auto,auto,auto,*">
+	<Grid RowDefinitions="auto,auto,auto,*" Background="{StaticResource BackgroundColor}">
 		<Grid Grid.Row="0" Height="70" Background="Black" Name="BlackBar"
 			  ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,auto,*,auto">
 
@@ -341,13 +432,25 @@
 			<!--Minimize, maximize and close-->
 			<Grid Grid.Column="9" ColumnDefinitions="auto,auto,auto" Margin="0,5,6,0">
 				<Button Grid.Column="0" Classes="BlankButton WControls" Command="{Binding minimizeCommand}">
-					<Svg Path="resm:NoodleManagerX.Assets.icons.minimize.svg"/>
+					<Path Fill="#FFFFFFFF">
+						<Path.Data>
+							<PathGeometry Figures="M 1.0742187 8.2011719 C 0.48951322 8.2010262 0.01547935 8.6750601 0.015625 9.2597656 0.01547951 9.844471 0.48951334 10.318505 1.0742187 10.318359 H 12.15625 c 0.584705 1.46e-4 1.058739 -0.4738879 1.058594 -1.0585934 C 13.21499 8.67506 12.740956 8.2010261 12.15625 8.2011719 Z M 0 0 h 13.229173 z m 0 13.229168 h 13.229173 z" FillRule="NonZero"/>
+						</Path.Data>
+					</Path>
 				</Button>
 				<Button Grid.Column="1" Classes="BlankButton WControls" Command="{Binding toggleFullscreenCommand}">
-					<Svg Path="resm:NoodleManagerX.Assets.icons.maximize.svg"/>
+					<Path Fill="#FFFFFFFF">
+						<Path.Data>
+							<PathGeometry Figures="M 1.0585937 0 A 1.0584408 1.0584408 0 0 0 0 1.0585937 V 12.171875 a 1.0584408 1.0584408 0 0 0 1.0585937 1.056641 H 12.171875 a 1.0584408 1.0584408 0 0 0 1.056641 -1.056641 V 1.0585937 A 1.0584408 1.0584408 0 0 0 12.171875 0 Z M 2.1171875 2.1171875 H 11.113281 V 11.113281 H 2.1171875 Z" FillRule="NonZero"/>
+						</Path.Data>
+					</Path>
 				</Button>
 				<Button Grid.Column="2" Classes="BlankButton WControls" Command="{Binding closeCommand}">
-					<Svg Path="resm:NoodleManagerX.Assets.icons.close.svg"/>
+					<Path Fill="#FFFFFFFF">
+						<Path.Data>
+							<PathGeometry Figures="M 4.0820312 0.08203125 A 3.9999496 3.9999496 0 0 0 1.2558594 1.2558594 A 3.9999496 3.9999496 0 0 0 1.2558594 6.9101562 L 19.384766 25.041016 L 1.2558594 43.169922 A 3.9999496 3.9999496 0 0 0 1.2558594 48.832031 A 3.9999496 3.9999496 0 0 0 6.9101562 48.832031 L 25.041016 30.701172 L 43.169922 48.832031 A 3.9999496 3.9999496 0 0 0 48.832031 48.832031 A 3.9999496 3.9999496 0 0 0 48.832031 43.169922 L 30.701172 25.041016 L 48.832031 6.9101562 A 3.9999496 3.9999496 0 0 0 48.832031 1.2558594 A 3.9999496 3.9999496 0 0 0 45.996094 0.08203125 A 3.9999496 3.9999496 0 0 0 43.169922 1.2558594 L 25.041016 19.384766 L 6.9101562 1.2558594 A 3.9999496 3.9999496 0 0 0 4.0820312 0.08203125 z " FillRule="NonZero"/>
+						</Path.Data>
+					</Path>
 				</Button>
 			</Grid>
 		</Grid>
@@ -358,15 +461,20 @@
 
 			<!--Connect Button-->
 			<Button Grid.Column="0" Classes="BlankButton" Command="{Binding connectQuestCommand}" Height="22" HorizontalAlignment="Left" Margin="32,5,0,0">
-				<Svg>
-					<Svg.Path>
-						<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
-									  ConverterParameter="resm:NoodleManagerX.Assets.icons.pc.svg|resm:NoodleManagerX.Assets.icons.pc_g.svg|resm:NoodleManagerX.Assets.icons.quest.svg|resm:NoodleManagerX.Assets.icons.quest_g.svg">
-							<Binding Path="updatingLocalItems"/>
-							<Binding Path="questConnected"/>
-						</MultiBinding>
-					</Svg.Path>
-				</Svg>
+				<Grid>
+					<!--PC-->
+					<Path IsVisible="{Binding Path=questConnected, Converter={StaticResource NotConverter}}" Fill="{Binding Path=updatingLocalItems, Converter={StaticResource BoolColorConverter}, ConverterParameter=NotConnectedColor|ConnectedColor}">
+						<Path.Data>
+							<PathGeometry Figures="M 7.1015625 0 C 3.2291073 0 -1.1842379e-15 3.2291073 0 7.1015625 L 0 31.654297 C 0 35.526752 3.2291073 38.748047 7.1015625 38.748047 L 36.503906 38.748047 L 36.503906 43 L 29.314453 43 A 3.4999937 3.4999937 0 0 0 25.814453 46.498047 A 3.4999937 3.4999937 0 0 0 29.314453 49.998047 L 50.683594 49.998047 A 3.4999937 3.4999937 0 0 0 54.183594 46.498047 A 3.4999937 3.4999937 0 0 0 50.683594 43 L 43.501953 43 L 43.501953 38.748047 L 72.904297 38.748047 C 76.776755 38.748047 79.998047 35.526752 79.998047 31.654297 L 79.998047 7.1015625 C 79.998047 3.2291073 76.776755 -1.1842379e-15 72.904297 0 L 7.1015625 0 z M 7.0371094 6.9980469 C 7.0522148 6.9973854 7.0726737 6.9980466 7.1015625 6.9980469 L 72.904297 6.9980469 C 73.019837 6.9980469 73 6.9860072 73 7.1015625 L 73 31.654297 C 73 31.769845 73.019913 31.75 72.904297 31.75 L 7.1015625 31.75 C 6.9860148 31.75 6.9980469 31.769841 6.9980469 31.654297 L 6.9980469 7.1015625 C 6.9980469 7.0149017 6.991793 7.0000314 7.0371094 6.9980469 z " FillRule="NonZero"/>
+						</Path.Data>
+					</Path>
+					<!--Quest-->
+					<Path IsVisible="{Binding questConnected}" Fill="{Binding Path=updatingLocalItems, Converter={StaticResource BoolColorConverter}, ConverterParameter=NotConnectedColor|ConnectedColor}">
+						<Path.Data>
+							<PathGeometry Figures="M 22.5 0 C 10.095556 0 2.3684758e-15 10.095556 0 22.5 L 0 27.498047 C 0 39.902492 10.095556 49.998047 22.5 49.998047 L 57.498047 49.998047 C 69.90249 49.998047 79.998047 39.902492 79.998047 27.498047 L 79.998047 22.5 C 79.998047 10.095556 69.90249 2.3684758e-15 57.498047 0 L 22.5 0 z M 22.5 6.9980469 L 57.498047 6.9980469 C 66.145579 6.9980469 73 13.852465 73 22.5 L 73 27.498047 C 73 36.145582 66.145579 43 57.498047 43 L 22.5 43 C 13.852465 43 6.9980469 36.145582 6.9980469 27.498047 L 6.9980469 22.5 C 6.9980469 13.852465 13.852465 6.9980469 22.5 6.9980469 z M 33.123047 10.001953 A 3.4999937 3.4999937 0 0 0 29.623047 13.501953 A 3.4999937 3.4999937 0 0 0 33.123047 17 L 46.875 17 A 3.4999937 3.4999937 0 0 0 50.373047 13.501953 A 3.4999937 3.4999937 0 0 0 46.875 10.001953 L 33.123047 10.001953 z " FillRule="NonZero"/>
+						</Path.Data>
+					</Path>
+				</Grid>
 				<ToolTip.Tip>
 					<MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
 									  ConverterParameter="Connect Quest|Connecting PC...|Connect PC|Connecting Quest...">
@@ -384,7 +492,11 @@
 					<Svg Path="resm:NoodleManagerX.Assets.icons.searchbar.svg" Height="2" Width="200" Stretch="Fill"/>
 				</StackPanel>
 				<Button Grid.Column="1" Classes="BlankButton" Height="22" ToolTip.Tip="Search" Command="{Binding searchCommand}">
-					<Svg Path="resm:NoodleManagerX.Assets.icons.search.svg"/>
+					<Path Fill="#FFFFFFFF">
+						<Path.Data>
+							<PathGeometry Figures="M 22.123047 -0.015625 C 9.9882311 -0.015625 0.050781212 9.8321562 0.05078125 21.916016 C 0.05078125 33.999875 9.9882311 43.841797 22.123047 43.841797 C 26.836123 43.841797 31.217876 42.355757 34.814453 39.832031 L 44.017578 48.964844 A 3.4999937 3.4999937 0 0 0 48.970703 48.941406 A 3.4999937 3.4999937 0 0 0 48.949219 43.996094 L 39.841797 34.958984 C 42.573921 31.310899 44.195312 26.796593 44.195312 21.916016 C 44.195312 9.8321562 34.257863 -0.015625 22.123047 -0.015625 z M 22.123047 6.9824219 C 30.504633 6.9824223 37.197266 13.645304 37.197266 21.916016 C 37.197266 30.186728 30.504633 36.84375 22.123047 36.84375 C 13.741461 36.84375 7.0488281 30.186728 7.0488281 21.916016 C 7.0488281 13.645304 13.741461 6.9824219 22.123047 6.9824219 z " FillRule="NonZero"/>
+						</Path.Data>
+					</Path>
 				</Button>
 			</Grid>
 
@@ -440,21 +552,27 @@
 			<!--Pagination-->
 			<Grid Grid.Column="5" ColumnDefinitions="auto,auto,auto,auto,auto" Margin="0,0,20,0">
 				<Button Grid.Column="0" Classes="BlankButton" ToolTip.Tip="Previous Page" Command="{Binding pageDownCommand}" Width="12" Height="20" Margin="0,0,5,0">
-					<Svg Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Width="20">
-						<Svg.RenderTransform>
+					<Path Fill="#FFFFFFFF" Width="20">
+						<Path.Data>
+							<PathGeometry Figures="M 6.6152344 0 A 0.9261326 0.9261326 0 0 0 5.9375 0.29296875 L 0.25 6.3789062 A 0.92603999 0.92603999 0 0 0 0.29296875 7.6875 0.92603999 0.92603999 0 0 0 1.6035156 7.6445312 L 6.6152344 2.2832031 11.626953 7.6445312 A 0.92603999 0.92603999 0 0 0 12.935547 7.6875 0.92603999 0.92603999 0 0 0 12.980469 6.3789062 L 7.2910156 0.29296875 A 0.9261326 0.9261326 0 0 0 6.6152344 0 Z" FillRule="NonZero"/>
+						</Path.Data>
+						<Path.RenderTransform>
 							<RotateTransform Angle="-90"/>
-						</Svg.RenderTransform>
-					</Svg>
+						</Path.RenderTransform>
+					</Path>
 				</Button>
 				<TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding currentPage}"/>
 				<TextBlock Grid.Column="2" VerticalAlignment="Center" Text="/"/>
 				<TextBlock Grid.Column="3" VerticalAlignment="Center" Text="{Binding numberOfPages}"/>
 				<Button Grid.Column="4" Classes="BlankButton" ToolTip.Tip="Next Page" Command="{Binding pageUpCommand}" Width="12" Height="20" Margin="5,0,0,0">
-					<Svg Path="resm:NoodleManagerX.Assets.icons.bracket.svg" Width="20">
-						<Svg.RenderTransform>
+					<Path Fill="#FFFFFFFF" Width="20">
+						<Path.Data>
+							<PathGeometry Figures="M 6.6152344 0 A 0.9261326 0.9261326 0 0 0 5.9375 0.29296875 L 0.25 6.3789062 A 0.92603999 0.92603999 0 0 0 0.29296875 7.6875 0.92603999 0.92603999 0 0 0 1.6035156 7.6445312 L 6.6152344 2.2832031 11.626953 7.6445312 A 0.92603999 0.92603999 0 0 0 12.935547 7.6875 0.92603999 0.92603999 0 0 0 12.980469 6.3789062 L 7.2910156 0.29296875 A 0.9261326 0.9261326 0 0 0 6.6152344 0 Z" FillRule="NonZero"/>
+						</Path.Data>
+						<Path.RenderTransform>
 							<RotateTransform Angle="90"/>
-						</Svg.RenderTransform>
-					</Svg>
+						</Path.RenderTransform>
+					</Path>
 				</Button>
 			</Grid>
 		</Grid>
@@ -522,16 +640,32 @@
 					<Grid Grid.Row="8" ColumnDefinitions="auto,*,auto,auto,auto,auto">
 						<TextBlock Grid.Column="0" Text="{Binding version}" VerticalAlignment="Center" Foreground="{StaticResource DownloadedColor}"/>
 						<Button Grid.Column="2" Classes="BlankButton Socials" Command="{Binding twitterCommand}">
-							<Svg Path="resm:NoodleManagerX.Assets.icons.twitter.svg"/>
+							<Path Fill="#FF888888">
+								<Path.Data>
+									<PathGeometry Figures="M19 3H5C3.895 3 3 3.895 3 5v14c0 1.105 0.895 2 2 2h14c1.105 0 2-0.895 2-2V5C21 3.895 20.105 3 19 3z M17.05 9.514 c0 0.086 0 0.171 0 0.343c0 3.257-2.486 7.029-7.029 7.029c-1.371 0-2.657-0.429-3.771-1.114c0.171 0 0.429 0 0.6 0 c1.114 0 2.229-0.429 3.086-1.029c-1.114 0-1.971-0.771-2.314-1.714c0.171 0 0.343 0.086 0.429 0.086c0.257 0 0.429 0 0.686-0.086 c-1.114-0.257-1.971-1.2-1.971-2.4c0.343 0.171 0.686 0.257 1.114 0.343c-0.686-0.6-1.114-1.286-1.114-2.143 c0-0.429 0.086-0.857 0.343-1.2c1.2 1.457 3 2.486 5.057 2.571c0-0.171-0.086-0.343-0.086-0.6c0-1.371 1.114-2.486 2.486-2.486 c0.686 0 1.371 0.257 1.8 0.771c0.6-0.086 1.114-0.343 1.543-0.6c-0.171 0.6-0.6 1.029-1.114 1.371 c0.514-0.086 0.943-0.171 1.457-0.429C17.907 8.743 17.479 9.171 17.05 9.514z" FillRule="NonZero"/>
+								</Path.Data>
+							</Path>
 						</Button>
 						<Button Grid.Column="3" Classes="BlankButton Socials" Command="{Binding githubCommand}">
-							<Svg Path="resm:NoodleManagerX.Assets.icons.github.svg"/>
+							<Path Fill="#FF888888">
+								<Path.Data>
+									<PathGeometry Figures="M 12 2 C 6.476563 2 2 6.476563 2 12 C 2 17.523438 6.476563 22 12 22 C 17.523438 22 22 17.523438 22 12 C 22 6.476563 17.523438 2 12 2 Z M 12 4 C 16.410156 4 20 7.589844 20 12 C 20 12.46875 19.953125 12.929688 19.875 13.375 C 19.628906 13.320313 19.265625 13.253906 18.84375 13.25 C 18.53125 13.246094 18.140625 13.296875 17.8125 13.34375 C 17.925781 12.996094 18 12.613281 18 12.21875 C 18 11.257813 17.53125 10.363281 16.78125 9.625 C 16.988281 8.855469 17.191406 7.535156 16.65625 7 C 15.074219 7 14.199219 8.128906 14.15625 8.1875 C 13.667969 8.070313 13.164063 8 12.625 8 C 11.933594 8 11.273438 8.125 10.65625 8.3125 L 10.84375 8.15625 C 10.84375 8.15625 9.964844 6.9375 8.34375 6.9375 C 7.777344 7.507813 8.035156 8.953125 8.25 9.6875 C 7.484375 10.417969 7 11.28125 7 12.21875 C 7 12.546875 7.078125 12.859375 7.15625 13.15625 C 6.878906 13.125 5.878906 13.03125 5.46875 13.03125 C 5.105469 13.03125 4.542969 13.117188 4.09375 13.21875 C 4.03125 12.820313 4 12.414063 4 12 C 4 7.589844 7.589844 4 12 4 Z M 5.46875 13.28125 C 5.863281 13.28125 7.0625 13.421875 7.21875 13.4375 C 7.238281 13.492188 7.257813 13.542969 7.28125 13.59375 C 6.851563 13.554688 6.019531 13.496094 5.46875 13.5625 C 5.101563 13.605469 4.632813 13.738281 4.21875 13.84375 C 4.1875 13.71875 4.148438 13.597656 4.125 13.46875 C 4.5625 13.375 5.136719 13.28125 5.46875 13.28125 Z M 18.84375 13.5 C 19.242188 13.503906 19.605469 13.570313 19.84375 13.625 C 19.832031 13.691406 19.796875 13.746094 19.78125 13.8125 C 19.527344 13.753906 19.109375 13.667969 18.625 13.65625 C 18.390625 13.652344 18.015625 13.664063 17.6875 13.6875 C 17.703125 13.65625 17.707031 13.625 17.71875 13.59375 C 18.058594 13.546875 18.492188 13.496094 18.84375 13.5 Z M 6.09375 13.78125 C 6.65625 13.785156 7.183594 13.824219 7.40625 13.84375 C 7.929688 14.820313 8.988281 15.542969 10.625 15.84375 C 10.222656 16.066406 9.863281 16.378906 9.59375 16.75 C 9.359375 16.769531 9.113281 16.78125 8.875 16.78125 C 8.179688 16.78125 7.746094 16.160156 7.375 15.625 C 7 15.089844 6.539063 15.03125 6.28125 15 C 6.019531 14.96875 5.929688 15.117188 6.0625 15.21875 C 6.824219 15.804688 7.097656 16.5 7.40625 17.125 C 7.683594 17.6875 8.265625 18 8.90625 18 L 9.03125 18 C 9.011719 18.109375 9 18.210938 9 18.3125 L 9 19.40625 C 6.691406 18.472656 4.933594 16.5 4.28125 14.0625 C 4.691406 13.960938 5.152344 13.855469 5.5 13.8125 C 5.660156 13.792969 5.863281 13.777344 6.09375 13.78125 Z M 18.625 13.90625 C 19.074219 13.917969 19.472656 14.003906 19.71875 14.0625 C 19.167969 16.132813 17.808594 17.855469 16 18.90625 L 16 18.3125 C 16 17.460938 15.328125 16.367188 14.375 15.84375 C 15.957031 15.554688 16.988281 14.863281 17.53125 13.9375 C 17.910156 13.910156 18.355469 13.898438 18.625 13.90625 Z M 12.5 18 C 12.773438 18 13 18.226563 13 18.5 L 13 19.9375 C 12.671875 19.980469 12.339844 20 12 20 L 12 18.5 C 12 18.226563 12.226563 18 12.5 18 Z M 10.5 19 C 10.773438 19 11 19.226563 11 19.5 L 11 19.9375 C 10.664063 19.894531 10.324219 19.832031 10 19.75 L 10 19.5 C 10 19.226563 10.226563 19 10.5 19 Z M 14.5 19 C 14.742188 19 14.953125 19.175781 15 19.40625 C 14.675781 19.539063 14.34375 19.660156 14 19.75 L 14 19.5 C 14 19.226563 14.226563 19 14.5 19 Z" FillRule="NonZero"/>
+								</Path.Data>
+							</Path>
 						</Button>
 						<Button Grid.Column="4" Classes="BlankButton Socials" Command="{Binding twitchCommand}">
-							<Svg Path="resm:NoodleManagerX.Assets.icons.twitch.svg"/>
+							<Path Fill="#FF888888">
+								<Path.Data>
+									<PathGeometry Figures="m 6.748326 3.0000001 c -0.2742857 0 -0.5319375 0.1303795 -0.6930804 0.3532366 L 3.592634 6.7500001 C 3.4863483 6.8965716 3.4285715 7.0730492 3.4285715 7.2539064 V 17.571429 c 0 0.473142 0.384 0.857142 0.8571429 0.857142 h 3.428571 v 1.714286 C 7.7142854 20.616 8.0982854 21 8.5714284 21 h 1.359375 c 0.2271426 0 0.4448836 -0.08997 0.6060266 -0.251116 l 2.069196 -2.069196 c 0.160286 -0.161143 0.378884 -0.251117 0.606027 -0.251117 h 2.718751 c 0.227142 0 0.444883 -0.08997 0.606026 -0.251116 l 3.783482 -3.783482 c 0.161143 -0.160285 0.251116 -0.378883 0.251116 -0.606026 V 3.857143 c 0 -0.4731429 -0.384 -0.8571429 -0.857143 -0.8571429 z M 6.8571434 4.7142858 H 18.857142 V 12.428571 L 16.285714 15 H 12 L 9.4285715 17.571429 V 15 H 6.8571435 Z M 12 7.2857144 c -0.473143 0 -0.857144 0.384 -0.857144 0.8571429 v 2.5714287 c 0 0.473143 0.384001 0.857143 0.857144 0.857143 0.473142 0 0.857142 -0.384 0.857142 -0.857143 V 8.1428573 c 0 -0.4731429 -0.384 -0.8571429 -0.857142 -0.8571429 z m 4.285714 0 c -0.473143 0 -0.857143 0.384 -0.857143 0.8571429 v 2.5714287 c 0 0.473143 0.384 0.857143 0.857143 0.857143 0.473143 0 0.857143 -0.384 0.857143 -0.857143 V 8.1428573 c 0 -0.4731429 -0.384 -0.8571429 -0.857143 -0.8571429 z" FillRule="NonZero"/>
+								</Path.Data>
+							</Path>
 						</Button>
 						<Button Grid.Column="5" Classes="BlankButton Socials" Command="{Binding youtubeCommand}">
-							<Svg Path="resm:NoodleManagerX.Assets.icons.youtube.svg"/>
+							<Path Fill="#FF888888">
+								<Path.Data>
+									<PathGeometry Figures="M21.582 6.186c-0.23-0.86-0.908-1.538-1.768-1.768C18.254 4 12 4 12 4S5.746 4 4.186 4.418 c-0.86 0.23-1.538 0.908-1.768 1.768C2 7.746 2 12 2 12s0 4.254 0.418 5.814c0.23 0.86 0.908 1.538 1.768 1.768 C5.746 20 12 20 12 20s6.254 0 7.814-0.418c0.861-0.23 1.538-0.908 1.768-1.768C22 16.254 22 12 22 12S22 7.746 21.582 6.186z M10 15.464V8.536L16 12L10 15.464z" FillRule="NonZero"/>
+								</Path.Data>
+							</Path>
 						</Button>
 					</Grid>
 				</Grid>
