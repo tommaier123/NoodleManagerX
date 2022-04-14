@@ -44,6 +44,7 @@ namespace NoodleManagerX.Models
         //splitting into different lists isn't necessary
         //using PathIcon will inherit button foreground
         //blacklist mappers
+        //clean up styles 
 
 
         [Reactive] private string version { get; set; } = "V1.0.0";

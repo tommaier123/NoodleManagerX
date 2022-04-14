@@ -9,12 +9,13 @@
         x:Class="NoodleManagerX.MainWindow"
         HasSystemDecorations="False"
         Icon="resm:NoodleManagerX.Assets.Included.icon-nm.ico"
-        Title="NoodleManagerX">
-	<!--
+        Title="NoodleManagerX"
+		FontFamily="resm:NoodleManagerX.Assets.Included?assembly=NoodleManagerX#Noto Sans">
+
 	<Window.Background>
-		<ImageBrush Source="C:\Users\Max\Downloads" Stretch="Fill" />
+		<ImageBrush Source="C:\Users\Max\Downloads\Test.jpg" Stretch="Fill" />
 	</Window.Background>
--->
+
 	<Window.Resources>
 		<local:EqualsConverter x:Key="EqualsConverter"/>
 		<local:TabHilightConverter x:Key="TabHilightConverter"/>
@@ -27,24 +28,56 @@
 		<local:NullToBoolConverter x:Key="NullToBoolConverter"/>
 		<local:NotConverter x:Key="NotConverter"/>
 
-		<SolidColorBrush x:Key="ControlHeaderColor" Color="#322680"/>
-		<SolidColorBrush x:Key="BackgroundColor" Color="#1a1b1f"/>
+		<Color x:Key="ThemeBackgroundColor">#FF282828</Color>
+		<Color x:Key="ThemeBorderLowColor">#FF505050</Color>
+		<Color x:Key="ThemeBorderMidColor">#FF808080</Color>
+		<Color x:Key="ThemeBorderHighColor">#FFA0A0A0</Color>
+		<Color x:Key="ThemeControlLowColor">#FF282828</Color>
+		<Color x:Key="ThemeControlMidColor">#FF505050</Color>
+		<Color x:Key="ThemeControlMidHighColor">#FF686868</Color>
+		<Color x:Key="ThemeControlHighColor">#FF808080</Color>
+		<Color x:Key="ThemeControlVeryHighColor">#FFEFEBEF</Color>
+		<Color x:Key="ThemeControlHighlightLowColor">#FFA8A8A8</Color>
+		<Color x:Key="ThemeControlHighlightMidColor">#FF828282</Color>
+		<Color x:Key="ThemeControlHighlightHighColor">#FF505050</Color>
+		<Color x:Key="ThemeForegroundColor">#FFDEDEDE</Color>
+		<Color x:Key="HighlightColor">#FF119EDA</Color>
+
+		<SolidColorBrush x:Key="TabBarColor" Color="#c0000000"/>
+		<SolidColorBrush x:Key="WindowControlColor" Color="#ffffff"/>
+		<SolidColorBrush x:Key="TabActiveColor" Color="#f91c85"/>
+		<SolidColorBrush x:Key="TabInactiveColor" Color="#aa49e0"/>
+		<SolidColorBrush x:Key="ControlHeaderColor" Color="#c0322680"/>
+		<SolidColorBrush x:Key="ControlColor" Color="Red"/>
+		<SolidColorBrush x:Key="ConnectedColor" Color="#ffffff"/>
+		<SolidColorBrush x:Key="NotConnectedColor" Color="#888888"/>
+		<SolidColorBrush x:Key="CaretColor" Color="#ff00ff"/>
+		<SolidColorBrush x:Key="BackgroundColor" Color="transparent"/>
 		<SolidColorBrush x:Key="SeparatorColor" Color="#999999"/>
 		<SolidColorBrush x:Key="DownloadedColor" Color="#888888"/>
 		<SolidColorBrush x:Key="NotDownloadedColor" Color="#ffffff"/>
-		<SolidColorBrush x:Key="TabActiveColor" Color="#f91c85"/>
-		<SolidColorBrush x:Key="TabInactiveColor" Color="#aa49e0"/>
-		<SolidColorBrush x:Key="CaretColor" Color="#ff00ff"/>
-		<SolidColorBrush x:Key="PathValidColor" Color="#aaaaaa"/>
-		<SolidColorBrush x:Key="PathInvalidColor" Color="#ff0000"/>
-		<SolidColorBrush x:Key="BackgroundDownloadedColor" Color="#303030"/>
-		<SolidColorBrush x:Key="BackgroundNotDownloadedColor" Color="#1a1b1f"/>
+		<SolidColorBrush x:Key="BackgroundDownloadedColor" Color="#80505050"/>
+		<SolidColorBrush x:Key="BackgroundNotDownloadedColor" Color="transparent"/>
 		<SolidColorBrush x:Key="DifficultyActiveDownloadedColor" Color="#bbbbbb"/>
 		<SolidColorBrush x:Key="DifficultyInactiveDownloadedColor" Color="#888888"/>
 		<SolidColorBrush x:Key="DifficultyActiveNotDownloadedColor" Color="#ffffff"/>
 		<SolidColorBrush x:Key="DifficultyInactiveNotDownloadedColor" Color="#888888"/>
-		<SolidColorBrush x:Key="ConnectedColor" Color="#ffffff"/>
-		<SolidColorBrush x:Key="NotConnectedColor" Color="#888888"/>
+		<SolidColorBrush x:Key="PathValidColor" Color="#aaaaaa"/>
+		<SolidColorBrush x:Key="PathInvalidColor" Color="#ff0000"/>
+		<SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{StaticResource ThemeBackgroundColor}" />
+		<SolidColorBrush x:Key="ThemeBorderLowBrush" Color="{StaticResource ThemeBorderLowColor}" />
+		<SolidColorBrush x:Key="ThemeBorderMidBrush" Color="{StaticResource ThemeBorderMidColor}" />
+		<SolidColorBrush x:Key="ThemeBorderHighBrush" Color="{StaticResource ThemeBorderHighColor}" />
+		<SolidColorBrush x:Key="ThemeControlLowBrush" Color="{StaticResource ThemeControlLowColor}" />
+		<SolidColorBrush x:Key="ThemeControlMidBrush" Color="{StaticResource ThemeControlMidColor}" />
+		<SolidColorBrush x:Key="ThemeControlMidHighBrush" Color="{StaticResource ThemeControlMidHighColor}" />
+		<SolidColorBrush x:Key="ThemeControlHighBrush" Color="{StaticResource ThemeControlHighColor}" />
+		<SolidColorBrush x:Key="ThemeControlVeryHighBrush" Color="{StaticResource ThemeControlVeryHighColor}" />
+		<SolidColorBrush x:Key="ThemeControlHighlightLowBrush" Color="{StaticResource ThemeControlHighlightLowColor}" />
+		<SolidColorBrush x:Key="ThemeControlHighlightMidBrush" Color="{StaticResource ThemeControlHighlightMidColor}" />
+		<SolidColorBrush x:Key="ThemeControlHighlightHighBrush" Color="{StaticResource ThemeControlHighlightHighColor}" />
+		<SolidColorBrush x:Key="ThemeForegroundBrush" Color="{StaticResource ThemeForegroundColor}" />
+		<SolidColorBrush x:Key="HighlightBrush" Color="{StaticResource HighlightColor}" />
 		<!--
 		<SolidColorBrush x:Key="ControlHeaderColor" Color="#322680"/>
 		<SolidColorBrush x:Key="BackgroundColor" Color="#1a1b1f"/>
@@ -62,9 +95,10 @@
 	</Window.Resources>
 
 	<Window.Styles>
+
 		<!--Set font-->
 		<Style Selector="TextBlock">
-			<Setter Property="FontFamily" Value="resm:NoodleManagerX.Assets.Included?assembly=NoodleManagerX#Noto Sans"/>
+			<Setter Property="Foreground" Value="{StaticResource ControlColor}"></Setter>
 		</Style>
 
 		<!--ToolTips-->
@@ -407,7 +441,7 @@
 
 
 	<Grid RowDefinitions="auto,auto,auto,*" Background="{StaticResource BackgroundColor}">
-		<Grid Grid.Row="0" Height="70" Background="Black" Name="BlackBar"
+		<Grid Grid.Row="0" Height="70" Background="{StaticResource TabBarColor}" Name="BlackBar"
 			  ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,auto,*,auto">
 
 			<Svg Path="resm:NoodleManagerX.Assets.icons.NoodleManagerLogo.svg" Grid.Column="0" Margin="12,12,20,12"/>
@@ -432,21 +466,21 @@
 			<!--Minimize, maximize and close-->
 			<Grid Grid.Column="9" ColumnDefinitions="auto,auto,auto" Margin="0,5,6,0">
 				<Button Grid.Column="0" Classes="BlankButton WControls" Command="{Binding minimizeCommand}">
-					<Path Fill="#FFFFFFFF">
+					<Path Fill="{StaticResource WindowControlColor}">
 						<Path.Data>
 							<PathGeometry Figures="M 1.0742187 8.2011719 C 0.48951322 8.2010262 0.01547935 8.6750601 0.015625 9.2597656 0.01547951 9.844471 0.48951334 10.318505 1.0742187 10.318359 H 12.15625 c 0.584705 1.46e-4 1.058739 -0.4738879 1.058594 -1.0585934 C 13.21499 8.67506 12.740956 8.2010261 12.15625 8.2011719 Z M 0 0 h 13.229173 z m 0 13.229168 h 13.229173 z" FillRule="NonZero"/>
 						</Path.Data>
 					</Path>
 				</Button>
 				<Button Grid.Column="1" Classes="BlankButton WControls" Command="{Binding toggleFullscreenCommand}">
-					<Path Fill="#FFFFFFFF">
+					<Path Fill="{StaticResource WindowControlColor}">
 						<Path.Data>
 							<PathGeometry Figures="M 1.0585937 0 A 1.0584408 1.0584408 0 0 0 0 1.0585937 V 12.171875 a 1.0584408 1.0584408 0 0 0 1.0585937 1.056641 H 12.171875 a 1.0584408 1.0584408 0 0 0 1.056641 -1.056641 V 1.0585937 A 1.0584408 1.0584408 0 0 0 12.171875 0 Z M 2.1171875 2.1171875 H 11.113281 V 11.113281 H 2.1171875 Z" FillRule="NonZero"/>
 						</Path.Data>
 					</Path>
 				</Button>
 				<Button Grid.Column="2" Classes="BlankButton WControls" Command="{Binding closeCommand}">
-					<Path Fill="#FFFFFFFF">
+					<Path Fill="{StaticResource WindowControlColor}">
 						<Path.Data>
 							<PathGeometry Figures="M 4.0820312 0.08203125 A 3.9999496 3.9999496 0 0 0 1.2558594 1.2558594 A 3.9999496 3.9999496 0 0 0 1.2558594 6.9101562 L 19.384766 25.041016 L 1.2558594 43.169922 A 3.9999496 3.9999496 0 0 0 1.2558594 48.832031 A 3.9999496 3.9999496 0 0 0 6.9101562 48.832031 L 25.041016 30.701172 L 43.169922 48.832031 A 3.9999496 3.9999496 0 0 0 48.832031 48.832031 A 3.9999496 3.9999496 0 0 0 48.832031 43.169922 L 30.701172 25.041016 L 48.832031 6.9101562 A 3.9999496 3.9999496 0 0 0 48.832031 1.2558594 A 3.9999496 3.9999496 0 0 0 45.996094 0.08203125 A 3.9999496 3.9999496 0 0 0 43.169922 1.2558594 L 25.041016 19.384766 L 6.9101562 1.2558594 A 3.9999496 3.9999496 0 0 0 4.0820312 0.08203125 z " FillRule="NonZero"/>
 						</Path.Data>
@@ -492,7 +526,7 @@
 					<Svg Path="resm:NoodleManagerX.Assets.icons.searchbar.svg" Height="2" Width="200" Stretch="Fill"/>
 				</StackPanel>
 				<Button Grid.Column="1" Classes="BlankButton" Height="22" ToolTip.Tip="Search" Command="{Binding searchCommand}">
-					<Path Fill="#FFFFFFFF">
+					<Path Fill="{StaticResource ControlColor}">
 						<Path.Data>
 							<PathGeometry Figures="M 22.123047 -0.015625 C 9.9882311 -0.015625 0.050781212 9.8321562 0.05078125 21.916016 C 0.05078125 33.999875 9.9882311 43.841797 22.123047 43.841797 C 26.836123 43.841797 31.217876 42.355757 34.814453 39.832031 L 44.017578 48.964844 A 3.4999937 3.4999937 0 0 0 48.970703 48.941406 A 3.4999937 3.4999937 0 0 0 48.949219 43.996094 L 39.841797 34.958984 C 42.573921 31.310899 44.195312 26.796593 44.195312 21.916016 C 44.195312 9.8321562 34.257863 -0.015625 22.123047 -0.015625 z M 22.123047 6.9824219 C 30.504633 6.9824223 37.197266 13.645304 37.197266 21.916016 C 37.197266 30.186728 30.504633 36.84375 22.123047 36.84375 C 13.741461 36.84375 7.0488281 30.186728 7.0488281 21.916016 C 7.0488281 13.645304 13.741461 6.9824219 22.123047 6.9824219 z " FillRule="NonZero"/>
 						</Path.Data>
@@ -552,7 +586,7 @@
 			<!--Pagination-->
 			<Grid Grid.Column="5" ColumnDefinitions="auto,auto,auto,auto,auto" Margin="0,0,20,0">
 				<Button Grid.Column="0" Classes="BlankButton" ToolTip.Tip="Previous Page" Command="{Binding pageDownCommand}" Width="12" Height="20" Margin="0,0,5,0">
-					<Path Fill="#FFFFFFFF" Width="20">
+					<Path Fill="{StaticResource ControlColor}" Width="20">
 						<Path.Data>
 							<PathGeometry Figures="M 6.6152344 0 A 0.9261326 0.9261326 0 0 0 5.9375 0.29296875 L 0.25 6.3789062 A 0.92603999 0.92603999 0 0 0 0.29296875 7.6875 0.92603999 0.92603999 0 0 0 1.6035156 7.6445312 L 6.6152344 2.2832031 11.626953 7.6445312 A 0.92603999 0.92603999 0 0 0 12.935547 7.6875 0.92603999 0.92603999 0 0 0 12.980469 6.3789062 L 7.2910156 0.29296875 A 0.9261326 0.9261326 0 0 0 6.6152344 0 Z" FillRule="NonZero"/>
 						</Path.Data>
@@ -565,7 +599,7 @@
 				<TextBlock Grid.Column="2" VerticalAlignment="Center" Text="/"/>
 				<TextBlock Grid.Column="3" VerticalAlignment="Center" Text="{Binding numberOfPages}"/>
 				<Button Grid.Column="4" Classes="BlankButton" ToolTip.Tip="Next Page" Command="{Binding pageUpCommand}" Width="12" Height="20" Margin="5,0,0,0">
-					<Path Fill="#FFFFFFFF" Width="20">
+					<Path Fill="{StaticResource ControlColor}" Width="20">
 						<Path.Data>
 							<PathGeometry Figures="M 6.6152344 0 A 0.9261326 0.9261326 0 0 0 5.9375 0.29296875 L 0.25 6.3789062 A 0.92603999 0.92603999 0 0 0 0.29296875 7.6875 0.92603999 0.92603999 0 0 0 1.6035156 7.6445312 L 6.6152344 2.2832031 11.626953 7.6445312 A 0.92603999 0.92603999 0 0 0 12.935547 7.6875 0.92603999 0.92603999 0 0 0 12.980469 6.3789062 L 7.2910156 0.29296875 A 0.9261326 0.9261326 0 0 0 6.6152344 0 Z" FillRule="NonZero"/>
 						</Path.Data>
