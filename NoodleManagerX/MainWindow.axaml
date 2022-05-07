@@ -444,7 +444,7 @@
 		<Grid Grid.Row="0" Height="70" Background="{StaticResource TabBarColor}" Name="BlackBar"
 			  ColumnDefinitions="auto,auto,auto,auto,auto,auto,auto,auto,*,auto">
 
-			<Svg Path="resm:NoodleManagerX.Assets.icons.NoodleManagerLogo.svg" Grid.Column="0" Margin="12,12,20,12"/>
+			<Svg Path="resm:NoodleManagerX.Assets.Included.NoodleManagerLogo.svg" Grid.Column="0" Margin="12,12,20,12"/>
 
 			<!--Tab header buttons-->
 			<Button Grid.Column="1" Classes="BlankButton Tab" Content="MAPS" Command="{Binding tabSelectCommand}" CommandParameter="0"
