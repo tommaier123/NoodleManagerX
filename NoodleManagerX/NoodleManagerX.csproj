@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0-windows</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows</TargetFrameworks>
     <ApplicationIcon>icon-nm.ico</ApplicationIcon>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
@@ -9,24 +9,25 @@
     <TrimMode>link</TrimMode>
     <DebugType>embedded</DebugType>
     <Platforms>AnyCPU;x64</Platforms>
+	<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.13" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.13" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.13" />
-    <PackageReference Include="Avalonia.Svg.Skia" Version="0.10.12" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="10.0.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.15" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.15" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.15" />
+    <PackageReference Include="Avalonia.Svg.Skia" Version="0.10.14" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="11.2.1" />
     <PackageReference Include="MediaDevices" Version="1.9.1" />
-    <PackageReference Include="NAudio" Version="2.0.1" />
+    <PackageReference Include="NAudio" Version="2.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Octokit" Version="0.50.0" />
-    <PackageReference Include="ReactiveUI.Fody" Version="17.1.50" />
+    <PackageReference Include="Octokit" Version="0.51.0" />
+    <PackageReference Include="ReactiveUI.Fody" Version="18.2.5" />
     <PackageReference Include="SharpAdbClient" Version="2.3.23" />
-    <PackageReference Include="YoutubeExplode" Version="6.1.0" />
+    <PackageReference Include="YoutubeExplode" Version="6.1.2" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\Included\*.ttf" />
