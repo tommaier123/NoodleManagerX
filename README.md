@@ -9,7 +9,7 @@ This is a standalone app to download Synth Riders custom content for PC and Ques
 Other android based headsets should also work but have not been tested. 
 A version for Mac and Linux is being worked on.
 
-### Check out the [Wiki](https://github.com/tommaier123/NoodleManagerX/wiki) if you have questions on how to install or use the NoodleManagerX
+### [Click to download](https://github.com/tommaier123/NoodleManagerX/releases/latest) and check out the [Wiki](https://github.com/tommaier123/NoodleManagerX/wiki) on how to install or use the NoodleManagerX
 
 <img src="./NoodleManagerX/Assets/NoodleManager.png"/>
 
