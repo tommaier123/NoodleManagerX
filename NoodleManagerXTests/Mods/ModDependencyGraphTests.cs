@@ -1,4 +1,5 @@
 using NoodleManagerX.Mods;
+using Semver;
 
 namespace NoodleManagerXTests.Mods
 {
@@ -87,7 +88,10 @@ namespace NoodleManagerXTests.Mods
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(2));
-                Assert.That(graph.ResolvedVersions.FindLast(v => v.Id.Equals("BBB"))?.Version, Is.EqualTo("2.3.5"));
+                Assert.That(
+                    graph.ResolvedVersions.FindLast(v => v.Id.Equals("BBB"))?.Version.ToString(),
+                    Is.EqualTo("2.3.5")
+                );
             });
         }
 
@@ -108,7 +112,7 @@ namespace NoodleManagerXTests.Mods
             });
         }
 
-        private ModVersion CreateTestModVersion(string id, string version)
+        private static ModVersion CreateTestModVersion(string id, string version)
         {
             return new ModVersion
             {
@@ -122,13 +126,13 @@ namespace NoodleManagerXTests.Mods
             };
         }
 
-        private ModDependencyInfo CreateTestDependency(string id, string minVersion, string? maxVersion = null)
+        private static ModDependencyInfo CreateTestDependency(string id, string minVersion, string? maxVersion = null)
         {
             return new ModDependencyInfo
             {
                 Id = id,
-                MinVersion = minVersion,
-                MaxVersion = maxVersion,
+                MinVersion = SemVersion.Parse(minVersion, SemVersionStyles.Any),
+                MaxVersion = maxVersion == null ? null : SemVersion.Parse(maxVersion, SemVersionStyles.Any),
             };
         }
     }
