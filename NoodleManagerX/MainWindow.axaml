@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:NoodleManagerX"
+        xmlns:converters="clr-namespace:NoodleManagerX.Converters"
         mc:Ignorable="d" d:DesignWidth="950" d:DesignHeight="622"
         Width="950" Height="622"
         x:Class="NoodleManagerX.MainWindow"
@@ -17,16 +18,16 @@
 	</Window.Background>-->
 
 	<Window.Resources>
-		<local:EqualsConverter x:Key="EqualsConverter"/>
-		<local:TabHilightConverter x:Key="TabHilightConverter"/>
-		<local:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
-		<local:BoolPathConverter x:Key="BoolPathConverter"/>
-		<local:TwoParameterPathConverter x:Key="TwoParameterPathConverter"/>
-		<local:BoolColorConverter x:Key="BoolColorConverter"/>
-		<local:TwoParameterColorConverter x:Key="TwoParameterColorConverter"/>
-		<local:StringToBoolConverter x:Key="StringToBoolConverter"/>
-		<local:NullToBoolConverter x:Key="NullToBoolConverter"/>
-		<local:NotConverter x:Key="NotConverter"/>
+		<converters:EqualsConverter x:Key="EqualsConverter"/>
+		<converters:TabHilightConverter x:Key="TabHilightConverter"/>
+		<converters:DifficultyColorConverter x:Key="DifficultyColorConverter"/>
+		<converters:BoolPathConverter x:Key="BoolPathConverter"/>
+		<converters:TwoParameterPathConverter x:Key="TwoParameterPathConverter"/>
+		<converters:BoolColorConverter x:Key="BoolColorConverter"/>
+		<converters:TwoParameterColorConverter x:Key="TwoParameterColorConverter"/>
+		<converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+		<converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+		<converters:NotConverter x:Key="NotConverter"/>
 
 		<Color x:Key="ThemeBackgroundColor">#FF282828</Color>
 		<Color x:Key="ThemeBorderLowColor">#FF505050</Color>
