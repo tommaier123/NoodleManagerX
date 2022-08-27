@@ -6,7 +6,7 @@ using DynamicData;
 using Microsoft.Win32;
 using MsgBox;
 using Newtonsoft.Json;
-using NoodleManagerX.Models.Mods;
+using NoodleManagerX.Mods;
 using NoodleManagerX.Utils;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

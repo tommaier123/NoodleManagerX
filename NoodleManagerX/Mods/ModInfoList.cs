@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NoodleManagerX.Models.Mods
+namespace NoodleManagerX.Mods
 {
     class ModInfoList
     {
