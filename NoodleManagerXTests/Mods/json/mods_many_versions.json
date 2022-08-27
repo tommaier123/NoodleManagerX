@@ -1,0 +1,54 @@
+{
+  "availableMods": [
+    {
+      "id": "SRVoting",
+      "name": "SRVoting",
+      "author": "bookdude13",
+      "description": "Add voting buttons for custom maps in-game",
+      "version": "1.2.0",
+      "downloadUrl": "https://github.com/bookdude13/SRVoting/releases/download/v1.2.0/SRVoting_v1.2.0.zip",
+      "dependencies": [
+        {
+          "id": "SRModCore",
+          "minVersion": "1.0.0"
+        }
+      ]
+    },
+    {
+      "id": "SRModCore",
+      "name": "SRModCore",
+      "author": "bookdude13",
+      "description": "Shared library for various SynthRiders mods",
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/bookdude13/SRModCore/releases/download/v1.0.0/SRModCore_v1.0.0.zip",
+      "dependencies": []
+    },
+    {
+      "id": "TestMajor",
+      "name": "Test versions major",
+      "author": "bookdude13",
+      "description": "Only major version",
+      "version": "1",
+      "downloadUrl": "localhost",
+      "dependencies": []
+    },
+    {
+      "id": "TestFull",
+      "name": "Test versions full",
+      "author": "bookdude13",
+      "description": "Full version",
+      "version": "1.2.3",
+      "downloadUrl": "localhost",
+      "dependencies": []
+    },
+    {
+      "id": "TestAlpha",
+      "name": "Test versions alpha",
+      "author": "bookdude13",
+      "description": "Alpha version",
+      "version": "1.2.3-alpha",
+      "downloadUrl": "localhost",
+      "dependencies": []
+    }
+  ]
+}

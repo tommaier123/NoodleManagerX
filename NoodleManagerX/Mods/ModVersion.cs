@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using NoodleManagerX.Models;
+using NoodleManagerX.Utils;
+using Semver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +26,8 @@ namespace NoodleManagerX.Mods
         public string Description { get; set; } = "";
         
         [JsonProperty("version", Required = Required.Always)]
-        public string Version { get; set; } = "";
+        [JsonConverter(typeof(SemVersionJsonConverter))]
+        public SemVersion Version { get; set; } = null;
 
         [JsonProperty("downloadUrl", Required = Required.Always)]
         public string DownloadUrl { get; set; } = "";

@@ -1,0 +1,13 @@
+{
+  "availableMods": [
+    {
+      "id": "TestBadVersion",
+      "name": "Test invalid version",
+      "author": "bookdude13",
+      "description": "Invalid semver",
+      "version": "1.2.3.4",
+      "downloadUrl": "localhost",
+      "dependencies": []
+    }
+  ]
+}

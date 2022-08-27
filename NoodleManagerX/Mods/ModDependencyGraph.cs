@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Semver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,23 +51,23 @@ namespace NoodleManagerX.Mods
                 {
                     if (finalVersions.ContainsKey(depInfo.Id))
                     {
-                        /*// Dependency exists. Check version range
+                        // Dependency exists. Check version range
                         var existingModInfo = finalVersions[depInfo.Id];
                         if (IsVersionInRange(existingModInfo.Version, depInfo.MinVersion, depInfo.MaxVersion))
                         {
-                            Console.WriteLine($"Dependency {depInfo.Name} already exists. Version is in range");
+                            Console.WriteLine($"Dependency {depInfo.Id} already defined. Version is in range");
                         }
                         else
                         {
-                            Message = $"Dependency {depInfo.Name} from mod {mod.Name} already defined at version " +
-                                $"{existingModInfo.Version} outside of required range {depInfo.MinVersion} to {depInfo.MaxVersion}";
+                            Message = $"Dependency {depInfo.Id} already defined at version {existingModInfo.Version}" +
+                                $" outside of required range {depInfo.MinVersion} to {depInfo.MaxVersion}";
                             State = ResolvedState.ERROR_VERSION_MISMATCH;
                             return;
-                        }*/
+                        }
                     }
                     else
                     {
-                        Console.WriteLine($"Dependency {depInfo.Name} not defined in list");
+                        Console.WriteLine($"Dependency {depInfo.Id} not defined in list");
                         State = ResolvedState.ERROR_MISSING_DEP;
                         return;
                     }
@@ -77,7 +78,7 @@ namespace NoodleManagerX.Mods
             ResolvedVersions = finalVersions.Values.ToList();
         }
 
-        private bool IsVersionInRange(string version, string lowInclusive, string highInclusive)
+        private bool IsVersionInRange(SemVersion version, SemVersion lowInclusive, SemVersion highInclusive)
         {
             return true;
         }

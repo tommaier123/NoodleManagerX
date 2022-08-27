@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NoodleManagerX.Mods
 {
-    class ModInfoList
+    public class ModInfoList
     {
         [JsonProperty("availableMods")]
         public List<ModVersion> AvailableMods { get; set; }
