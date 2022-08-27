@@ -12,9 +12,9 @@
         Title="NoodleManagerX"
 		FontFamily="resm:NoodleManagerX.Assets.Included?assembly=NoodleManagerX#Noto Sans">
 
-	<Window.Background>
+	<!--<Window.Background>
 		<ImageBrush Source="C:\Users\Max\Downloads\Test.jpg" Stretch="Fill" />
-	</Window.Background>
+	</Window.Background>-->
 
 	<Window.Resources>
 		<local:EqualsConverter x:Key="EqualsConverter"/>
