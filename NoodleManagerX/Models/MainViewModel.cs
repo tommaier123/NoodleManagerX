@@ -46,6 +46,10 @@ namespace NoodleManagerX.Models
         //blacklist mappers
         //clean up styles 
 
+        public const int TAB_MAPS = 0;
+        public const int TAB_PLAYLISTS = 1;
+        public const int TAB_STAGES = 2;
+        public const int TAB_AVATARS = 3;
 
         [Reactive] private string version { get; set; } = "V1.0.0";
 
@@ -53,7 +57,7 @@ namespace NoodleManagerX.Models
 
         [Reactive] public Settings settings { get; set; } = new Settings();
 
-        [Reactive] public int selectedTabIndex { get; set; } = 0;
+        [Reactive] public int selectedTabIndex { get; set; } = TAB_MAPS;
         [Reactive] public int currentPage { get; set; } = 1;
         [Reactive] public int numberOfPages { get; set; } = 1;
         [Reactive] public string searchText { get; set; } = "";
@@ -199,7 +203,7 @@ namespace NoodleManagerX.Models
 
                 getPageCommand = ReactiveCommand.Create(() =>
                 {
-                    if (selectedTabIndex != 0)
+                    if (selectedTabIndex != TAB_MAPS)
                     {
                         OpenErrorDialog("Currently only map downloading is supported");
                         return;
@@ -415,19 +419,19 @@ namespace NoodleManagerX.Models
             {
                 switch (selectedTabIndex)
                 {
-                    case 0:
+                    case TAB_MAPS:
                         maps.Clear();
                         maps.AddRange(items.Where(x => x.itemType == ItemType.Map).Select(x => (MapItem)x));
                         break;
-                    case 1:
+                    case TAB_PLAYLISTS:
                         playlists.Clear();
                         playlists.AddRange(items.Where(x => x.itemType == ItemType.Playlist).Select(x => (PlaylistItem)x));
                         break;
-                    case 2:
+                    case TAB_STAGES:
                         stages.Clear();
                         stages.AddRange(items.Where(x => x.itemType == ItemType.Stage).Select(x => (StageItem)x));
                         break;
-                    case 3:
+                    case TAB_AVATARS:
                         avatars.Clear();
                         avatars.AddRange(items.Where(x => x.itemType == ItemType.Avatar).Select(x => (AvatarItem)x));
                         break;
@@ -449,16 +453,16 @@ namespace NoodleManagerX.Models
             {
                 switch (selectedTabIndex)
                 {
-                    case 0:
+                    case TAB_MAPS:
                         await mapHandler.GetPage();
                         break;
-                    case 1:
+                    case TAB_PLAYLISTS:
                         await playlistHandler.GetPage();
                         break;
-                    case 2:
+                    case TAB_STAGES:
                         await stageHandler.GetPage();
                         break;
-                    case 3:
+                    case TAB_AVATARS:
                         await avatarHandler.GetPage();
                         break;
                 }
@@ -467,7 +471,7 @@ namespace NoodleManagerX.Models
 
         public Task GetAll()
         {
-            if (selectedTabIndex != 0)
+            if (selectedTabIndex != TAB_MAPS)
             {
                 OpenErrorDialog("Currently only map downloading is supported");
                 return Task.CompletedTask;
@@ -483,16 +487,16 @@ namespace NoodleManagerX.Models
                 {
                     switch (selectedTabIndex)
                     {
-                        case 0:
+                        case TAB_MAPS:
                             await mapHandler.GetAll();
                             break;
-                        case 1:
+                        case TAB_PLAYLISTS:
                             await playlistHandler.GetAll();
                             break;
-                        case 2:
+                        case TAB_STAGES:
                             await stageHandler.GetAll();
                             break;
-                        case 3:
+                        case TAB_AVATARS:
                             await avatarHandler.GetAll();
                             break;
                     }
