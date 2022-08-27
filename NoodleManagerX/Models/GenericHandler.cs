@@ -109,7 +109,7 @@ namespace NoodleManagerX.Models
             return Task.FromResult(false);
         }
 
-        public async Task GetPage()
+        public async virtual Task GetPage()
         {
             int requestID = MainViewModel.s_instance.apiRequestCounter;
             Clear();

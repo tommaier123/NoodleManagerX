@@ -6,6 +6,8 @@ using DynamicData;
 using Microsoft.Win32;
 using MsgBox;
 using Newtonsoft.Json;
+using NoodleManagerX.Models.Mods;
+using NoodleManagerX.Utils;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SharpAdbClient;
@@ -50,6 +52,7 @@ namespace NoodleManagerX.Models
         public const int TAB_PLAYLISTS = 1;
         public const int TAB_STAGES = 2;
         public const int TAB_AVATARS = 3;
+        public const int TAB_MODS = 4;
 
         [Reactive] private string version { get; set; } = "V1.0.0";
 
@@ -122,6 +125,7 @@ namespace NoodleManagerX.Models
         public PlaylistHandler playlistHandler = new PlaylistHandler();
         public StageHandler stageHandler = new StageHandler();
         public AvatarHandler avatarHandler = new AvatarHandler();
+        public ModHandler modHandler = new ModHandler();
 
         public MainViewModel()
         {
@@ -373,12 +377,21 @@ namespace NoodleManagerX.Models
                     previewVolume = settings.previewVolume;
                 });
 
+                // synthDirectory should be set by now
+                if (directoryValid)
+                {
+                    var gameDataDir = Path.Combine(synthDirectory, "SynthRiders_Data");
+                    UnityInformationHandler.Setup(gameDataDir);
+                }
+
                 this.WhenAnyValue(x => x.synthDirectory).Skip(1).Subscribe(x =>
                 {
                     directoryValid = CheckDirectory(synthDirectory);
                     if (settings.synthDirectory != synthDirectory && directoryValid)
                     {
                         settings.synthDirectory = synthDirectory;
+                        var gameDataDir = Path.Combine(synthDirectory, "SynthRiders_Data");
+                        UnityInformationHandler.Setup(gameDataDir);
                         ReloadLocalSources(true);
                     }
                 });
@@ -464,6 +477,9 @@ namespace NoodleManagerX.Models
                         break;
                     case TAB_AVATARS:
                         await avatarHandler.GetPage();
+                        break;
+                    case TAB_MODS:
+                        await modHandler.GetPage();
                         break;
                 }
             });
