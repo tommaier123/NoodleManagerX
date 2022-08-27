@@ -78,8 +78,18 @@ namespace NoodleManagerX.Mods
             ResolvedVersions = finalVersions.Values.ToList();
         }
 
-        private bool IsVersionInRange(SemVersion version, SemVersion lowInclusive, SemVersion highInclusive)
+        private static bool IsVersionInRange(SemVersion version, SemVersion lowInclusive, SemVersion highInclusive)
         {
+            if (version.ComparePrecedenceTo(lowInclusive) == -1)
+            {
+                return false;
+            }
+
+            if (highInclusive != null && version.ComparePrecedenceTo(highInclusive) == 1)
+            {
+                return false;
+            }
+
             return true;
         }
     }
