@@ -174,7 +174,7 @@ namespace NoodleManagerX.Models
                                 );
                         }
 
-                        if (!MainViewModel.s_instance.settings.allowConverts && MainViewModel.s_instance.selectedTabIndex == 0)
+                        if (!MainViewModel.s_instance.settings.allowConverts && MainViewModel.s_instance.selectedTabIndex == MainViewModel.TAB_MAPS)
                         {
                             convert =
                             new JObject(
@@ -251,7 +251,7 @@ namespace NoodleManagerX.Models
                         using (WebClient client = new WebClient())
                         {
                             JObject convert = new JObject();
-                            if (!MainViewModel.s_instance.settings.allowConverts && MainViewModel.s_instance.selectedTabIndex == 0)
+                            if (!MainViewModel.s_instance.settings.allowConverts && MainViewModel.s_instance.selectedTabIndex == MainViewModel.TAB_MAPS)
                             {
                                 convert =
                                 new JObject(
