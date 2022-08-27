@@ -2,6 +2,7 @@
 using DynamicData;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NoodleManagerX.Models;
 using NoodleManagerX.Utils;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NoodleManagerX.Models.Mods
+namespace NoodleManagerX.Mods
 {
     class ModHandler : GenericHandler
     {
@@ -78,7 +79,7 @@ namespace NoodleManagerX.Models.Mods
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine("Failed to deserialize mod list");
+                Console.Error.WriteLine("Failed to deserialize mod list: " + e.Message);
                 return new List<ModVersion>();
             }
         }

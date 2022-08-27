@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NoodleManagerX.Models.Mods
+namespace NoodleManagerX.Mods
 {
     class ModVersion
     {
