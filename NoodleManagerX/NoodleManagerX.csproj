@@ -16,6 +16,7 @@
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AssetsTools.NET" Version="2.0.12" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.15" />
     <PackageReference Include="Avalonia.Diagnostics" Version="0.10.15" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.15" />
@@ -32,11 +33,25 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets\Included\*.ttf" />
 	  <EmbeddedResource Include="Assets\Included\*.svg" />
+	  <None Remove="Resources\classdata.tpk" />
     <EmbeddedResource Include="Assets\Included\icon-nm.ico" />
   </ItemGroup>
 	<ItemGroup Condition="'$(RuntimeIdentifier)'=='win-x64'or'$(Configuration)'=='DEBUG'">
     <EmbeddedResource Include="Resources\UpdateHelper.exe" />
   </ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Resources\Resources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Resources.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	</ItemGroup>
 	
 <!--
   <ItemGroup Condition="'$(RuntimeIdentifier)'=='win-x64'or'$(Configuration)'=='DEBUG'">
