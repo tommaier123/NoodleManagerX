@@ -9,8 +9,11 @@ using System.Threading.Tasks;
 
 namespace NoodleManagerX.Mods
 {
-    class ModVersion
+    public class ModVersion
     {
+        [JsonProperty("id", Required = Required.Always)]
+        public string Id { get; set; } = "N/A";
+
         [JsonProperty("name", Required=Required.Always)]
         public string Name { get; set; } = "N/A";
 
