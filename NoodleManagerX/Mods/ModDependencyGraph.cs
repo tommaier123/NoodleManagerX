@@ -26,6 +26,7 @@ namespace NoodleManagerX.Mods
 
         // ModInfo.id, ModVersion
         public Dictionary<string, ModVersion> ResolvedVersions { get; private set; } = new();
+        public Dictionary<string, ModVersion> ResolvingVersions { get; private set; } = new();
 
         // ModInfo.id, ModInfo
         private Dictionary<string, ModInfo> _mods = new();
@@ -71,50 +72,24 @@ namespace NoodleManagerX.Mods
             ResolvedVersions = new();
             State = ResolvedState.RESOLVING;
 
-            var finalVersions = new Dictionary<string, ModVersion>();
+            ResolvingVersions = new Dictionary<string, ModVersion>();
 
             // Add base selections
-            foreach (var selection in selectedVersions)
+            ResolvingAddBaseVersions(selectedVersions);
+            if (State != ResolvedState.RESOLVING)
             {
-                if (!_mods.ContainsKey(selection.ModId))
-                {
-                    Console.WriteLine($"Selected mod {selection.ModId} not found in graph!");
-                    State = ResolvedState.ERROR_MISSING_MOD;
-                    return;
-                }
-
-                if (selection.ModVersion == null)
-                {
-                    // No selection, use largest
-                    finalVersions[selection.ModId] = GetLatestVersion(_mods[selection.ModId].Versions);
-                }
-                else
-                {
-                    var modInfo = _mods[selection.ModId];
-                    var matchedModVersion = modInfo.Versions.Find(
-                        v => v.Version.ComparePrecedenceTo(selection.ModVersion.Version) == 0
-                    );
-                    if (matchedModVersion == null)
-                    {
-                        Console.WriteLine($"Version {selection.ModVersion.Version} for selected mod {selection.ModId} not found in graph!");
-                        State = ResolvedState.ERROR_MISSING_MOD;
-                        return;
-                    }
-                    finalVersions[selection.ModId] = selection.ModVersion;
-                }
+                Console.WriteLine("Failed to add base versions");
+                return;
             }
 
-            /*// Check dependencies
-            foreach (var modId in finalVersions.Keys)
+            // Make sure dependencies all exist
+            ResolvingCheckDependenciesExist();
+            if (State != ResolvedState.RESOLVING)
             {
-                var modVersion = finalVersions[modId];
-                if (!AreDependenciesValid(modVersion.Dependencies, finalVersions))
-                {
-                    Console.WriteLine($"Dependencies not valid for mod ${modId}");
-                    State = ResolvedState.ERROR_MISSING_DEP;
-                    return;
-                }
-            }*/
+                Console.WriteLine("Not all dependencies exist in main list");
+                return;
+            }
+
 
             /*
 
@@ -149,7 +124,60 @@ namespace NoodleManagerX.Mods
             }*/
 
             State = ResolvedState.RESOLVED;
-            ResolvedVersions = finalVersions;
+            ResolvedVersions = ResolvingVersions;
+            ResolvingVersions = new();
+        }
+
+        private void ResolvingAddBaseVersions(List<ModVersionSelection> selectedVersions)
+        {
+            foreach (var selection in selectedVersions)
+            {
+                if (!_mods.ContainsKey(selection.ModId))
+                {
+                    Console.WriteLine($"Selected mod {selection.ModId} not found in graph!");
+                    State = ResolvedState.ERROR_MISSING_MOD;
+                    return;
+                }
+
+                if (selection.ModVersion == null)
+                {
+                    // No selection, use largest
+                    ResolvingVersions[selection.ModId] = GetLatestVersion(_mods[selection.ModId].Versions);
+                }
+                else
+                {
+                    var modInfo = _mods[selection.ModId];
+                    var matchedModVersion = modInfo.Versions.Find(
+                        v => v.Version.ComparePrecedenceTo(selection.ModVersion.Version) == 0
+                    );
+                    if (matchedModVersion == null)
+                    {
+                        Console.WriteLine($"Version {selection.ModVersion.Version} for selected mod {selection.ModId} not found in graph!");
+                        State = ResolvedState.ERROR_MISSING_MOD;
+                        return;
+                    }
+                    ResolvingVersions[selection.ModId] = selection.ModVersion;
+                }
+            }
+        }
+
+        private void ResolvingCheckDependenciesExist()
+        {
+            foreach (var modId in ResolvingVersions.Keys)
+            {
+                var modVersion = ResolvingVersions[modId];
+
+                foreach (var dep in modVersion.Dependencies)
+                {
+                    // Dependencies must be present
+                    if (!ResolvingVersions.ContainsKey(dep.Id))
+                    {
+                        Console.WriteLine($"Dependency missing for mod ${modId}");
+                        State = ResolvedState.ERROR_MISSING_DEP;
+                        return;
+                    }
+                }
+            }
         }
 
         private static bool IsVersionInRange(SemVersion version, SemVersion lowInclusive, SemVersion highInclusive)
