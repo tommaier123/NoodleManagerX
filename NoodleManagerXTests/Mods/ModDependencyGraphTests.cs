@@ -75,15 +75,20 @@ namespace NoodleManagerXTests.Mods
                 AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
             });
         }
-        /*
+        
         [Test]
         public void Test_Resolve_DepNotInList_Error()
         {
-            var modA = CreateTestModVersion("AAA", "1.0");
-            modA.Dependencies.Add(CreateTestDependency("BBB", "1.0"));
-            graph.AddModVersion(modA);
+            graph.AddMod(CreateTestMod("AAA", new List<ModVersion>
+            {
+                CreateTestModVersion("1.0", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.0")
+                }),
+            }));
 
             graph.Resolve();
+
             Assert.Multiple(() =>
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.ERROR_MISSING_DEP));
@@ -91,7 +96,7 @@ namespace NoodleManagerXTests.Mods
                 Assert.That(graph.ResolvedVersions, Is.Empty);
             });
         }
-
+        /*
         [Test]
         public void Test_Resolve_DepExistsAtMinVersion()
         {
@@ -182,13 +187,13 @@ namespace NoodleManagerXTests.Mods
             };
         }
 
-        private static ModVersion CreateTestModVersion(string version)
+        private static ModVersion CreateTestModVersion(string version, List<ModDependencyInfo>? dependencies = null)
         {
             return new ModVersion
             {
                 Version = SemVersion.Parse(version, SemVersionStyles.Any),
                 DownloadUrl = "localhost",
-                Dependencies = new(),
+                Dependencies = dependencies ?? new(),
             };
         }
 
