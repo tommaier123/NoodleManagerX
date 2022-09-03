@@ -7,16 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NoodleManagerX.Mods
+namespace NoodleManagerX.Models.Mods
 {
     public class ModDependencyInfo
     {
         [JsonProperty("id", Required = Required.Always)]
         public string Id { get; set; } = "N/A";
-        
+
         [JsonProperty("minVersion", Required = Required.Always)]
         [JsonConverter(typeof(SemVersionJsonConverter))]
-        public SemVersion MinVersion{ get; set; } = null;
+        public SemVersion MinVersion { get; set; } = null;
 
         [JsonProperty("maxVersion", Required = Required.Default)]
         [JsonConverter(typeof(SemVersionJsonConverter))]

@@ -1,4 +1,5 @@
-﻿using Semver;
+﻿using NoodleManagerX.Models.Mods;
+using Semver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,26 +21,29 @@ namespace NoodleManagerX.Mods
 
         public ResolvedState State { get; private set; } = ResolvedState.UNRESOLVED;
         public string Message { get; private set; } = "";
-        public List<ModVersion> ResolvedVersions { get; private set; } = new List<ModVersion>();
 
-        private Dictionary<string, ModVersion> _modVersions = new Dictionary<string, ModVersion>();
+        // ModInfo.id, ModVersion
+        public Dictionary<string, ModVersion> ResolvedVersions { get; private set; } = new();
+
+        // ModInfo.id, ModInfo
+        private Dictionary<string, ModInfo> _mods = new();
 
 
-        public void AddModVersion(ModVersion version)
+        public void AddMod(ModInfo mod)
         {
-            _modVersions.Add(version.Id, version);
+            _mods.Add(mod.Id, mod);
         }
 
         public void Resolve()
         {
             // Reset resolved versions until resolution is finished
-            ResolvedVersions = new List<ModVersion>();
+            ResolvedVersions = new();
             State = ResolvedState.RESOLVING;
 
             var finalVersions = new Dictionary<string, ModVersion>();
-
+/*
             // Add base mods
-            foreach (var mod in _modVersions.Values)
+            foreach (var mod in _mods.Values)
             {
                 finalVersions.Add(mod.Id, mod);
             }
@@ -72,10 +76,10 @@ namespace NoodleManagerX.Mods
                         return;
                     }
                 }
-            }
+            }*/
 
             State = ResolvedState.RESOLVED;
-            ResolvedVersions = finalVersions.Values.ToList();
+            ResolvedVersions = finalVersions;
         }
 
         private static bool IsVersionInRange(SemVersion version, SemVersion lowInclusive, SemVersion highInclusive)

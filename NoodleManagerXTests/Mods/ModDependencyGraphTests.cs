@@ -1,3 +1,4 @@
+using NoodleManagerX.Models.Mods;
 using NoodleManagerX.Mods;
 using Semver;
 
@@ -26,7 +27,7 @@ namespace NoodleManagerXTests.Mods
             });
         }
 
-        [Test]
+        /*[Test]
         public void Test_Resolve_MultipleModsNoDeps()
         {
             graph.AddModVersion(CreateTestModVersion("AAA", "1.0"));
@@ -88,10 +89,7 @@ namespace NoodleManagerXTests.Mods
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(2));
-                Assert.That(
-                    graph.ResolvedVersions.FindLast(v => v.Id.Equals("BBB"))?.Version.ToString(),
-                    Is.EqualTo("2.3.5")
-                );
+                Assert.That(GetVersionStringFromResolved(graph.ResolvedVersions, "BBB"), Is.EqualTo("2.3.5"));
             });
         }
 
@@ -109,6 +107,30 @@ namespace NoodleManagerXTests.Mods
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.ERROR_VERSION_MISMATCH));
                 Assert.That(graph.ResolvedVersions, Is.Empty);
+            });
+        }
+
+        [Test]
+        public void Test_Resolve_MultipleDepVersions_ChooseHighestInRange()
+        {
+            // Versions vs selections - two lists??
+
+            var modA = CreateTestModVersion("AAA", "1.0");
+            modA.Dependencies.Add(CreateTestDependency("BBB", "1.0", "1.2.1"));
+            graph.AddModVersion(modA);
+
+            graph.AddModVersion(CreateTestModVersion("BBB", "1.0"));
+            graph.AddModVersion(CreateTestModVersion("BBB", "1.2"));
+            graph.AddModVersion(CreateTestModVersion("BBB", "1.2.1"));
+            graph.AddModVersion(CreateTestModVersion("BBB", "1.2.2"));
+            graph.AddModVersion(CreateTestModVersion("BBB", "1.3"));
+
+            graph.Resolve();
+            Assert.Multiple(() =>
+            {
+                Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
+                Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(2));
+                Assert.That(GetVersionStringFromResolved(graph.ResolvedVersions, "BBB"), Is.EqualTo("1.2.1"));
             });
         }
 
@@ -135,5 +157,10 @@ namespace NoodleManagerXTests.Mods
                 MaxVersion = maxVersion == null ? null : SemVersion.Parse(maxVersion, SemVersionStyles.Any),
             };
         }
+
+        private string? GetVersionStringFromResolved(List<ModVersion> resolvedVersions, string modId)
+        {
+            return resolvedVersions.FindLast(v => v.Id.Equals(modId))?.Version?.ToString();
+        }*/
     }
 }
