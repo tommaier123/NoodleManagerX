@@ -96,24 +96,33 @@ namespace NoodleManagerXTests.Mods
                 Assert.That(graph.ResolvedVersions, Is.Empty);
             });
         }
-        /*
+        
         [Test]
         public void Test_Resolve_DepExistsAtMinVersion()
         {
-            var modA = CreateTestModVersion("AAA", "1.0");
-            modA.Dependencies.Add(CreateTestDependency("BBB", "1.0"));
-            graph.AddModVersion(modA);
-
-            graph.AddModVersion(CreateTestModVersion("BBB", "1.0"));
+            graph.AddMod(CreateTestMod("AAA", new List<ModVersion>
+            {
+                CreateTestModVersion("1.2", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.0")
+                }),
+            }));
+            graph.AddMod(CreateTestMod("BBB", new List<ModVersion>
+            {
+                CreateTestModVersion("1.0"),
+            }));
 
             graph.Resolve();
+
             Assert.Multiple(() =>
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(2));
+                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
+                AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.0");
             });
         }
-
+        /*
         [Test]
         public void Test_Resolve_DepExistsAtMaxVersion()
         {
