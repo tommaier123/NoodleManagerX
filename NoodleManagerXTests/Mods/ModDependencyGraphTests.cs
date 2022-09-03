@@ -177,18 +177,22 @@ namespace NoodleManagerXTests.Mods
             });
         }
 
-        /*[Test]
+        [Test]
         public void Test_Resolve_DepNotInList_Error()
         {
-            graph.AddMod(CreateTestMod("AAA", new List<ModVersion>
+            var modA = CreateTestMod("AAA", new List<ModVersion>
             {
                 CreateTestModVersion("1.0", new List<ModDependencyInfo>
                 {
                     CreateTestDependency("BBB", "1.0")
                 }),
-            }));
+            });
+            graph.AddMod(modA);
 
-            var selections = new List<ModVersionSelection>();
+            var selections = new List<ModVersionSelection>()
+            {
+                new ModVersionSelection(modA.Id, modA.Versions[0])
+            };
             graph.Resolve(selections);
 
             Assert.Multiple(() =>
@@ -200,21 +204,28 @@ namespace NoodleManagerXTests.Mods
         }
         
         [Test]
-        public void Test_Resolve_DepExistsAtMinVersion()
+        public void Test_Resolve_DepSelected_ExistsAtMinVersion()
         {
-            graph.AddMod(CreateTestMod("AAA", new List<ModVersion>
+            var modA = CreateTestMod("AAA", new List<ModVersion>
             {
                 CreateTestModVersion("1.2", new List<ModDependencyInfo>
                 {
                     CreateTestDependency("BBB", "1.0")
                 }),
-            }));
-            graph.AddMod(CreateTestMod("BBB", new List<ModVersion>
+            });
+            graph.AddMod(modA);
+
+            var modB = CreateTestMod("BBB", new List<ModVersion>
             {
                 CreateTestModVersion("1.0"),
-            }));
+            });
+            graph.AddMod(modB);
 
-            var selections = new List<ModVersionSelection>();
+            var selections = new List<ModVersionSelection>
+            {
+                new ModVersionSelection(modA.Id, modA.Versions[0]),
+                new ModVersionSelection(modB.Id, modB.Versions[0]),
+            };
             graph.Resolve(selections);
 
             Assert.Multiple(() =>
@@ -224,25 +235,56 @@ namespace NoodleManagerXTests.Mods
                 AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
                 AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.0");
             });
-        }*/
+        }
 
-        // TODO need to pass in selected mods and versions.
-        // With that, the original mod list can be reduced by only allowing versions
-        // in the ranges described by all dependencies of selected versions (use combined dep list).
-        // Then the latest versions can be selected, and if any missing, invalid configuration.
-        // The UI could try resolving for each version once dropdown selected, and make entries that don't resolve red
-        
-        /*[Test]
-        public void Test_Resolve_DepExistsAtManyVersions_SelectMaxInRange()
+        /// <summary>
+        /// For now, dependencies need to be manually selected.
+        /// If the dependency is not selected, return an error
+        /// </summary>
+        [Test]
+        public void Test_Resolve_DepNotSelected_Error()
         {
-            graph.AddMod(CreateTestMod("AAA", new List<ModVersion>
+            var modA = CreateTestMod("AAA", new List<ModVersion>
+            {
+                CreateTestModVersion("1.2", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.0")
+                }),
+            });
+            graph.AddMod(modA);
+
+            var modB = CreateTestMod("BBB", new List<ModVersion>
+            {
+                CreateTestModVersion("1.0"),
+            });
+            graph.AddMod(modB);
+
+            var selections = new List<ModVersionSelection>
+            {
+                new ModVersionSelection(modA.Id, modA.Versions[0]),
+            };
+            graph.Resolve(selections);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.ERROR_MISSING_DEP));
+                Assert.That(graph.ResolvedVersions, Is.Empty);
+            });
+        }
+
+        [Test]
+        public void Test_Resolve_DepVersionUnspecified_SelectMaxInRange()
+        {
+            var modA = CreateTestMod("AAA", new List<ModVersion>
             {
                 CreateTestModVersion("1.2", new List<ModDependencyInfo>
                 {
                     CreateTestDependency("BBB", "1.0", "2.3.5"),
                 }),
-            }));
-            graph.AddMod(CreateTestMod("BBB", new List<ModVersion>
+            });
+            graph.AddMod(modA);
+
+            var modB = CreateTestMod("BBB", new List<ModVersion>
             {
                 CreateTestModVersion("1.0"),
                 CreateTestModVersion("1.3.5"),
@@ -250,9 +292,15 @@ namespace NoodleManagerXTests.Mods
                 CreateTestModVersion("2.3.4"),
                 CreateTestModVersion("2.3.6"),
                 CreateTestModVersion("2.4.0"),
-            }));
+            });
+            graph.AddMod(modB);
 
-            graph.Resolve();
+            var selections = new List<ModVersionSelection>
+            {
+                new ModVersionSelection(modA.Id, modA.Versions[0]),
+                new ModVersionSelection(modB.Id, null),
+            };
+            graph.Resolve(selections);
 
             Assert.Multiple(() =>
             {
@@ -261,7 +309,15 @@ namespace NoodleManagerXTests.Mods
                 AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
                 AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "2.3.4");
             });
-        }*/
+        }
+
+        // TODO need to pass in selected mods and versions.
+        // With that, the original mod list can be reduced by only allowing versions
+        // in the ranges described by all dependencies of selected versions (use combined dep list).
+        // Then the latest versions can be selected, and if any missing, invalid configuration.
+        // The UI could try resolving for each version once dropdown selected, and make entries that don't resolve red
+
+        /**/
         /*
         [Test]
         public void Test_Resolve_DepOutOfRange_Error()
