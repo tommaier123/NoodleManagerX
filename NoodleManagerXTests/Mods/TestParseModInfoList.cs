@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using NoodleManagerX.Mods;
+using NoodleManagerX.Models.Mods;
 using System;
 using System.Collections.Generic;
 using System.Linq;

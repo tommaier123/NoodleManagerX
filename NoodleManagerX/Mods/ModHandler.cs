@@ -3,6 +3,7 @@ using DynamicData;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NoodleManagerX.Models;
+using NoodleManagerX.Models.Mods;
 using NoodleManagerX.Utils;
 using System;
 using System.Collections.Generic;
@@ -45,7 +46,7 @@ namespace NoodleManagerX.Mods
                         return;
                     };
 
-                    List<ModVersion> modItems = ParseRemoteModList(rawResponse);
+                    var mods = ParseRemoteModList(rawResponse);
 
 /*                    await Dispatcher.UIThread.InvokeAsync(() =>
                     {
@@ -65,11 +66,11 @@ namespace NoodleManagerX.Mods
             }
         }
 
-        private List<ModVersion> ParseRemoteModList(string rawRemoteModList)
+        private List<ModInfo> ParseRemoteModList(string rawRemoteModList)
         {
             if (rawRemoteModList == null)
             {
-                return new List<ModVersion>();
+                return new();
             }
 
             try
@@ -80,7 +81,7 @@ namespace NoodleManagerX.Mods
             catch (Exception e)
             {
                 Console.Error.WriteLine("Failed to deserialize mod list: " + e.Message);
-                return new List<ModVersion>();
+                return new();
             }
         }
 
