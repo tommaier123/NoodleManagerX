@@ -35,10 +35,10 @@ namespace NoodleManagerX.Mods
             _mods.Add(mod.Id, mod);
         }
 
-        private bool IsVersionValid(ModVersion version, Dictionary<string, ModVersion> currentVersions)
+        private bool AreDependenciesValid(List<ModDependencyInfo> dependencies, Dictionary<string, ModVersion> currentVersions)
         {
             // Dependencies must be present
-            foreach (var dep in version.Dependencies)
+            foreach (var dep in dependencies)
             {
                 if (!currentVersions.ContainsKey(dep.Id))
                 {
@@ -47,6 +47,21 @@ namespace NoodleManagerX.Mods
             }
 
             return true;
+        }
+
+        private ModVersion GetLatestVersion(List<ModVersion> versions)
+        {
+            ModVersion selectedVersion = null;
+            foreach (var version in versions)
+            {
+                if (selectedVersion == null ||
+                    version.Version.ComparePrecedenceTo(selectedVersion.Version) > 0)
+                {
+                    // version > selectedVersion. Choose max valid
+                    selectedVersion = version;
+                }
+            }
+            return selectedVersion;
         }
 
         public void Resolve()
@@ -60,30 +75,19 @@ namespace NoodleManagerX.Mods
             // Add base mods
             foreach (var mod in _mods.Values)
             {
-                ModVersion selectedVersion = null;
-                foreach (var version in mod.Versions)
+                finalVersions[mod.Id] = GetLatestVersion(mod.Versions);
+            }
+
+            // Check dependencies
+            foreach (var modId in finalVersions.Keys)
+            {
+                var modVersion = finalVersions[modId];
+                if (!AreDependenciesValid(modVersion.Dependencies, finalVersions))
                 {
-                    if (IsVersionValid(version, finalVersions))
-                    {
-                        if (selectedVersion == null || 
-                            version.Version.ComparePrecedenceTo(selectedVersion.Version) > 0)
-                        {
-                            // version > selectedVersion. Choose max valid
-                            selectedVersion = version;
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Ignoring invalid version {version.Version} for mod {mod.Id}");
-                    }
-                }
-                if (selectedVersion == null)
-                {
-                    Console.WriteLine($"Valid version for mod {mod.Id} not found");
+                    Console.WriteLine($"Dependencies not valid for mod ${modId}");
                     State = ResolvedState.ERROR_MISSING_DEP;
                     return;
                 }
-                finalVersions.Add(mod.Id, selectedVersion);
             }
 
             /*
