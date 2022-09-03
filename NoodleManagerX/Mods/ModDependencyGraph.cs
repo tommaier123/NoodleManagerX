@@ -3,6 +3,7 @@ using Semver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,6 +35,20 @@ namespace NoodleManagerX.Mods
             _mods.Add(mod.Id, mod);
         }
 
+        private bool IsVersionValid(ModVersion version, Dictionary<string, ModVersion> currentVersions)
+        {
+            // Dependencies must be present
+            foreach (var dep in version.Dependencies)
+            {
+                if (!currentVersions.ContainsKey(dep.Id))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public void Resolve()
         {
             // Reset resolved versions until resolution is finished
@@ -45,14 +60,28 @@ namespace NoodleManagerX.Mods
             // Add base mods
             foreach (var mod in _mods.Values)
             {
-                var selectedVersion = mod.Versions[0];
-                foreach (var version in mod.Versions.Skip(1))
+                ModVersion selectedVersion = null;
+                foreach (var version in mod.Versions)
                 {
-                    if (version.Version.ComparePrecedenceTo(selectedVersion.Version) > 0)
+                    if (IsVersionValid(version, finalVersions))
                     {
-                        // version > selectedVersion. Choose max
-                        selectedVersion = version;
+                        if (selectedVersion == null || 
+                            version.Version.ComparePrecedenceTo(selectedVersion.Version) > 0)
+                        {
+                            // version > selectedVersion. Choose max valid
+                            selectedVersion = version;
+                        }
                     }
+                    else
+                    {
+                        Console.WriteLine($"Ignoring invalid version {version.Version} for mod {mod.Id}");
+                    }
+                }
+                if (selectedVersion == null)
+                {
+                    Console.WriteLine($"Valid version for mod {mod.Id} not found");
+                    State = ResolvedState.ERROR_MISSING_DEP;
+                    return;
                 }
                 finalVersions.Add(mod.Id, selectedVersion);
             }
