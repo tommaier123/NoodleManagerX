@@ -41,12 +41,23 @@ namespace NoodleManagerX.Mods
             State = ResolvedState.RESOLVING;
 
             var finalVersions = new Dictionary<string, ModVersion>();
-/*
+
             // Add base mods
             foreach (var mod in _mods.Values)
             {
-                finalVersions.Add(mod.Id, mod);
+                var selectedVersion = mod.Versions[0];
+                foreach (var version in mod.Versions.Skip(1))
+                {
+                    if (version.Version.ComparePrecedenceTo(selectedVersion.Version) > 0)
+                    {
+                        // version > selectedVersion. Choose max
+                        selectedVersion = version;
+                    }
+                }
+                finalVersions.Add(mod.Id, selectedVersion);
             }
+
+            /*
 
             // Check dependencies
             foreach (var mod in _modVersions.Values)
