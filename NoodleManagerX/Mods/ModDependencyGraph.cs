@@ -16,6 +16,7 @@ namespace NoodleManagerX.Mods
             UNRESOLVED,
             RESOLVING,
             RESOLVED,
+            ERROR_MISSING_MOD,
             ERROR_MISSING_DEP,
             ERROR_VERSION_MISMATCH,
         }
@@ -64,7 +65,7 @@ namespace NoodleManagerX.Mods
             return selectedVersion;
         }
 
-        public void Resolve()
+        public void Resolve(List<ModVersionSelection> selectedVersions)
         {
             // Reset resolved versions until resolution is finished
             ResolvedVersions = new();
@@ -72,13 +73,38 @@ namespace NoodleManagerX.Mods
 
             var finalVersions = new Dictionary<string, ModVersion>();
 
-            // Add base mods
-            foreach (var mod in _mods.Values)
+            // Add base selections
+            foreach (var selection in selectedVersions)
             {
-                finalVersions[mod.Id] = GetLatestVersion(mod.Versions);
+                if (!_mods.ContainsKey(selection.ModId))
+                {
+                    Console.WriteLine($"Selected mod {selection.ModId} not found in graph!");
+                    State = ResolvedState.ERROR_MISSING_MOD;
+                    return;
+                }
+
+                if (selection.ModVersion == null)
+                {
+                    // No selection, use largest
+                    finalVersions[selection.ModId] = GetLatestVersion(_mods[selection.ModId].Versions);
+                }
+                else
+                {
+                    var modInfo = _mods[selection.ModId];
+                    var matchedModVersion = modInfo.Versions.Find(
+                        v => v.Version.ComparePrecedenceTo(selection.ModVersion.Version) == 0
+                    );
+                    if (matchedModVersion == null)
+                    {
+                        Console.WriteLine($"Version {selection.ModVersion.Version} for selected mod {selection.ModId} not found in graph!");
+                        State = ResolvedState.ERROR_MISSING_MOD;
+                        return;
+                    }
+                    finalVersions[selection.ModId] = selection.ModVersion;
+                }
             }
 
-            // Check dependencies
+            /*// Check dependencies
             foreach (var modId in finalVersions.Keys)
             {
                 var modVersion = finalVersions[modId];
@@ -88,7 +114,7 @@ namespace NoodleManagerX.Mods
                     State = ResolvedState.ERROR_MISSING_DEP;
                     return;
                 }
-            }
+            }*/
 
             /*
 
