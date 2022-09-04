@@ -9,11 +9,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Mods\json\current_list.json" />
     <None Remove="Mods\json\invalid_version.json" />
     <None Remove="Mods\json\mods_many_versions.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Mods\json\current_list.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Mods\json\current_list.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Mods\json\invalid_version.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>

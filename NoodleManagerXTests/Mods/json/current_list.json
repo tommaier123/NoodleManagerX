@@ -1,0 +1,118 @@
+﻿{
+  "availableMods": [
+    {
+      "id": "SRModsList",
+      "name": "SRModsList",
+      "author": "Mondanzo",
+      "description": "Add a new button to the main menu to open a mod list",
+      "versions": [
+        {
+          "version": "1.0.1",
+          "downloadUrl": "https://github.com/Mondanzo/SRModsList/releases/download/1.0.1/SRModsList.dll",
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "Trashbin",
+      "name": "Trashbin",
+      "author": "Goinn",
+      "description": "Adds a button to delete songs for Synth Riders [PCVR]. Deleted songs will be added to NoodleManagerX's blacklist",
+      "versions": [
+        {
+          "version": "1.2.0",
+          "downloadUrl": "https://github.com/Goinn/Trashbin/releases/download/V1.2.0/Trashbin.dll",
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "MultiplayerSongGrabber",
+      "name": "MultiplayerSongGrabber",
+      "author": "Goinn",
+      "description": "Download missing custom songs with the click of a button inside a multiplayer lobby! For Synth Riders [PCVR]",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "downloadUrl": "https://github.com/Goinn/MultiplayerSongGrabber/releases/download/V1.0.0/MultiplayerSongGrabber.dll",
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "CustomSounds",
+      "name": "CustomSounds",
+      "author": "Goinn",
+      "description": "Allows you to customize most sounds from Synth Riders [PCVR]",
+      "versions": [
+        {
+          "version": "1.1.0",
+          "downloadUrl": "https://github.com/Goinn/CustomSounds/releases/download/v1.1.0/CustomSound.dll",
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "SRModCore",
+      "name": "SRModCore",
+      "author": "bookdude13",
+      "description": "Shared library used by various SynthRiders mods",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "downloadUrl": "https://github.com/bookdude13/SRModCore/releases/download/v1.0.0/SRModCore_v1.0.0.zip",
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "SRVoting",
+      "name": "SRVoting",
+      "author": "bookdude13",
+      "description": "In-game up/down voting UI for custom songs",
+      "versions": [
+        {
+          "version": "1.2.0",
+          "downloadUrl": "https://github.com/bookdude13/SRVoting/releases/download/v1.2.0/SRVoting_v1.2.0.zip",
+          "dependencies": [
+            {
+              "id": "SRModCore",
+              "minVersion": "1.0.0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SRPerformanceMeter",
+      "name": "PerformanceMeter",
+      "author": "bookdude13",
+      "description": "View additional playthrough statistics/info in-game after each song",
+      "versions": [
+        {
+          "version": "1.2.1",
+          "downloadUrl": "https://github.com/bookdude13/SRPerformanceMeter/releases/download/v1.2.1/PerformanceMeter_v1.2.1.zip",
+          "dependencies": [
+            {
+              "id": "SynthRiders-Websockets-Mod",
+              "minVersion": "1.0.2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SynthRiders-Websockets-Mod",
+      "name": "SynthRiders-Websockets-Mod",
+      "author": "KK964",
+      "description": "Emits game events through websockets",
+      "versions": [
+        {
+          "version": "1.0.2",
+          "downloadUrl": "https://github.com/KK964/SynthRiders-Websockets-Mod/releases/download/v1.0.2/SynthRidersWebsockets.zip",
+          "dependencies": []
+        }
+      ]
+    }
+  ]
+}
