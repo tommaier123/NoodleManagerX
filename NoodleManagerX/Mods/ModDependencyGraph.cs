@@ -33,6 +33,7 @@ namespace NoodleManagerX.Mods
 
         // ModInfo.id, ModInfo
         private Dictionary<string, ModInfo> _mods = new();
+        private bool IsDirty = false;
 
 
         public void AddMod(ModInfo mod)
@@ -40,7 +41,24 @@ namespace NoodleManagerX.Mods
             _mods.Add(mod.Id, mod);
         }
 
-        public void Resolve(List<ModVersionSelection> selectedVersions)
+        private List<ModVersionSelection> GetNewSelectionFromResolving(List<ModVersionSelection> originalSelection)
+        {
+            var newSelection = new List<ModVersionSelection>();
+            foreach (var originalSelect in originalSelection)
+            {
+                if (ResolvingVersions.ContainsKey(originalSelect.ModId))
+                {
+                    newSelection.Add(new ModVersionSelection(originalSelect.ModId, ResolvingVersions[originalSelect.ModId]));
+                }
+                else
+                {
+                    newSelection.Add(originalSelect);
+                }
+            }
+            return newSelection;
+        }
+
+        public ResolvedState Resolve(List<ModVersionSelection> selectedVersions)
         {
             // Reset resolved versions until resolution is finished
             ResolvingVersions = new Dictionary<string, ModVersion>();
@@ -51,7 +69,12 @@ namespace NoodleManagerX.Mods
             if (State != ResolvedState.RESOLVING)
             {
                 Console.WriteLine("Failed to add base versions");
-                return;
+                return State;
+            }
+            if (IsDirty)
+            {
+                IsDirty = false;
+                return Resolve(GetNewSelectionFromResolving(selectedVersions));
             }
 
             // Make sure dependencies all exist
@@ -59,7 +82,7 @@ namespace NoodleManagerX.Mods
             if (State != ResolvedState.RESOLVING)
             {
                 Console.WriteLine("Not all dependencies exist in main list");
-                return;
+                return State;
             }
 
             // If any dependencies need to be selected, do so and re-resolve
@@ -69,8 +92,7 @@ namespace NoodleManagerX.Mods
                 Console.WriteLine($"Missing dependencies selected; re-resolving");
                 var newSelection = selectedVersions;
                 newSelection.AddRange(additionalSelections);
-                Resolve(newSelection);
-                return;
+                return Resolve(newSelection);
             }
 
             // Validate final state
@@ -78,11 +100,12 @@ namespace NoodleManagerX.Mods
             if (State != ResolvedState.RESOLVING)
             {
                 Console.WriteLine("Failed final resolution validation");
-                return;
+                return State;
             }
 
-            State = ResolvedState.RESOLVED;
             ResolvedVersions = ResolvingVersions;
+            State = ResolvedState.RESOLVED;
+            return State;
         }
 
         private void ResolvingAddBaseVersions(List<ModVersionSelection> selectedVersions)
@@ -109,7 +132,13 @@ namespace NoodleManagerX.Mods
                         State = ResolvedState.ERROR_VERSION_MISMATCH;
                         return;
                     }
-                    ResolvingVersions[selection.ModId] = latestSupportedVersion;
+                    else
+                    {
+                        // Version selected, re-resolve using it
+                        ResolvingVersions[selection.ModId] = latestSupportedVersion;
+                        IsDirty = true;
+                        return;
+                    }
                 }
                 else
                 {
