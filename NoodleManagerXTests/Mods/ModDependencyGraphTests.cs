@@ -33,9 +33,9 @@ namespace NoodleManagerXTests.Mods
         [Test]
         public void Test_Resolve_NoModsSelected()
         {
-            graph.AddMod(CreateTestMod("AAA", new List<ModVersion>
+            graph.AddMod(TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.0")
+                TestUtils.CreateTestModVersion("1.0")
             }));
 
             var selections = new List<ModVersionSelection>();
@@ -51,21 +51,21 @@ namespace NoodleManagerXTests.Mods
         [Test]
         public void Test_Resolve_MultipleModsNoDeps()
         {
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.0")
+                TestUtils.CreateTestModVersion("1.0")
             });
             graph.AddMod(modA);
 
-            var modB = CreateTestMod("BBB", new List<ModVersion>
+            var modB = TestUtils.CreateTestMod("BBB", new List<ModVersion>
             {
-                CreateTestModVersion("2.0")
+                TestUtils.CreateTestModVersion("2.0")
             });
             graph.AddMod(modB);
 
-            var modC = CreateTestMod("CCC", new List<ModVersion>
+            var modC = TestUtils.CreateTestMod("CCC", new List<ModVersion>
             {
-                CreateTestModVersion("1.2.3")
+                TestUtils.CreateTestModVersion("1.2.3")
             });
             graph.AddMod(modC);
 
@@ -80,8 +80,8 @@ namespace NoodleManagerXTests.Mods
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(2));
-                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.0");
-                AssertVersionsEqual(graph.ResolvedVersions["CCC"].Version, "1.2.3");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.0");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["CCC"].Version, "1.2.3");
                 Assert.That(graph.ResolvedVersions.ContainsKey("BBB"), Is.False);
             });
         }
@@ -89,11 +89,11 @@ namespace NoodleManagerXTests.Mods
         [Test]
         public void Test_Resolve_NoVersionSpecified_LargestChosen()
         {
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.0"),
-                CreateTestModVersion("1.2"),
-                CreateTestModVersion("1.1.1"),
+                TestUtils.CreateTestModVersion("1.0"),
+                TestUtils.CreateTestModVersion("1.2"),
+                TestUtils.CreateTestModVersion("1.1.1"),
             });
             graph.AddMod(modA);
 
@@ -107,18 +107,18 @@ namespace NoodleManagerXTests.Mods
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(1));
-                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
             });
         }
 
         [Test]
         public void Test_Resolve_UseSelectedVersion()
         {
-            var desiredVersion = CreateTestModVersion("1.1.1");
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var desiredVersion = TestUtils.CreateTestModVersion("1.1.1");
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.0"),
-                CreateTestModVersion("1.2"),
+                TestUtils.CreateTestModVersion("1.0"),
+                TestUtils.CreateTestModVersion("1.2"),
                 desiredVersion,
             });
             graph.AddMod(modA);
@@ -133,18 +133,18 @@ namespace NoodleManagerXTests.Mods
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(1));
-                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.1.1");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.1.1");
             });
         }
 
         [Test]
         public void Test_Resolve_SelectedVersionNotFound()
         {
-            var desiredVersion = CreateTestModVersion("1.1.1");
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var desiredVersion = TestUtils.CreateTestModVersion("1.1.1");
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.0"),
-                CreateTestModVersion("1.1"),
+                TestUtils.CreateTestModVersion("1.0"),
+                TestUtils.CreateTestModVersion("1.1"),
             });
             graph.AddMod(modA);
 
@@ -180,11 +180,11 @@ namespace NoodleManagerXTests.Mods
         [Test]
         public void Test_Resolve_DepNotInList_Error()
         {
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.0", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.0", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.0")
+                    TestUtils.CreateTestDependency("BBB", "1.0")
                 }),
             });
             graph.AddMod(modA);
@@ -206,18 +206,18 @@ namespace NoodleManagerXTests.Mods
         [Test]
         public void Test_Resolve_DepSelectedAtSupportedVersion()
         {
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.2", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.2", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.0")
+                    TestUtils.CreateTestDependency("BBB", "1.0")
                 }),
             });
             graph.AddMod(modA);
 
-            var modB = CreateTestMod("BBB", new List<ModVersion>
+            var modB = TestUtils.CreateTestMod("BBB", new List<ModVersion>
             {
-                CreateTestModVersion("1.1"),
+                TestUtils.CreateTestModVersion("1.1"),
             });
             graph.AddMod(modB);
 
@@ -232,26 +232,26 @@ namespace NoodleManagerXTests.Mods
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(2));
-                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
-                AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.1");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.1");
             });
         }
 
         [Test]
         public void Test_Resolve_DepNotSelected_TreatedLikeUnspecifiedVersion()
         {
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.2", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.2", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.0")
+                    TestUtils.CreateTestDependency("BBB", "1.0")
                 }),
             });
             graph.AddMod(modA);
 
-            var modB = CreateTestMod("BBB", new List<ModVersion>
+            var modB = TestUtils.CreateTestMod("BBB", new List<ModVersion>
             {
-                CreateTestModVersion("1.0"),
+                TestUtils.CreateTestModVersion("1.0"),
             });
             graph.AddMod(modB);
 
@@ -265,31 +265,31 @@ namespace NoodleManagerXTests.Mods
             Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
             Assert.Multiple(() =>
             {
-                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
-                AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.0");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.0");
             });
         }
 
         [Test]
         public void Test_Resolve_DepVersionUnspecified_SelectMaxInRange()
         {
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.2", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.2", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.0", "2.3.5"),
+                    TestUtils.CreateTestDependency("BBB", "1.0", "2.3.5"),
                 }),
             });
             graph.AddMod(modA);
 
-            var modB = CreateTestMod("BBB", new List<ModVersion>
+            var modB = TestUtils.CreateTestMod("BBB", new List<ModVersion>
             {
-                CreateTestModVersion("1.0"),
-                CreateTestModVersion("1.3.5"),
-                CreateTestModVersion("2.2.2"),
-                CreateTestModVersion("2.3.4"),
-                CreateTestModVersion("2.3.6"),
-                CreateTestModVersion("2.4.0"),
+                TestUtils.CreateTestModVersion("1.0"),
+                TestUtils.CreateTestModVersion("1.3.5"),
+                TestUtils.CreateTestModVersion("2.2.2"),
+                TestUtils.CreateTestModVersion("2.3.4"),
+                TestUtils.CreateTestModVersion("2.3.6"),
+                TestUtils.CreateTestModVersion("2.4.0"),
             });
             graph.AddMod(modB);
 
@@ -304,46 +304,46 @@ namespace NoodleManagerXTests.Mods
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(2));
-                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
-                AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "2.3.4");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "2.3.4");
             });
         }
 
         [Test]
         public void Test_Resolve_AllVersionsNull()
         {
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.1", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.1", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.0"),
+                    TestUtils.CreateTestDependency("BBB", "1.0"),
                 }),
-                CreateTestModVersion("1.2", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.2", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.1"),
+                    TestUtils.CreateTestDependency("BBB", "1.1"),
                 }),
             });
             graph.AddMod(modA);
 
-            var modC = CreateTestMod("CCC", new List<ModVersion>
+            var modC = TestUtils.CreateTestMod("CCC", new List<ModVersion>
             {
-                CreateTestModVersion("2.1", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("2.1", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.0"),
+                    TestUtils.CreateTestDependency("BBB", "1.0"),
                 }),
-                CreateTestModVersion("2.2", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("2.2", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.2"),
+                    TestUtils.CreateTestDependency("BBB", "1.2"),
                 }),
             });
             graph.AddMod(modC);
 
-            var modB = CreateTestMod("BBB", new List<ModVersion>
+            var modB = TestUtils.CreateTestMod("BBB", new List<ModVersion>
             {
-                CreateTestModVersion("1.0"),
-                CreateTestModVersion("1.1"),
-                CreateTestModVersion("1.2"),
-                CreateTestModVersion("1.3"),
+                TestUtils.CreateTestModVersion("1.0"),
+                TestUtils.CreateTestModVersion("1.1"),
+                TestUtils.CreateTestModVersion("1.2"),
+                TestUtils.CreateTestModVersion("1.3"),
             });
             graph.AddMod(modB);
 
@@ -359,47 +359,47 @@ namespace NoodleManagerXTests.Mods
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(3));
-                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
-                AssertVersionsEqual(graph.ResolvedVersions["CCC"].Version, "2.2");
-                AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.3");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["CCC"].Version, "2.2");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.3");
             });
         }
 
         [Test]
         public void Test_Resolve_VersionMismatchForMaxSelections_Error()
         {
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.1", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.1", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.0"),
+                    TestUtils.CreateTestDependency("BBB", "1.0"),
                 }),
-                CreateTestModVersion("1.2", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.2", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.1", "1.1"),
+                    TestUtils.CreateTestDependency("BBB", "1.1", "1.1"),
                 }),
             });
             graph.AddMod(modA);
 
-            var modC = CreateTestMod("CCC", new List<ModVersion>
+            var modC = TestUtils.CreateTestMod("CCC", new List<ModVersion>
             {
-                CreateTestModVersion("2.1", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("2.1", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.0"),
+                    TestUtils.CreateTestDependency("BBB", "1.0"),
                 }),
-                CreateTestModVersion("2.2", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("2.2", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.2"),
+                    TestUtils.CreateTestDependency("BBB", "1.2"),
                 }),
             });
             graph.AddMod(modC);
 
-            var modB = CreateTestMod("BBB", new List<ModVersion>
+            var modB = TestUtils.CreateTestMod("BBB", new List<ModVersion>
             {
-                CreateTestModVersion("1.0"),
-                CreateTestModVersion("1.1"),
-                CreateTestModVersion("1.2"),
-                CreateTestModVersion("1.3"),
+                TestUtils.CreateTestModVersion("1.0"),
+                TestUtils.CreateTestModVersion("1.1"),
+                TestUtils.CreateTestModVersion("1.2"),
+                TestUtils.CreateTestModVersion("1.3"),
             });
             graph.AddMod(modB);
 
@@ -421,36 +421,36 @@ namespace NoodleManagerXTests.Mods
         [Test]
         public void Test_Resolve_MultiNestedDependencies()
         {
-            var modA = CreateTestMod("AAA", new List<ModVersion>
+            var modA = TestUtils.CreateTestMod("AAA", new List<ModVersion>
             {
-                CreateTestModVersion("1.1", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.1", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("BBB", "1.0"),
+                    TestUtils.CreateTestDependency("BBB", "1.0"),
                 }),
             });
             graph.AddMod(modA);
 
-            var modB = CreateTestMod("BBB", new List<ModVersion>
+            var modB = TestUtils.CreateTestMod("BBB", new List<ModVersion>
             {
-                CreateTestModVersion("1.1", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.1", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("CCC", "1.3"),
+                    TestUtils.CreateTestDependency("CCC", "1.3"),
                 }),
             });
             graph.AddMod(modB);
 
-            var modC = CreateTestMod("CCC", new List<ModVersion>
+            var modC = TestUtils.CreateTestMod("CCC", new List<ModVersion>
             {
-                CreateTestModVersion("1.3", new List<ModDependencyInfo>
+                TestUtils.CreateTestModVersion("1.3", new List<ModDependencyInfo>
                 {
-                    CreateTestDependency("DDD", "1.0"),
+                    TestUtils.CreateTestDependency("DDD", "1.0"),
                 }),
             });
             graph.AddMod(modC);
 
-            var modD = CreateTestMod("DDD", new List<ModVersion>
+            var modD = TestUtils.CreateTestMod("DDD", new List<ModVersion>
             {
-                CreateTestModVersion("1.0.1")
+                TestUtils.CreateTestModVersion("1.0.1")
             });
             graph.AddMod(modD);
 
@@ -466,50 +466,11 @@ namespace NoodleManagerXTests.Mods
             {
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(4));
-                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.1");
-                AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.1");
-                AssertVersionsEqual(graph.ResolvedVersions["CCC"].Version, "1.3");
-                AssertVersionsEqual(graph.ResolvedVersions["DDD"].Version, "1.0.1");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.1");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.1");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["CCC"].Version, "1.3");
+                TestUtils.AssertVersionsEqual(graph.ResolvedVersions["DDD"].Version, "1.0.1");
             });
-        }
-
-
-        private static ModInfo CreateTestMod(string id, List<ModVersion> versions)
-        {
-            return new ModInfo
-            {
-                Id = id,
-                Name = id + " name",
-                Author = "Foo",
-                Description = "Some mod",
-                Versions = versions,
-            };
-        }
-
-        private static ModVersion CreateTestModVersion(string version, List<ModDependencyInfo>? dependencies = null)
-        {
-            return new ModVersion
-            {
-                Version = SemVersion.Parse(version, SemVersionStyles.Any),
-                DownloadUrl = "localhost",
-                Dependencies = dependencies ?? new(),
-            };
-        }
-
-        private static ModDependencyInfo CreateTestDependency(string id, string minVersion, string? maxVersion = null)
-        {
-            return new ModDependencyInfo
-            {
-                Id = id,
-                MinVersion = SemVersion.Parse(minVersion, SemVersionStyles.Any),
-                MaxVersion = maxVersion == null ? null : SemVersion.Parse(maxVersion, SemVersionStyles.Any),
-            };
-        }
-
-        private static void AssertVersionsEqual(SemVersion v1, string v2)
-        {
-            var semVersion2 = SemVersion.Parse(v2, SemVersionStyles.Any);
-            Assert.That(v1.ComparePrecedenceTo(semVersion2), Is.EqualTo(0), $"SemVersion {v1} != {v2}");
         }
     }
 }
