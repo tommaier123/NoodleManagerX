@@ -3,6 +3,7 @@ using Semver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,6 +62,17 @@ namespace NoodleManagerX.Mods
                 return;
             }
 
+            // If any dependencies need to be selected, do so and re-resolve
+            var additionalSelections = SelectMissingDependencies();
+            if (additionalSelections.Count > 0)
+            {
+                Console.WriteLine($"Missing dependencies selected; re-resolving");
+                var newSelection = selectedVersions;
+                newSelection.AddRange(additionalSelections);
+                Resolve(newSelection);
+                return;
+            }
+
             // Validate final state
             ValidateState(selectedVersions);
             if (State != ResolvedState.RESOLVING)
@@ -116,6 +128,26 @@ namespace NoodleManagerX.Mods
             }
         }
 
+        private List<ModVersionSelection> SelectMissingDependencies()
+        {
+            var addedSelections = new List<ModVersionSelection>();
+            foreach (var modId in ResolvingVersions.Keys)
+            {
+                var modVersion = ResolvingVersions[modId];
+
+                foreach (var dep in modVersion.Dependencies)
+                {
+                    // If dependency wasn't selected, select it and resolve again
+                    if (!ResolvingVersions.ContainsKey(dep.Id))
+                    {
+                        Console.WriteLine($"Dependency {dep.Id} not selected; selecting at \"max\" version");
+                        addedSelections.Add(new ModVersionSelection(dep.Id, null));
+                    }
+                }
+            }
+            return addedSelections;
+        }
+
         private void ResolvingCheckDependenciesExist()
         {
             foreach (var modId in ResolvingVersions.Keys)
@@ -125,7 +157,7 @@ namespace NoodleManagerX.Mods
                 foreach (var dep in modVersion.Dependencies)
                 {
                     // Dependencies must be present
-                    if (!ResolvingVersions.ContainsKey(dep.Id))
+                    if (!_mods.ContainsKey(dep.Id))
                     {
                         Console.WriteLine($"Dependency missing for mod ${modId}");
                         State = ResolvedState.ERROR_MISSING_DEP;
@@ -196,7 +228,10 @@ namespace NoodleManagerX.Mods
                         // Some selection depends on this mod.
                         // Filter out versions that are outside of this dependency range
                         filteredVersions.RemoveWhere(version => version.ComparePrecedenceTo(dependency.MinVersion) < 0);
-                        filteredVersions.RemoveWhere(version => version.ComparePrecedenceTo(dependency.MaxVersion) > 0);
+                        if (dependency.MaxVersion != null)
+                        {
+                            filteredVersions.RemoveWhere(version => version.ComparePrecedenceTo(dependency.MaxVersion) > 0);
+                        }
                     }
                 }
             }
@@ -222,12 +257,12 @@ namespace NoodleManagerX.Mods
 
         private bool VersionInRange(SemVersion version, SemVersion lowInclusive, SemVersion highInclusive)
         {
-            if (version.ComparePrecedenceTo(lowInclusive) < 1)
+            if (version.ComparePrecedenceTo(lowInclusive) < 0)
             {
                 return false;
             }
 
-            if (highInclusive != null && version.ComparePrecedenceTo(highInclusive) > 1)
+            if (highInclusive != null && version.ComparePrecedenceTo(highInclusive) > 0)
             {
                 return false;
             }
