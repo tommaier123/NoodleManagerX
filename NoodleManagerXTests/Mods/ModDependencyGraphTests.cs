@@ -309,6 +309,170 @@ namespace NoodleManagerXTests.Mods
             });
         }
 
+        [Test]
+        public void Test_Resolve_AllVersionsNull()
+        {
+            var modA = CreateTestMod("AAA", new List<ModVersion>
+            {
+                CreateTestModVersion("1.1", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.0"),
+                }),
+                CreateTestModVersion("1.2", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.1"),
+                }),
+            });
+            graph.AddMod(modA);
+
+            var modC = CreateTestMod("CCC", new List<ModVersion>
+            {
+                CreateTestModVersion("2.1", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.0"),
+                }),
+                CreateTestModVersion("2.2", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.2"),
+                }),
+            });
+            graph.AddMod(modC);
+
+            var modB = CreateTestMod("BBB", new List<ModVersion>
+            {
+                CreateTestModVersion("1.0"),
+                CreateTestModVersion("1.1"),
+                CreateTestModVersion("1.2"),
+                CreateTestModVersion("1.3"),
+            });
+            graph.AddMod(modB);
+
+            var selections = new List<ModVersionSelection>
+            {
+                new ModVersionSelection(modA.Id, null),
+                new ModVersionSelection(modC.Id, null),
+            };
+
+            graph.Resolve(selections);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
+                Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(3));
+                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
+                AssertVersionsEqual(graph.ResolvedVersions["CCC"].Version, "2.2");
+                AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.3");
+            });
+        }
+
+        [Test]
+        public void Test_Resolve_VersionMismatchForMaxSelections_Error()
+        {
+            var modA = CreateTestMod("AAA", new List<ModVersion>
+            {
+                CreateTestModVersion("1.1", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.0"),
+                }),
+                CreateTestModVersion("1.2", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.1", "1.1"),
+                }),
+            });
+            graph.AddMod(modA);
+
+            var modC = CreateTestMod("CCC", new List<ModVersion>
+            {
+                CreateTestModVersion("2.1", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.0"),
+                }),
+                CreateTestModVersion("2.2", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.2"),
+                }),
+            });
+            graph.AddMod(modC);
+
+            var modB = CreateTestMod("BBB", new List<ModVersion>
+            {
+                CreateTestModVersion("1.0"),
+                CreateTestModVersion("1.1"),
+                CreateTestModVersion("1.2"),
+                CreateTestModVersion("1.3"),
+            });
+            graph.AddMod(modB);
+
+            var selections = new List<ModVersionSelection>
+            {
+                new ModVersionSelection(modA.Id, null),
+                new ModVersionSelection(modC.Id, null),
+            };
+
+            graph.Resolve(selections);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.ERROR_VERSION_MISMATCH));
+                Assert.That(graph.ResolvedVersions, Is.Empty);
+            });
+        }
+
+        [Test]
+        public void Test_Resolve_MultiNestedDependencies()
+        {
+            var modA = CreateTestMod("AAA", new List<ModVersion>
+            {
+                CreateTestModVersion("1.1", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("BBB", "1.0"),
+                }),
+            });
+            graph.AddMod(modA);
+
+            var modB = CreateTestMod("BBB", new List<ModVersion>
+            {
+                CreateTestModVersion("1.1", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("CCC", "1.3"),
+                }),
+            });
+            graph.AddMod(modB);
+
+            var modC = CreateTestMod("CCC", new List<ModVersion>
+            {
+                CreateTestModVersion("1.3", new List<ModDependencyInfo>
+                {
+                    CreateTestDependency("DDD", "1.0"),
+                }),
+            });
+            graph.AddMod(modC);
+
+            var modD = CreateTestMod("DDD", new List<ModVersion>
+            {
+                CreateTestModVersion("1.0.1")
+            });
+            graph.AddMod(modD);
+
+
+            var selections = new List<ModVersionSelection>
+            {
+                new ModVersionSelection(modA.Id, null),
+            };
+
+            graph.Resolve(selections);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
+                Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(4));
+                AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.1");
+                AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.1");
+                AssertVersionsEqual(graph.ResolvedVersions["CCC"].Version, "1.3");
+                AssertVersionsEqual(graph.ResolvedVersions["DDD"].Version, "1.0.1");
+            });
+        }
+
 
         private static ModInfo CreateTestMod(string id, List<ModVersion> versions)
         {
