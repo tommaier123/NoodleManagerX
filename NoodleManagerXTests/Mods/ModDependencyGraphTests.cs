@@ -204,7 +204,7 @@ namespace NoodleManagerXTests.Mods
         }
         
         [Test]
-        public void Test_Resolve_DepSelected_ExistsAtMinVersion()
+        public void Test_Resolve_DepSelectedAtSupportedVersion()
         {
             var modA = CreateTestMod("AAA", new List<ModVersion>
             {
@@ -217,7 +217,7 @@ namespace NoodleManagerXTests.Mods
 
             var modB = CreateTestMod("BBB", new List<ModVersion>
             {
-                CreateTestModVersion("1.0"),
+                CreateTestModVersion("1.1"),
             });
             graph.AddMod(modB);
 
@@ -233,7 +233,7 @@ namespace NoodleManagerXTests.Mods
                 Assert.That(graph.State, Is.EqualTo(ModDependencyGraph.ResolvedState.RESOLVED));
                 Assert.That(graph.ResolvedVersions, Has.Count.EqualTo(2));
                 AssertVersionsEqual(graph.ResolvedVersions["AAA"].Version, "1.2");
-                AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.0");
+                AssertVersionsEqual(graph.ResolvedVersions["BBB"].Version, "1.1");
             });
         }
 
