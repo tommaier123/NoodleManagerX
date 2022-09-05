@@ -55,6 +55,7 @@ namespace NoodleManagerX.Models
                     case ItemType.Playlist: return MainViewModel.s_instance.playlistHandler;
                     case ItemType.Avatar: return MainViewModel.s_instance.avatarHandler;
                     case ItemType.Stage: return MainViewModel.s_instance.stageHandler;
+                    case ItemType.Mod: return MainViewModel.s_instance.modHandler;
                     default: return null;
                 }
             }

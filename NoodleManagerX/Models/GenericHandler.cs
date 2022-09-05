@@ -233,7 +233,7 @@ namespace NoodleManagerX.Models
             catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
         }
 
-        public async Task GetAll()
+        public virtual async Task GetAll()
         {
             if (!MainViewModel.s_instance.getAllRunning)
             {

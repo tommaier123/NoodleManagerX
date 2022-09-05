@@ -106,6 +106,7 @@ namespace NoodleManagerX.Models
         public ObservableCollection<PlaylistItem> playlists { get; private set; } = new ObservableCollection<PlaylistItem>();
         public ObservableCollection<StageItem> stages { get; private set; } = new ObservableCollection<StageItem>();
         public ObservableCollection<AvatarItem> avatars { get; private set; } = new ObservableCollection<AvatarItem>();
+        public ObservableCollection<ModItem> mods { get; private set; } = new ObservableCollection<ModItem>();
         public List<LocalItem> localItems { get; set; } = new List<LocalItem>();
 
         public AdbServer adbServer = new AdbServer();
@@ -447,6 +448,10 @@ namespace NoodleManagerX.Models
                     case TAB_AVATARS:
                         avatars.Clear();
                         avatars.AddRange(items.Where(x => x.itemType == ItemType.Avatar).Select(x => (AvatarItem)x));
+                        break;
+                    case TAB_MODS:
+                        mods.Clear();
+                        mods.AddRange(items.Where(x => x.itemType == ItemType.Mod).Select(x => (ModItem)x));
                         break;
                 }
             });

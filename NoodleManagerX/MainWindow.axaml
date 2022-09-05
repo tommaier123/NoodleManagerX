@@ -619,23 +619,31 @@
 
 		<!--Tab content-->
 		<Grid Grid.Row="3" Margin="10,0,10,10">
+      <!-- Maps tab -->
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
 				<ListBox Items="{Binding Path=maps}" Classes="MyListBox MyListBoxSmall ContentItem"/>
 			</Grid>
-			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1}">
+      <!-- Playlists tab -->
+      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1}">
 				<ListBox Items="{Binding Path=playlists}" Classes="MyListBox MyListBoxSmall ContentItem"/>
 			</Grid>
-			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=2}">
+      <!-- Stages tab -->
+      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=2}">
 				<ListBox Items="{Binding Path=stages}" Classes="MyListBox MyListBoxBig ContentItem"/>
 			</Grid>
-			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=3}">
+      <!-- Avatars tab -->
+      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=3}">
 				<ListBox Items="{Binding Path=avatars}" Classes="MyListBox MyListBoxBig ContentItem"/>
 			</Grid>
+      <!-- Mods tab -->
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=4}">
+        <ListBox Items="{Binding Path=mods}" Classes="MyListBox MyListBoxBig ContentItem"/>
 			</Grid>
-			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
+			<!-- Tools tab -->
+      <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
 				<!--<TextBlock Text="These are the tools (Sync to Quest, Sync to PC, Download Songs from Playlist, Setup Twitch Integration)"/>-->
 			</Grid>
+      <!-- Settings tab -->
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=6}">
 				<Grid RowDefinitions="auto,auto,auto,auto,auto,auto,auto,*,auto">
 					<Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" Classes="SettingsGrid" ToolTip.Tip="You probably don't need to change this, it is automatic for PC and unused for Quest">

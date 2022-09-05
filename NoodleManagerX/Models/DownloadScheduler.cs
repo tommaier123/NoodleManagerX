@@ -30,6 +30,10 @@ namespace NoodleManagerX.Models
                 item.downloadAttempts = 1;
                 queue.Add(item);
             }
+            else
+            {
+                Console.WriteLine("Not queueing item since it's not a map");
+            }
         }
 
         public static void Requeue(GenericItem item)
