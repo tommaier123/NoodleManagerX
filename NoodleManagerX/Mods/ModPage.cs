@@ -10,6 +10,6 @@ namespace NoodleManagerX.Mods
 {
     class ModPage : GenericPage
     {
-        public List<ModVersion> Items { get; set; }
+        public List<ModInfo> Mods { get; set; }
     }
 }

@@ -29,7 +29,23 @@ namespace NoodleManagerX.Mods
             return JsonConvert.DeserializeObject<ModPage>(json);
         }
 
+        public async override Task GetAll()
+        {
+            Console.WriteLine("Mods page doesn't follow normal GetAll() process");
+        }
+
         public async override Task GetPage()
+        {
+            var mods = await GetAvailableMods();
+            Console.WriteLine($"{mods.Count} mods loaded");
+
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                MainViewModel.s_instance.items.AddRange(mods.Select(mod => new ModItem(mod)));
+            });
+        }
+
+        private async Task<List<ModInfo>> GetAvailableMods()
         {
             int requestID = MainViewModel.s_instance.apiRequestCounter;
             Clear();
@@ -43,26 +59,16 @@ namespace NoodleManagerX.Mods
                     if (MainViewModel.s_instance.apiRequestCounter != requestID)
                     {
                         // Stale request; cancel and end early
-                        return;
+                        return new List<ModInfo>();
                     };
 
-                    var mods = ParseRemoteModList(rawResponse);
-
-/*                    await Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        MainViewModel.s_instance.items.AddRange(modItems);
-                    });*/
-
-                    //parallel.foreach is not necessary but seems more robust against changing collections, maybe with the list copy no more errors?
-                    /*Parallel.ForEach(new List<GenericItem>(MainViewModel.s_instance.items), item =>
-                    {
-                        _ = item.UpdateDownloaded(MainViewModel.s_instance.downloadPage);
-                    });*/
+                    return ParseRemoteModList(rawResponse);
                 }
             }
             catch (Exception e)
             {
                 MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+                return new List<ModInfo>();
             }
         }
 
