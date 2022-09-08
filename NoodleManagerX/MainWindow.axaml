@@ -242,6 +242,11 @@
 			<Setter Property="Width" Value="1"/>
 			<Setter Property="HorizontalAlignment" Value="Left"/>
 		</Style>
+    
+    <!--Text that is right aligned-->
+    <Style Selector="TextBlock.RightText">
+      <Setter Property="HorizontalAlignment" Value="Right"/>
+    </Style>
 
 		<!--Some general settings for the SVGs-->
 		<Style Selector="Svg">
@@ -456,10 +461,10 @@
                 </Grid>
                 <!--v version v-->
                 <Grid Grid.Column="1" RowDefinitions="auto,auto" ColumnDefinitions="*,auto" VerticalAlignment="Center">
-                  <TextBlock Grid.Row="0" Text="{Binding DisplayedVersion}" Classes="Downloaded DynamicText" FontSize="30"/>
-                  <TextBlock Grid.Row="1" Text="{Binding ResolvedVersion}" Classes="Downloaded DynamicText" FontSize="30"/>
+                  <TextBlock Grid.Row="0" Text="{Binding DisplayedVersion}" Classes="Downloaded RightText" FontSize="30"/>
+                  <TextBlock Grid.Row="1" Text="{Binding ResolvedVersion}" Classes="Downloaded RightText" FontSize="30"/>
                 </Grid>
-                <!--v icons v-->
+                <!--v download button v-->
                 <Grid Grid.Column="2" RowDefinitions="auto" ColumnDefinitions="*,auto" VerticalAlignment="Center">
 									<!--button-->
                   <Button Grid.Column="0" Grid.Row="0" Classes="BlankButton" Height="30" Margin="10,0,10,0" Command="{Binding downloadCommand}">
@@ -484,7 +489,7 @@
                     </ToolTip.Tip>
                   </Button>
                 </Grid>
-                <!--v buttons v-->
+                <!--v delete button v-->
                 <Grid Grid.Column="3" RowDefinitions="auto" VerticalAlignment="Center" Margin="10,0,10,0">
                   <Button Grid.Row="0" Classes="BlankButton" Height="30" Width="30" Margin="0,5,0,0" Command="{Binding deleteCommand}">
                     <Grid>
