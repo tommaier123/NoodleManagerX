@@ -35,9 +35,9 @@ namespace NoodleManagerX.Mods
         private Dictionary<string, ModInfo> _mods = new();
         private bool IsDirty = false;
 
-        public void LoadModInfoList(ModInfoList modList)
+        public void LoadMods(List<ModInfo> mods)
         {
-            foreach (var mod in modList.AvailableMods)
+            foreach (var mod in mods)
             {
                 AddMod(mod);
             }

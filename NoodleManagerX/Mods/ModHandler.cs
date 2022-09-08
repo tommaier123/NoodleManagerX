@@ -34,15 +34,48 @@ namespace NoodleManagerX.Mods
             Console.WriteLine("Mods page doesn't follow normal GetAll() process");
         }
 
+        private List<ModVersionSelection> GetLocalSelection(List<ModInfo> availableMods)
+        {
+            // TODO get from local db
+            List<ModVersionSelection> localSelection = new();
+
+            foreach (var mod in availableMods)
+            {
+                // TODO check if in local db, and if so use version from there.
+                // Default is to assume latest (null) and resolve with that
+                localSelection.Add(new ModVersionSelection(mod.Id, null));
+            }
+
+            return localSelection;
+        }
+
         public async override Task GetPage()
         {
             var mods = await GetAvailableMods();
             Console.WriteLine($"{mods.Count} mods loaded");
 
-            await Dispatcher.UIThread.InvokeAsync(() =>
+            var localSelection = GetLocalSelection(mods);
+
+            var dependencyGraph = new ModDependencyGraph();
+            dependencyGraph.LoadMods(mods);
+            var resolveResult = dependencyGraph.Resolve(localSelection);
+            if (resolveResult == ModDependencyGraph.ResolvedState.RESOLVED)
             {
-                MainViewModel.s_instance.items.AddRange(mods.Select(mod => new ModItem(mod)));
-            });
+                Console.WriteLine($"Dependencies resolved: {dependencyGraph.ResolvedVersions.Count}");
+                
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    MainViewModel.s_instance.items.AddRange(mods.Select(
+                        mod => new ModItem(mod, null, dependencyGraph.ResolvedVersions[mod.Id].Version)
+                    ));
+                });
+            }
+            else
+            {
+                Console.Error.WriteLine("Failed to resolve dependencies");
+                // TODO popup
+            }
         }
 
         private async Task<List<ModInfo>> GetAvailableMods()

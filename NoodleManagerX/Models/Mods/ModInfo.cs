@@ -23,8 +23,5 @@ namespace NoodleManagerX.Models.Mods
 
         [JsonProperty("versions", Required = Required.Always)]
         public List<ModVersion> Versions { get; set; } = new List<ModVersion>();
-
-        [JsonIgnore]
-        public ModVersion SelectedVersion { get; set; } = null;
     }
 }
