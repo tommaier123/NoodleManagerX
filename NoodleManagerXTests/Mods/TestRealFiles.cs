@@ -19,7 +19,7 @@ namespace NoodleManagerXTests.Mods
             Assert.That(modList, Is.Not.Null);
 
             var graph = new ModDependencyGraph();
-            graph.LoadModInfoList(modList);
+            graph.LoadMods(modList.AvailableMods);
 
             var selections = new List<ModVersionSelection>
             {
