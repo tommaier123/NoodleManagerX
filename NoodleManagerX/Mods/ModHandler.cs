@@ -63,7 +63,6 @@ namespace NoodleManagerX.Mods
             {
                 Console.WriteLine($"Dependencies resolved: {dependencyGraph.ResolvedVersions.Count}");
                 
-
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     MainViewModel.s_instance.items.AddRange(mods.Select(
@@ -73,7 +72,7 @@ namespace NoodleManagerX.Mods
             }
             else
             {
-                Console.Error.WriteLine("Failed to resolve dependencies");
+                MainViewModel.Log("Failed to resolve dependencies");
                 // TODO popup
             }
         }

@@ -248,6 +248,12 @@
       <Setter Property="HorizontalAlignment" Value="Right"/>
     </Style>
 
+    <!--Description text-->
+    <Style Selector="TextBlock.Description">
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="Width" Value="{Binding Source.Width}"/>
+    </Style>
+
 		<!--Some general settings for the SVGs-->
 		<Style Selector="Svg">
 			<Setter Property="EnableCache" Value="True"/>
@@ -449,15 +455,16 @@
       <Setter Property="ItemTemplate">
         <DataTemplate>
           <!--v content, separator v-->
-          <Grid RowDefinitions="*,auto,auto">
+          <Grid RowDefinitions="*,auto">
             <!--< main content >-->
             <Grid ColumnDefinitions="*" Grid.Row="0">
               <!--< info, version, buttons >-->
               <Grid ColumnDefinitions="*,auto,auto,auto" Grid.Column="0" Margin="20,0,10,5">
-                <!--v title, modder v-->
-                <Grid Grid.Column="0" RowDefinitions="auto,auto">
+                <!--v title, modder, description v-->
+                <Grid Grid.Column="0" RowDefinitions="auto,auto,auto">
                   <TextBlock Grid.Row="0" Text="{Binding display_title}" Classes="Downloaded DynamicText" FontSize="35"/>
                   <TextBlock Grid.Row="1" Text="{Binding display_creator}" Classes="Downloaded DynamicText" FontSize="20"/>
+                  <TextBlock Grid.Row="2" Text="{Binding description}" Classes="Downloaded Description" FontSize="18"/>
                 </Grid>
                 <!--v version v-->
                 <Grid Grid.Column="1" RowDefinitions="auto,auto" ColumnDefinitions="*,auto" VerticalAlignment="Center">
@@ -465,7 +472,7 @@
                   <TextBlock Grid.Row="1" Text="{Binding ResolvedVersion}" Classes="Downloaded RightText" FontSize="30"/>
                 </Grid>
                 <!--v download button v-->
-                <Grid Grid.Column="2" RowDefinitions="auto" ColumnDefinitions="*,auto" VerticalAlignment="Center">
+                <Grid Grid.Column="2" RowDefinitions="auto" ColumnDefinitions="auto" VerticalAlignment="Center">
 									<!--button-->
                   <Button Grid.Column="0" Grid.Row="0" Classes="BlankButton" Height="30" Margin="10,0,10,0" Command="{Binding downloadCommand}">
                     <Path>
@@ -517,10 +524,7 @@
                 </Grid>
               </Grid>
             </Grid>
-            <Canvas Grid.Row="1" >
-              <TextBlock Text="{Binding description}" TextWrapping="Wrap" Width="{Binding Source.Width}" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}"/>
-            </Canvas>
-            <Grid Grid.Row="2" Background="{StaticResource SeparatorColor}" Height="2"/>
+            <Grid Grid.Row="1" Background="{StaticResource SeparatorColor}" Height="2"/>
           </Grid>
         </DataTemplate>
       </Setter>
