@@ -652,6 +652,7 @@ namespace NoodleManagerX.Models
                 await playlistHandler.LoadLocalItems();
                 await stageHandler.LoadLocalItems();
                 await avatarHandler.LoadLocalItems();
+                //await modHandler.LoadLocalItems();
 
                 Log("Local items loaded");
 

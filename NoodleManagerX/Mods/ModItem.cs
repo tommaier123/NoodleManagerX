@@ -32,6 +32,11 @@ namespace NoodleManagerX.Mods
             this.ResolvedVersion = resolvedVersion;
         }
 
+        public override void LoadBitmap()
+        {
+            Console.WriteLine("No bitmaps needed for mod items");
+        }
+
         public string DisplayedVersion
         {
             get

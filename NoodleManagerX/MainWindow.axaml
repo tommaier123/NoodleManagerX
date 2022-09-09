@@ -497,7 +497,7 @@
                   <TextBlock Grid.Row="1" Text="{Binding ResolvedVersion}" Classes="Downloaded RightText" FontSize="30"/>
                 </Grid>
                 <!--v download button v-->
-                <Grid Grid.Column="2" VerticalAlignment="Center">
+                <Grid Grid.Column="2" RowDefinitions="auto" VerticalAlignment="Center">
 									<!--button-->
                   <Button Classes="BlankButton" Height="30" Margin="10,0,10,0" Command="{Binding downloadCommand}">
                     <Path>

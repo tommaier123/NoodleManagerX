@@ -299,7 +299,7 @@ namespace NoodleManagerX.Models
             return false;
         }
 
-        public void LoadBitmap()
+        public virtual void LoadBitmap()
         {
             Task.Factory.StartNew(async () =>
             {
