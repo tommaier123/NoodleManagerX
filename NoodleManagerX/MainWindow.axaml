@@ -170,7 +170,9 @@
 		<Style Selector="ListBox.MyListBox ScrollBar:vertical Thumb">
 			<Setter Property="Width" Value="22"/>
 		</Style>
-		<Style Selector="ListBox.MyListBox ListBoxItem">
+    
+    <!--Item-specific styles for list boxes-->
+		<Style Selector="ListBox.MyListBoxItem ListBoxItem">
 			<Setter Property="Padding" Value="0"/>
 			<Setter Property="IsSelected" Value="{Binding selected, Mode=TwoWay}"/>
 			<Setter Property="FocusAdorner" Value="{x:Null}"/>
@@ -182,15 +184,38 @@
 				</Setter.Value>
 			</Setter>
 		</Style>
-		<Style Selector="ListBox.MyListBox ItemsPresenter">
+    <Style Selector="ListBox.MyListBoxItem ListBoxItem">
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="IsSelected" Value="{Binding selected, Mode=TwoWay}"/>
+      <Setter Property="FocusAdorner" Value="{x:Null}"/>
+    </Style>
+		<Style Selector="ListBox.MyListBoxItem ItemsPresenter">
 			<Setter Property="Margin" Value="0"/>
 		</Style>
-		<Style Selector="ListBox.MyListBox ListBoxItem > ContentPresenter">
+		<Style Selector="ListBox.MyListBoxItem ListBoxItem > ContentPresenter">
 			<Setter Property="Background" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=BackgroundDownloadedColor|BackgroundNotDownloadedColor}"/>
 		</Style>
 
+    <!--Different styles for mod list items-->
+    <Style Selector="ListBox.MyListBoxModItem ListBoxItem">
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="IsSelected" Value="{Binding selected, Mode=TwoWay}"/>
+      <Setter Property="FocusAdorner" Value="{x:Null}"/>
+    </Style>
+    <Style Selector="ListBox.MyListBoxModItem ListBoxItem">
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="IsSelected" Value="{Binding selected, Mode=TwoWay}"/>
+      <Setter Property="FocusAdorner" Value="{x:Null}"/>
+    </Style>
+    <Style Selector="ListBox.MyListBoxModItem ItemsPresenter">
+      <Setter Property="Margin" Value="0"/>
+    </Style>
+    <Style Selector="ListBox.MyListBoxModItem ListBoxItem > ContentPresenter">
+      <Setter Property="Background" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=BackgroundDownloadedColor|BackgroundNotDownloadedColor}"/>
+    </Style>
 
-		<!--Different List Boxes-->
+
+    <!--Different List Boxes-->
 		<Style Selector="ListBox.MyListBoxSmall ListBoxItem">
 			<Setter Property="Height" Value="162"/>
 		</Style>
@@ -472,9 +497,9 @@
                   <TextBlock Grid.Row="1" Text="{Binding ResolvedVersion}" Classes="Downloaded RightText" FontSize="30"/>
                 </Grid>
                 <!--v download button v-->
-                <Grid Grid.Column="2" RowDefinitions="auto" ColumnDefinitions="auto" VerticalAlignment="Center">
+                <Grid Grid.Column="2" VerticalAlignment="Center">
 									<!--button-->
-                  <Button Grid.Column="0" Grid.Row="0" Classes="BlankButton" Height="30" Margin="10,0,10,0" Command="{Binding downloadCommand}">
+                  <Button Classes="BlankButton" Height="30" Margin="10,0,10,0" Command="{Binding downloadCommand}">
                     <Path>
                       <Path.Fill>
                         <MultiBinding Converter="{StaticResource TwoParameterColorConverter}"
@@ -712,23 +737,23 @@
 		<Grid Grid.Row="3" Margin="10,0,10,10">
       <!-- Maps tab -->
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">
-				<ListBox Items="{Binding Path=maps}" Classes="MyListBox MyListBoxSmall ContentItem"/>
+				<ListBox Items="{Binding Path=maps}" Classes="MyListBox MyListBoxItem MyListBoxSmall ContentItem"/>
 			</Grid>
       <!-- Playlists tab -->
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1}">
-				<ListBox Items="{Binding Path=playlists}" Classes="MyListBox MyListBoxSmall ContentItem"/>
+				<ListBox Items="{Binding Path=playlists}" Classes="MyListBox MyListBoxItem MyListBoxSmall ContentItem"/>
 			</Grid>
       <!-- Stages tab -->
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=2}">
-				<ListBox Items="{Binding Path=stages}" Classes="MyListBox MyListBoxBig ContentItem"/>
+				<ListBox Items="{Binding Path=stages}" Classes="MyListBox MyListBoxItem MyListBoxBig ContentItem"/>
 			</Grid>
       <!-- Avatars tab -->
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=3}">
-				<ListBox Items="{Binding Path=avatars}" Classes="MyListBox MyListBoxBig ContentItem"/>
+				<ListBox Items="{Binding Path=avatars}" Classes="MyListBox MyListBoxItem MyListBoxBig ContentItem"/>
 			</Grid>
       <!-- Mods tab -->
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=4}">
-        <ListBox Items="{Binding Path=mods}" Classes="MyListBox ModItem"/>
+        <ListBox Items="{Binding Path=mods}" Classes="MyListBox MyListBoxModItem MyListBoxSmall ModItem"/>
 			</Grid>
 			<!-- Tools tab -->
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
