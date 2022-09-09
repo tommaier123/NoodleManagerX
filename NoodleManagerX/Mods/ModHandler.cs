@@ -24,7 +24,11 @@ namespace NoodleManagerX.Mods
         public override ItemType itemType { get; set; } = ItemType.Mod;
         public override string apiEndpoint { get; set; } = "https://raw.githubusercontent.com/bookdude13/SRModsList/dev/SynthRiders";
         public override string folder { get; set; } = "Mods";
-        public override string[] extensions { get; set; } = { ".dll" };
+
+        // Save mod information in local file, to fake out same structure as other *Items
+        // Needs this to call Deserialize function so the downloadCommand is initialized
+
+        public override string[] extensions { get; set; } = { ".synthmod" };
 
         public override dynamic DeserializePage(string json)
         {
@@ -34,6 +38,7 @@ namespace NoodleManagerX.Mods
         public async override Task GetAll()
         {
             Console.WriteLine("Mods page doesn't follow normal GetAll() process");
+            await Task.CompletedTask;
         }
 
         private List<ModVersionSelection> GetLocalSelection(List<ModInfo> availableMods)
@@ -50,7 +55,7 @@ namespace NoodleManagerX.Mods
 
             return localSelection;
         }
-
+        
         public async override Task GetPage()
         {
             var mods = await GetAvailableMods();
@@ -64,12 +69,20 @@ namespace NoodleManagerX.Mods
             if (resolveResult == ModDependencyGraph.ResolvedState.RESOLVED)
             {
                 Console.WriteLine($"Dependencies resolved: {dependencyGraph.ResolvedVersions.Count}");
-                
+                var modItems = mods.Select(
+                    mod => new ModItem(mod, null, dependencyGraph.ResolvedVersions[mod.Id].Version)
+                );
+
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    MainViewModel.s_instance.items.AddRange(mods.Select(
-                        mod => new ModItem(mod, null, dependencyGraph.ResolvedVersions[mod.Id].Version)
-                    ));
+                    MainViewModel.s_instance.numberOfPages = 1;
+                    MainViewModel.s_instance.items.AddRange(modItems);
+                });
+
+                //parallel.foreach is not necessary but seems more robust against changing collections, maybe with the list copy no more errors?
+                Parallel.ForEach(new List<GenericItem>(MainViewModel.s_instance.items), item =>
+                {
+                    _ = item.UpdateDownloaded();
                 });
             }
             else
