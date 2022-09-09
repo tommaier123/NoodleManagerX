@@ -209,6 +209,10 @@ namespace NoodleManagerX.Converters
         }
     }
 
+    /// <summary>
+    /// Converts two boolean values into one of four colors.
+    /// The order of the parameter is FF|TF|FT|TT, with TF being the default
+    /// </summary>
     public class TwoParameterColorConverter : IMultiValueConverter
     {
         public object Convert(IList<object> values, Type targetType, object parameter, CultureInfo culture)
