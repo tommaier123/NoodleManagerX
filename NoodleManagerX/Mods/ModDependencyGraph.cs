@@ -253,7 +253,7 @@ namespace NoodleManagerX.Mods
             {
                 if (selection.ModVersion == null)
                 {
-                    Console.WriteLine($"Version not specified for {selection.ModId}; ignoring dependency check for now");
+                    //Console.WriteLine($"Version not specified for {selection.ModId}; ignoring dependency check for now");
                     continue;
                 }
 

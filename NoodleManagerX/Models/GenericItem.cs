@@ -80,6 +80,11 @@ namespace NoodleManagerX.Models
         public int downloadAttempts = 0;
 
 
+        public GenericItem() 
+        {
+            SetupCommands();
+        }
+
         [OnDeserialized]
         private void OnDeserializedMethod(StreamingContext context)
         {
@@ -91,45 +96,50 @@ namespace NoodleManagerX.Models
 
                 updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
 
-                downloadCommand = ReactiveCommand.Create((() =>
-                {
-                    if (MainViewModel.s_instance.selectedTabIndex != MainViewModel.TAB_MAPS)
-                    {
-                        MainViewModel.s_instance.OpenErrorDialog("Currently only map downloading is supported");
-                        return;
-                    }
+                SetupCommands();
+            });
+        }
 
-                    if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
-                    {
-                        blacklisted = false;
-                        DownloadScheduler.Download(this);
-                    }
-                }));
-
-                deleteCommand = ReactiveCommand.Create((() =>
+        private void SetupCommands()
+        {
+            downloadCommand = ReactiveCommand.Create((() =>
+            {
+                if (MainViewModel.s_instance.selectedTabIndex != MainViewModel.TAB_MAPS)
                 {
-                    if (!MainViewModel.s_instance.updatingLocalItems)
+                    MainViewModel.s_instance.OpenErrorDialog("Currently only map downloading is supported");
+                    return;
+                }
+
+                if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
+                {
+                    blacklisted = false;
+                    DownloadScheduler.Download(this);
+                }
+            }));
+
+            deleteCommand = ReactiveCommand.Create((() =>
+            {
+                if (!MainViewModel.s_instance.updatingLocalItems)
+                {
+                    if (downloaded)
                     {
-                        if (downloaded)
+                        Task.Run(Delete);
+                    }
+                    else
+                    {
+                        blacklisted = !blacklisted;
+
+                        if (blacklisted)
                         {
-                            Task.Run(Delete);
+                            MainViewModel.s_instance.blacklist.Add(filename);
                         }
                         else
                         {
-                            blacklisted = !blacklisted;
-
-                            if (blacklisted)
-                            {
-                                MainViewModel.s_instance.blacklist.Add(filename);
-                            }
-                            else
-                            {
-                                MainViewModel.s_instance.blacklist.Remove(filename);
-                            }
+                            MainViewModel.s_instance.blacklist.Remove(filename);
                         }
                     }
-                }));
-            });
+                }
+            }));
         }
 
         public async Task UpdateDownloaded(bool forceUpdate = false)
