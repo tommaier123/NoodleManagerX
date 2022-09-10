@@ -43,7 +43,23 @@ namespace NoodleManagerX.Models
                         await stream.CopyToAsync(file);
                     }
                 }
+                stream.Flush();
                 stream.Close();
+            }
+        }
+
+        public static async Task CreateDirectory(string path)
+        {
+            if (MtpDevice.connected)
+            {
+                lock (MtpDeviceLock)
+                {
+                    MtpDevice.device.CreateDirectory(Path.Combine(MtpDevice.path, path));
+                }
+            }
+            else
+            {
+                Directory.CreateDirectory(Path.Combine(MainViewModel.s_instance.settings.synthDirectory, path));
             }
         }
 
