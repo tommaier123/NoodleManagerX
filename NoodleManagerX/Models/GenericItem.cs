@@ -21,7 +21,7 @@ using Stream = System.IO.Stream;
 namespace NoodleManagerX.Models
 {
     [DataContract]
-    abstract class GenericItem : ReactiveObject
+    public abstract class GenericItem : ReactiveObject
     {
         public const int maxDeleteAttempts = 5;
 
@@ -100,7 +100,7 @@ namespace NoodleManagerX.Models
             });
         }
 
-        private void SetupCommands()
+        protected virtual void SetupCommands()
         {
             downloadCommand = ReactiveCommand.Create((() =>
             {
@@ -207,6 +207,36 @@ namespace NoodleManagerX.Models
             }
         }
 
+        protected async virtual Task<string> RawDownloadAndSave()
+        {
+            var path = "";
+
+            try
+            {
+                string url = "https://synthriderz.com" + download_url;
+                WebRequest request = WebRequest.Create(new Uri(url));
+                using (WebResponse response = await request.GetResponseAsync())
+                using (Stream stream = response.GetResponseStream())
+                using (MemoryStream str = await FixMetadata(stream))
+                {
+                    if (String.IsNullOrEmpty(filename))
+                    {
+                        string contentDisposition = response.Headers["content-disposition"];
+                        filename = HttpUtility.UrlDecode(new ContentDisposition(contentDisposition).FileName);
+                    }
+
+                    path = Path.Combine(target, filename);
+                    await StorageAbstraction.WriteFile(str, path);
+                }
+            }
+            catch (Exception e)
+            {
+                MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+            }
+
+            return path;
+        }
+
         public async Task Download()
         {
             string path = "";
@@ -224,21 +254,7 @@ namespace NoodleManagerX.Models
                     downloading = true;
                 });
 
-                string url = "https://synthriderz.com" + download_url;
-                WebRequest request = WebRequest.Create(new Uri(url));
-                using (WebResponse response = await request.GetResponseAsync())
-                using (Stream stream = response.GetResponseStream())
-                using (MemoryStream str = await FixMetadata(stream))
-                {
-                    if (String.IsNullOrEmpty(filename))
-                    {
-                        string contentDisposition = response.Headers["content-disposition"];
-                        filename = HttpUtility.UrlDecode(new ContentDisposition(contentDisposition).FileName);
-                    }
-
-                    path = Path.Combine(target, filename);
-                    await StorageAbstraction.WriteFile(str, path);
-                }
+                path = await RawDownloadAndSave();
             }
             catch (Exception e)
             {
@@ -337,40 +353,6 @@ namespace NoodleManagerX.Models
         }
     }
 
-    class LocalItem
-    {
-        public LocalItem(int id, string hash, string filename, DateTime modifiedTime, ItemType itemType)
-        {
-            this.id = id;
-            this.hash = hash;
-            this.filename = filename;
-            this.modifiedTime = modifiedTime;
-            this.itemType = itemType;
-        }
-
-        public int id = -1;
-        public string hash = "";
-        public string filename = "";
-        public DateTime modifiedTime = new DateTime();
-        public ItemType itemType = ItemType.init;
-
-        public bool CheckEquality(GenericItem item, bool checkHash = false)
-        {
-            if (item != null && itemType == item.itemType)
-            {
-                if (itemType == ItemType.Map && id != -1)
-                {
-                    return this.id == item.id && (!checkHash || hash == ((MapItem)item).hash);
-                }
-                else
-                {
-                    return filename == item.filename;
-                }
-            }
-            return false;
-        }
-    }
-
     abstract class GenericPage
     {
         public int count = -1;
@@ -380,13 +362,13 @@ namespace NoodleManagerX.Models
     }
 
     [DataContract]
-    class User : ReactiveObject
+    public class User : ReactiveObject
     {
         [DataMember] public int id { get; set; }
         [DataMember] public string username { get; set; }
     }
 
-    enum ItemType
+    public enum ItemType
     {
         init,
         Map,

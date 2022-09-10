@@ -1,5 +1,6 @@
 ﻿using Avalonia.Threading;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
@@ -24,7 +25,8 @@ namespace NoodleManagerX.Models
 
         public static void Download(GenericItem item)
         {
-            if (item.itemType == ItemType.Map && !item.blacklisted)
+            var supportedDownloadTypes = new HashSet<ItemType> { ItemType.Map, ItemType.Mod };
+            if (supportedDownloadTypes.Contains(item.itemType) && !item.blacklisted)
             {
                 toDownload++;
                 item.downloadAttempts = 1;
@@ -32,7 +34,7 @@ namespace NoodleManagerX.Models
             }
             else
             {
-                Console.WriteLine("Not queueing item since it's not a map");
+                Console.WriteLine("Not queueing item since it's not a map or mod");
             }
         }
 
