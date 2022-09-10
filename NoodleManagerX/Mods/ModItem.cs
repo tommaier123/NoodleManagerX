@@ -121,6 +121,11 @@ namespace NoodleManagerX.Mods
 
                 path = Path.Combine(target, filename);
                 await StorageAbstraction.WriteFile(str, path);
+
+                if (! await ExtractModFilesToSynthDir(path))
+                {
+                    path = "";
+                }
             }
             catch (Exception e)
             {
@@ -128,6 +133,56 @@ namespace NoodleManagerX.Mods
             }
 
             return path;
+        }
+
+        private async Task<bool> ExtractModFilesToSynthDir(string synthmodPath)
+        {
+            if (MtpDevice.connected)
+            {
+                MainViewModel.s_instance.OpenErrorDialog("Cannot download mod while MTP device (Oculus) is connected!");
+                return false;
+            }
+
+            try
+            {
+                if (StorageAbstraction.FileExists(synthmodPath))
+                {
+                    using (Stream stream = StorageAbstraction.ReadFile(synthmodPath))
+                    using (ZipArchive archive = new ZipArchive(stream))
+                    {
+                        foreach (ZipArchiveEntry entry in archive.Entries)
+                        {
+                            if (entry.FullName != "LocalItem.json")
+                            {
+                                if (StorageAbstraction.FileExists(entry.FullName))
+                                {
+                                    MainViewModel.Log($"WARNING: Overwriting {entry.FullName}");
+                                    await StorageAbstraction.WriteFile(await FixMetadata(stream), entry.FullName);
+                                }
+                                else
+                                {
+                                    if (String.IsNullOrEmpty(entry.Name))
+                                    {
+                                        // No file name, so directory
+                                        MainViewModel.Log($"Creating directory for {entry.FullName}");
+                                        await StorageAbstraction.CreateDirectory(entry.FullName);
+                                    }
+                                    else
+                                    {
+                                        MainViewModel.Log($"Extracting file {entry.FullName}");
+                                        await StorageAbstraction.WriteFile(await FixMetadata(stream), entry.FullName);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+
+            return false;
         }
 
         public override bool Delete(string filename)
@@ -154,12 +209,12 @@ namespace NoodleManagerX.Mods
                                 if (entry.FullName != "LocalItem.json")
                                 {
                                     var fullPath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, entry.FullName);
-                                    if (StorageAbstraction.FileExists(fullPath))
+                                    if (StorageAbstraction.FileExists(entry.FullName))
                                     {
                                         MainViewModel.Log("Deleting " + fullPath);
                                         StorageAbstraction.DeleteFile(fullPath);
                                     }
-                                    else if (!Directory.Exists(fullPath))
+                                    else if (!StorageAbstraction.DirectoryExists(fullPath))
                                     {
                                         MainViewModel.Log($"Mod file {entry.FullName} already deleted");
                                     }
