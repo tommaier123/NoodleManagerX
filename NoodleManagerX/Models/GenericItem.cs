@@ -310,7 +310,7 @@ namespace NoodleManagerX.Models
             }
         }
 
-        public bool Delete(string filename)
+        public virtual bool Delete(string filename)
         {
             if (!String.IsNullOrEmpty(filename))
             {

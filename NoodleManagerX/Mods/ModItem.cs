@@ -14,6 +14,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Net.Http;
+using Avalonia.Controls.Shapes;
+using Newtonsoft.Json;
+using System.IO.Compression;
+using Path = System.IO.Path;
+using System.Data.SqlTypes;
 
 namespace NoodleManagerX.Mods
 {
@@ -123,6 +128,56 @@ namespace NoodleManagerX.Mods
             }
 
             return path;
+        }
+
+        public override bool Delete(string filename)
+        {
+            if (MtpDevice.connected)
+            {
+                MainViewModel.s_instance.OpenErrorDialog("Cannot delete mod while MTP device (Oculus) is connected!");
+                return false;
+            }
+
+            // TODO delete dependencies as well, if they are orphaned
+            if (!String.IsNullOrEmpty(filename) && filename.EndsWith(".synthmod"))
+            {
+                try
+                {
+                    var synthmodPath = Path.Combine(target, filename);
+                    if (StorageAbstraction.FileExists(synthmodPath))
+                    {
+                        using (Stream stream = StorageAbstraction.ReadFile(synthmodPath))
+                        using (ZipArchive archive = new ZipArchive(stream))
+                        {
+                            foreach (ZipArchiveEntry entry in archive.Entries)
+                            {
+                                if (entry.FullName != "LocalItem.json")
+                                {
+                                    var fullPath = Path.Combine(MainViewModel.s_instance.settings.synthDirectory, entry.FullName);
+                                    if (StorageAbstraction.FileExists(fullPath))
+                                    {
+                                        MainViewModel.Log("Deleting " + fullPath);
+                                        StorageAbstraction.DeleteFile(fullPath);
+                                    }
+                                    else if (!Directory.Exists(fullPath))
+                                    {
+                                        MainViewModel.Log($"Mod file {entry.FullName} already deleted");
+                                    }
+                                }
+                            }
+                        }
+
+                        // Deleted all pieces, now delete the raw file itself
+                        MainViewModel.Log($"Deleting {synthmodPath}");
+                        StorageAbstraction.DeleteFile(synthmodPath);
+                    }
+
+                    MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && !(x.itemType == itemType && x.filename == filename)).ToList();
+                    return true;
+                }
+                catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
+            }
+            return false;
         }
 
         public string DisplaySelectedVersion
