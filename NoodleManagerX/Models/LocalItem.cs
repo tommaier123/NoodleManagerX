@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NoodleManagerX.Mods;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,7 +35,8 @@ namespace NoodleManagerX.Models
                 }
                 else if (itemType == ItemType.Mod && id != -1)
                 {
-                    return this.id == item.id;
+                    // id isn't set for mods, so always compare with hash (which is set to the modinfo id)
+                    return hash == ((ModItem)item).ModInfo?.Id;
                 }
                 else
                 {
