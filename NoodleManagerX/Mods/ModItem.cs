@@ -34,10 +34,9 @@ namespace NoodleManagerX.Mods
         [DataMember] public ModVersion ResolvedVersion { get; private set; }
 
 
-        public ModItem(ModInfo modInfo, ModVersion selectedVersion, ModVersion resolvedVersion)
+        public ModItem(ModInfo modInfo, ModVersion resolvedVersion)
         {
             this.ModInfo = modInfo;
-            this.SelectedVersion = selectedVersion;
             this.ResolvedVersion = resolvedVersion;
 
             this.name = modInfo.Name;
@@ -239,14 +238,20 @@ namespace NoodleManagerX.Mods
         {
             get
             {
-                if (this.SelectedVersion?.Version == null)
+                var localItem = MainViewModel.s_instance.localItems.FirstOrDefault(item => item.CheckEquality(this));
+                if (localItem == null)
                 {
                     // Not installed
                     return "---";
                 }
 
-                var displayed = this.SelectedVersion.Version.ToString();
-                if (this.SelectedVersion.Version.ComparePrecedenceTo(this.ResolvedVersion?.Version) != 0)
+                if (localItem.ItemVersion == null)
+                {
+                    return "Latest";
+                }
+
+                var displayed = localItem.ItemVersion.ToString();
+                if (localItem.ItemVersion.ComparePrecedenceTo(this.ResolvedVersion?.Version) != 0)
                 {
                     displayed += "*";
                 }
