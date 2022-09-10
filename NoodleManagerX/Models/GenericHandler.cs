@@ -14,7 +14,7 @@ using Path = System.IO.Path;
 
 namespace NoodleManagerX.Models
 {
-    abstract class GenericHandler
+    public abstract class GenericHandler
     {
         public abstract ItemType itemType { get; set; }
         public abstract string apiEndpoint { get; set; }

@@ -24,10 +24,6 @@ namespace NoodleManagerX.Mods
         public override ItemType itemType { get; set; } = ItemType.Mod;
         public override string apiEndpoint { get; set; } = "https://raw.githubusercontent.com/bookdude13/SRModsList/dev/SynthRiders";
         public override string folder { get; set; } = "Mods";
-
-        // Save mod information in local file, to fake out same structure as other *Items
-        // Needs this to call Deserialize function so the downloadCommand is initialized
-
         public override string[] extensions { get; set; } = { ".synthmod" };
 
         public override dynamic DeserializePage(string json)
@@ -70,7 +66,7 @@ namespace NoodleManagerX.Mods
             {
                 Console.WriteLine($"Dependencies resolved: {dependencyGraph.ResolvedVersions.Count}");
                 var modItems = mods.Select(
-                    mod => new ModItem(mod, null, dependencyGraph.ResolvedVersions[mod.Id].Version)
+                    mod => new ModItem(mod, null, dependencyGraph.ResolvedVersions[mod.Id])
                 );
 
                 await Dispatcher.UIThread.InvokeAsync(() =>
@@ -90,6 +86,52 @@ namespace NoodleManagerX.Mods
                 MainViewModel.Log("Failed to resolve dependencies");
                 // TODO popup
             }
+        }
+
+        /// <summary>
+        /// Mods are stored in a zip file with the .synthmod extension.
+        /// Inside is the following:
+        ///     A ModInfo.json file containing a serialized ModInfo representing this mod
+        ///     All files that need to be copied, in a folder structure relative to the main SynthRiders directory
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public override async Task<bool> GetLocalItem(string path)
+        {
+            try
+            {
+                if (StorageAbstraction.FileExists(path))
+                {
+                    using (Stream stream = StorageAbstraction.ReadFile(path))
+                    using (ZipArchive archive = new ZipArchive(stream))
+                    {
+                        foreach (ZipArchiveEntry entry in archive.Entries)
+                        {
+                            if (entry.FullName == "LocalItem.json")
+                            {
+                                using (System.IO.StreamReader sr = new System.IO.StreamReader(entry.Open()))
+                                {
+                                    LocalItem localItem = JsonConvert.DeserializeObject<LocalItem>(await sr.ReadToEndAsync());
+                                    localItem.filename = Path.GetFileName(path);
+                                    localItem.modifiedTime = StorageAbstraction.GetLastWriteTime(path);
+                                    localItem.itemType = ItemType.Mod;
+                                    MainViewModel.s_instance.localItems.Add(localItem);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
+                MainViewModel.Log("Deleting corrupted file " + Path.GetFileName(path));
+                try { StorageAbstraction.DeleteFile(path); }
+                catch (Exception ee) { MainViewModel.Log(MethodBase.GetCurrentMethod(), ee); }
+            }
+
+            return false;
         }
 
         private async Task<List<ModInfo>> GetAvailableMods()

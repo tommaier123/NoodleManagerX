@@ -474,8 +474,8 @@
                 </Grid>
                 <!--v version v-->
                 <Grid Grid.Column="1" RowDefinitions="auto,auto" ColumnDefinitions="auto" VerticalAlignment="Center">
-                  <TextBlock Grid.Row="0" Text="{Binding DisplayedVersion}" Classes="Downloaded RightText" FontSize="30"/>
-                  <TextBlock Grid.Row="1" Text="{Binding ResolvedVersion}" Classes="Downloaded RightText" FontSize="30"/>
+                  <TextBlock Grid.Row="0" Text="{Binding DisplaySelectedVersion}" Classes="Downloaded RightText" FontSize="30"/>
+                  <TextBlock Grid.Row="1" Text="{Binding DisplayResolvedVersion}" Classes="Downloaded RightText" FontSize="30"/>
                 </Grid>
                 <!--v download button v-->
                 <Grid Grid.Column="2" RowDefinitions="auto,auto" VerticalAlignment="Center">
