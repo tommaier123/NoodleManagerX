@@ -16,6 +16,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Semver;
 
 namespace NoodleManagerX.Mods
 {
@@ -44,9 +45,34 @@ namespace NoodleManagerX.Mods
 
             foreach (var mod in availableMods)
             {
-                // TODO check if in local db, and if so use version from there.
+                // Check if in local items list, and if so use version from there.
                 // Default is to assume latest (null) and resolve with that
-                localSelection.Add(new ModVersionSelection(mod.Id, null));
+                var localItem = MainViewModel.s_instance.localItems.FirstOrDefault(item => item.hash == mod.Id);
+                if (localItem == null)
+                {
+                    localSelection.Add(new ModVersionSelection(mod.Id, null));
+                }
+                else
+                {
+                    if (localItem.ItemVersion == null)
+                    {
+                        // Local selection is "latest"
+                        localSelection.Add(new ModVersionSelection(mod.Id, null));
+                    }
+                    else
+                    {
+                        var selectedVersion = mod.Versions.FirstOrDefault(v => localItem.ItemVersion.ComparePrecedenceTo(v.Version) == 0);
+                        if (selectedVersion == null)
+                        {
+                            MainViewModel.Log($"Locally selected version {localItem.ItemVersion} not found in mod list for mod {mod.Id}. Defaulting to latest");
+                            localSelection.Add(new ModVersionSelection(mod.Id, null));
+                        }
+                        else
+                        {
+                            localSelection.Add(new ModVersionSelection(mod.Id, selectedVersion));
+                        }
+                    }
+                }
             }
 
             return localSelection;
@@ -66,7 +92,10 @@ namespace NoodleManagerX.Mods
             {
                 Console.WriteLine($"Dependencies resolved: {dependencyGraph.ResolvedVersions.Count}");
                 var modItems = mods.Select(
-                    mod => new ModItem(mod, null, dependencyGraph.ResolvedVersions[mod.Id])
+                    mod => new ModItem(
+                        mod,
+                        dependencyGraph.ResolvedVersions[mod.Id]
+                    )
                 );
 
                 await Dispatcher.UIThread.InvokeAsync(() =>

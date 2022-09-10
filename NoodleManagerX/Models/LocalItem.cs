@@ -1,4 +1,6 @@
-﻿using NoodleManagerX.Mods;
+﻿using NoodleManagerX.Models.Mods;
+using NoodleManagerX.Mods;
+using Semver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +27,31 @@ namespace NoodleManagerX.Models
         public DateTime modifiedTime = new DateTime();
         public ItemType itemType = ItemType.init;
 
+        public SemVersion ItemVersion
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(filename))
+                {
+                    return null;
+                }
+
+                if (filename.StartsWith(hash + "_") && filename.EndsWith(".synthmod"))
+                {
+                    var versionStr = filename.Substring(hash.Length + 1, filename.Length - hash.Length - 1 - ".synthmod".Length);
+                    try
+                    {
+                        return SemVersion.Parse(versionStr, SemVersionStyles.Any);
+                    }
+                    catch (Exception ex)
+                    {
+                        MainViewModel.Log($"Failed to parse version '{versionStr}' for mod {hash}");
+                    }
+                }
+                return null;
+            }
+        }
+
         public bool CheckEquality(GenericItem item, bool checkHash = false)
         {
             if (item != null && itemType == item.itemType)
@@ -36,7 +63,12 @@ namespace NoodleManagerX.Models
                 else if (itemType == ItemType.Mod && id != -1)
                 {
                     // id isn't set for mods, so always compare with hash (which is set to the modinfo id)
-                    return hash == ((ModItem)item).ModInfo?.Id;
+                    // Version is located within filename. Filename is always {modId}_{version}.synthmod
+                    var modItem = (ModItem)item;
+                    var isSameVersion = ItemVersion == null ||
+                        modItem.SelectedVersion?.Version == null ||
+                        ItemVersion.ComparePrecedenceTo(modItem.SelectedVersion?.Version) == 0;
+                    return hash == modItem.ModInfo?.Id && isSameVersion;
                 }
                 else
                 {
