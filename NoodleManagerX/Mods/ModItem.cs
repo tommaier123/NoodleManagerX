@@ -115,7 +115,7 @@ namespace NoodleManagerX.Mods
 
                 using HttpClient client = new HttpClient();
                 using var rawResponse = await client.GetStreamAsync(url);
-                using MemoryStream str = await FixMetadata(rawResponse);
+                using MemoryStream str = await CopyStreamToMemoryStream(rawResponse);
                 if (String.IsNullOrEmpty(filename))
                 {
                     filename = SelectedVersion.DownloadUrl.Split("/").Last();
@@ -161,7 +161,7 @@ namespace NoodleManagerX.Mods
                                 if (StorageAbstraction.FileExists(entry.FullName))
                                 {
                                     MainViewModel.Log($"WARNING: Overwriting {entry.FullName}");
-                                    await StorageAbstraction.WriteFile(await FixMetadata(stream), entry.FullName);
+                                    await StorageAbstraction.WriteFile(await CopyStreamToMemoryStream(stream, false), entry.FullName);
                                 }
                                 else
                                 {
@@ -174,7 +174,7 @@ namespace NoodleManagerX.Mods
                                     else
                                     {
                                         MainViewModel.Log($"Extracting file {entry.FullName}");
-                                        await StorageAbstraction.WriteFile(await FixMetadata(stream), entry.FullName);
+                                        await StorageAbstraction.WriteFile(await CopyStreamToMemoryStream(stream, false), entry.FullName);
                                     }
                                 }
                             }

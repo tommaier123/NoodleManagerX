@@ -123,9 +123,9 @@ namespace NoodleManagerX.Models
             }));
         }
 
-        public override async Task<MemoryStream> FixMetadata(Stream stream)
+        public override async Task<MemoryStream> CopyStreamToMemoryStream(Stream stream, bool closeOriginal = true)
         {
-            MemoryStream ms = await base.FixMetadata(stream);
+            MemoryStream ms = await base.CopyStreamToMemoryStream(stream);
 
             using (ZipArchive archive = new ZipArchive(ms, ZipArchiveMode.Update, true))
             {

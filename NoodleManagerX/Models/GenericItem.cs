@@ -217,7 +217,7 @@ namespace NoodleManagerX.Models
                 WebRequest request = WebRequest.Create(new Uri(url));
                 using (WebResponse response = await request.GetResponseAsync())
                 using (Stream stream = response.GetResponseStream())
-                using (MemoryStream str = await FixMetadata(stream))
+                using (MemoryStream str = await CopyStreamToMemoryStream(stream))
                 {
                     if (String.IsNullOrEmpty(filename))
                     {
@@ -290,12 +290,15 @@ namespace NoodleManagerX.Models
             catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
         }
 
-        public virtual async Task<MemoryStream> FixMetadata(Stream stream)
+        public virtual async Task<MemoryStream> CopyStreamToMemoryStream(Stream stream, bool closeOriginal = true)
         {
             MemoryStream ms = new MemoryStream();
             await stream.CopyToAsync(ms);
             stream.Flush();
-            stream.Close();
+            if (closeOriginal)
+            {
+                stream.Close();
+            }
             return ms;
         }
 
