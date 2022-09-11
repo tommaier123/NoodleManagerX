@@ -244,7 +244,8 @@ namespace NoodleManagerX.Models
             try
             {
                 if (downloaded)
-                {//remove from local items
+                {
+                    //remove from local items
                     MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this) == false).ToList();
                 }
 

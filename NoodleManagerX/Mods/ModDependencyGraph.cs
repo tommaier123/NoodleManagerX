@@ -291,7 +291,7 @@ namespace NoodleManagerX.Mods
             return latestSupportedVersion;
         }
 
-        private bool VersionInRange(SemVersion version, SemVersion lowInclusive, SemVersion highInclusive)
+        public static bool VersionInRange(SemVersion version, SemVersion lowInclusive, SemVersion highInclusive)
         {
             if (version.ComparePrecedenceTo(lowInclusive) < 0)
             {

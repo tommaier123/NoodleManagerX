@@ -30,16 +30,26 @@ namespace NoodleManagerX.Mods
         public override string target { get; set; } = "Mods";
         public override ItemType itemType { get; set; } = ItemType.Mod;
 
+        private Dictionary<string, ModVersion> ResolvedVersions { get; set; }
+
         [DataMember] public ModInfo ModInfo { get; private set; }
         [DataMember] public ModVersion SelectedVersion { get; private set; }
         [Reactive] public string DisplaySelectedVersion { get; private set; }
-        [DataMember] public ModVersion ResolvedVersion { get; private set; }
+        
+        [DataMember]
+        public ModVersion ResolvedVersion
+        {
+            get
+            {
+                return ResolvedVersions[ModInfo.Id];
+            }
+        }
 
 
-        public ModItem(ModInfo modInfo, ModVersion selectedVersion, ModVersion resolvedVersion)
+        public ModItem(ModInfo modInfo, ModVersion selectedVersion, Dictionary<string, ModVersion> resolvedVersions)
         {
             this.ModInfo = modInfo;
-            this.ResolvedVersion = resolvedVersion;
+            this.ResolvedVersions = resolvedVersions;
             SelectVersion(selectedVersion);
 
             this.name = modInfo.Name;
@@ -55,76 +65,85 @@ namespace NoodleManagerX.Mods
             Console.WriteLine("No bitmaps needed for mod items");
         }
 
+        public void TryDownload()
+        {
+            if (MainViewModel.s_instance.selectedTabIndex != MainViewModel.TAB_MODS)
+            {
+                MainViewModel.Log("Ignoring mod download when not on mods tab");
+                return;
+            }
+
+            if (MtpDevice.connected)
+            {
+                MainViewModel.s_instance.OpenErrorDialog("Mods only supported on PCVR");
+                return;
+            }
+
+            if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
+            {
+                blacklisted = false;
+                SelectResolvedVersionForDownload();
+                DownloadScheduler.Download(this);
+            }
+        }
+
+        public void TryDelete()
+        {
+            if (!MainViewModel.s_instance.updatingLocalItems)
+            {
+                if (downloaded)
+                {
+                    Task.Run(Delete);
+                }
+                else
+                {
+                    blacklisted = !blacklisted;
+
+                    if (blacklisted)
+                    {
+                        MainViewModel.s_instance.blacklist.Add(filename);
+                    }
+                    else
+                    {
+                        MainViewModel.s_instance.blacklist.Remove(filename);
+                    }
+                }
+            }
+        }
+
         protected override void SetupCommands()
         {
             downloadCommand = ReactiveCommand.Create((() =>
             {
-                if (MainViewModel.s_instance.selectedTabIndex != MainViewModel.TAB_MODS)
-                {
-                    MainViewModel.Log("Ignoring mod download when not on mods tab");
-                    return;
-                }
-
-                if (MtpDevice.connected)
-                {
-                    MainViewModel.s_instance.OpenErrorDialog("Mods only supported on PCVR");
-                    return;
-                }
-
-                if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
-                {
-                    blacklisted = false;
-                    SelectResolvedVersionForDownload();
-                    DownloadScheduler.Download(this);
-                }
+                TryDownload();
             }));
 
             deleteCommand = ReactiveCommand.Create((() =>
             {
-                if (!MainViewModel.s_instance.updatingLocalItems)
-                {
-                    if (downloaded)
-                    {
-                        Task.Run(Delete);
-                    }
-                    else
-                    {
-                        blacklisted = !blacklisted;
-
-                        if (blacklisted)
-                        {
-                            MainViewModel.s_instance.blacklist.Add(filename);
-                        }
-                        else
-                        {
-                            MainViewModel.s_instance.blacklist.Remove(filename);
-                        }
-                    }
-                }
+                TryDelete();
             }));
         }
 
-        protected async override Task<string> RawDownloadAndSave()
+        private async Task<string> DownloadAndSaveVersion(ModVersion modVersion)
         {
             var path = "";
 
             try
             {
-                // TODO rename DownloadUrl to DownloadPath
-                string url = baseDownloadUrl + "/" + SelectedVersion.DownloadUrl;
+                string url = baseDownloadUrl + "/" + modVersion.DownloadUrl;
 
                 using HttpClient client = new HttpClient();
                 using var rawResponse = await client.GetStreamAsync(url);
                 using MemoryStream str = await CopyStreamToMemoryStream(rawResponse);
                 if (String.IsNullOrEmpty(filename))
                 {
-                    filename = SelectedVersion.DownloadUrl.Split("/").Last();
+                    filename = modVersion.DownloadUrl.Split("/").Last();
                 }
 
                 path = Path.Combine(target, filename);
                 await StorageAbstraction.WriteFile(str, path);
 
-                if (! await ExtractModFilesToSynthDir(path))
+                if (!await ExtractModFilesToSynthDir(path))
                 {
                     DisplaySelectedVersion = "---";
                     path = "";
@@ -137,6 +156,25 @@ namespace NoodleManagerX.Mods
             }
 
             return path;
+        }
+
+        protected async override Task<string> RawDownloadAndSave()
+        {
+            // Download dependencies
+            foreach (var dependency in SelectedVersion.Dependencies)
+            {
+                var depModItem = MainViewModel.s_instance.mods.FirstOrDefault(mod => mod.ModInfo.Id == dependency.Id);
+                depModItem.TryDownload();
+            }
+
+            var baseModPath = await DownloadAndSaveVersion(SelectedVersion);
+            if (baseModPath == "")
+            {
+                MainViewModel.Log($"Failed to download and save base file for mod {ModInfo.Id}");
+                return "";
+            }
+
+            return baseModPath;
         }
 
         private async Task<bool> ExtractModFilesToSynthDir(string synthmodPath)
