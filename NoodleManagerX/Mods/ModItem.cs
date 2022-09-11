@@ -235,7 +235,6 @@ namespace NoodleManagerX.Mods
                 return false;
             }
 
-            // TODO delete dependencies as well, if they are orphaned
             if (!String.IsNullOrEmpty(filename) && filename.EndsWith(".synthmod"))
             {
                 try
@@ -269,7 +268,35 @@ namespace NoodleManagerX.Mods
                         StorageAbstraction.DeleteFile(synthmodPath);
                     }
 
+                    // Delete orphaned dependencies
+                    foreach (var dependency in SelectedVersion.Dependencies)
+                    {
+                        var isDepOrphaned = MainViewModel.s_instance.mods.FirstOrDefault(mod => {
+                            if (mod.ModInfo.Id == ModInfo.Id)
+                            {
+                                // Ignore ourselves
+                                return false;
+                            }
+
+                            if (mod.SelectedVersion != null)
+                            {
+                                return mod.SelectedVersion.HasDependency(dependency);
+                            }
+                            else
+                            {
+                                return mod.ResolvedVersion?.HasDependency(dependency) ?? false;
+                            }
+                        }) == null;
+                        if (isDepOrphaned)
+                        {
+                            MainViewModel.Log($"Deleting orphaned dependency {dependency.Id} for mod {ModInfo.Id}");
+                            var depModItem = MainViewModel.s_instance.mods.FirstOrDefault(mod => mod.ModInfo.Id == dependency.Id);
+                            depModItem.TryDelete();
+                        }
+                    }
+
                     MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && !(x.itemType == itemType && x.filename == filename)).ToList();
+
                     SelectVersion(null);
                     return true;
                 }

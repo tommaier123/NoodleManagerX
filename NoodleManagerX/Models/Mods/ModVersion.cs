@@ -22,5 +22,19 @@ namespace NoodleManagerX.Models.Mods
 
         [JsonProperty("dependencies", Required = Required.Always)]
         public List<ModDependencyInfo> Dependencies { get; set; } = new List<ModDependencyInfo>();
+
+        // TODO make this nested. Assumes max depth of 1 for dependencies right now
+        public bool HasDependency(ModDependencyInfo dep)
+        {
+            foreach (var dependency in this.Dependencies)
+            {
+                if (dep.Id == dependency.Id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
