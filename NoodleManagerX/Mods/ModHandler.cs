@@ -121,7 +121,8 @@ namespace NoodleManagerX.Mods
         /// <summary>
         /// Mods are stored in a zip file with the .synthmod extension.
         /// Inside is the following:
-        ///     A ModInfo.json file containing a serialized ModInfo representing this mod
+        ///     A LocalItem.json file containing a serialized LocalItem representing the mod item.
+        ///         The only field here that is set is the hash, equal to the ModId
         ///     All files that need to be copied, in a folder structure relative to the main SynthRiders directory
         /// </summary>
         /// <param name="path"></param>

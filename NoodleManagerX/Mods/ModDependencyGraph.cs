@@ -195,7 +195,7 @@ namespace NoodleManagerX.Mods
                     // Dependencies must be present
                     if (!_mods.ContainsKey(dep.Id))
                     {
-                        Console.WriteLine($"Dependency missing for mod ${modId}");
+                        Console.WriteLine($"Dependency {dep.Id} missing for mod {modId}");
                         State = ResolvedState.ERROR_MISSING_DEP;
                         return;
                     }
