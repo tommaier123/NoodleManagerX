@@ -19,6 +19,7 @@ using Newtonsoft.Json;
 using System.IO.Compression;
 using Path = System.IO.Path;
 using System.Data.SqlTypes;
+using ReactiveUI.Fody.Helpers;
 
 namespace NoodleManagerX.Mods
 {
@@ -31,13 +32,15 @@ namespace NoodleManagerX.Mods
 
         [DataMember] public ModInfo ModInfo { get; private set; }
         [DataMember] public ModVersion SelectedVersion { get; private set; }
+        [Reactive] public string DisplaySelectedVersion { get; private set; }
         [DataMember] public ModVersion ResolvedVersion { get; private set; }
 
 
-        public ModItem(ModInfo modInfo, ModVersion resolvedVersion)
+        public ModItem(ModInfo modInfo, ModVersion selectedVersion, ModVersion resolvedVersion)
         {
             this.ModInfo = modInfo;
             this.ResolvedVersion = resolvedVersion;
+            SelectVersion(selectedVersion);
 
             this.name = modInfo.Name;
             this.description = modInfo.Description;
@@ -71,7 +74,7 @@ namespace NoodleManagerX.Mods
                 if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
                 {
                     blacklisted = false;
-                    SelectedVersion = ResolvedVersion;
+                    SelectResolvedVersionForDownload();
                     DownloadScheduler.Download(this);
                 }
             }));
@@ -123,11 +126,13 @@ namespace NoodleManagerX.Mods
 
                 if (! await ExtractModFilesToSynthDir(path))
                 {
+                    DisplaySelectedVersion = "---";
                     path = "";
                 }
             }
             catch (Exception e)
             {
+                DisplaySelectedVersion = "---";
                 MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
             }
 
@@ -227,6 +232,7 @@ namespace NoodleManagerX.Mods
                     }
 
                     MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && !(x.itemType == itemType && x.filename == filename)).ToList();
+                    SelectVersion(null);
                     return true;
                 }
                 catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
@@ -234,29 +240,38 @@ namespace NoodleManagerX.Mods
             return false;
         }
 
-        public string DisplaySelectedVersion
+        private void SelectResolvedVersionForDownload()
         {
-            get
+            SelectedVersion = ResolvedVersion;
+            DisplaySelectedVersion = ResolvedVersion?.Version?.ToString() ?? "ERR";
+        }
+
+        private void SelectVersion(ModVersion version)
+        {
+            SelectedVersion = version;
+            DisplaySelectedVersion = SelectedVersionToDisplayString(SelectedVersion);
+        }
+
+        public string SelectedVersionToDisplayString(ModVersion selectedVersion)
+        {
+            var localItem = MainViewModel.s_instance.localItems.FirstOrDefault(item => item.CheckEquality(this));
+            if (localItem == null)
             {
-                var localItem = MainViewModel.s_instance.localItems.FirstOrDefault(item => item.CheckEquality(this));
-                if (localItem == null)
-                {
-                    // Not installed
-                    return "---";
-                }
-
-                if (localItem.ItemVersion == null)
-                {
-                    return "Latest";
-                }
-
-                var displayed = localItem.ItemVersion.ToString();
-                if (localItem.ItemVersion.ComparePrecedenceTo(this.ResolvedVersion?.Version) != 0)
-                {
-                    displayed += "*";
-                }
-                return displayed;
+                // Not installed
+                return "---";
             }
+
+            if (localItem.ItemVersion == null)
+            {
+                return "Latest";
+            }
+
+            var displayed = localItem.ItemVersion.ToString();
+            if (localItem.ItemVersion.ComparePrecedenceTo(selectedVersion?.Version) != 0)
+            {
+                displayed += "*";
+            }
+            return displayed;
         }
 
         public string DisplayResolvedVersion

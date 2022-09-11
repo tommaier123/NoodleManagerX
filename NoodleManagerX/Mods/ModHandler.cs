@@ -94,6 +94,7 @@ namespace NoodleManagerX.Mods
                 var modItems = mods.Select(
                     mod => new ModItem(
                         mod,
+                        localSelection.FirstOrDefault(selection => selection.ModId == mod.Id)?.ModVersion,
                         dependencyGraph.ResolvedVersions[mod.Id]
                     )
                 );
