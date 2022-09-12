@@ -40,7 +40,6 @@ namespace NoodleManagerX.Mods
 
         private List<ModVersionSelection> GetLocalSelection(List<ModInfo> availableMods)
         {
-            // TODO get from local db
             List<ModVersionSelection> localSelection = new();
 
             foreach (var mod in availableMods)
@@ -56,7 +55,6 @@ namespace NoodleManagerX.Mods
                 {
                     if (localItem.ItemVersion == null)
                     {
-                        // Local selection is "latest"
                         localSelection.Add(new ModVersionSelection(mod.Id, null));
                     }
                     else
@@ -113,8 +111,7 @@ namespace NoodleManagerX.Mods
             }
             else
             {
-                MainViewModel.Log("Failed to resolve dependencies");
-                // TODO popup
+                MainViewModel.s_instance.OpenErrorDialog("Failed to resolve mod dependencies");
             }
         }
 
@@ -167,14 +164,14 @@ namespace NoodleManagerX.Mods
 
         private async Task<List<ModInfo>> GetAvailableMods()
         {
+            MainViewModel.Log("Game version: " + GetCurrentGameVersion());
             int requestID = MainViewModel.s_instance.apiRequestCounter;
             Clear();
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string gameVersion = GetCurrentGameVersion();
-                    string requestUrl = apiEndpoint + "/" + Uri.EscapeDataString(gameVersion) + "/mods.json";
+                    string requestUrl = apiEndpoint + "/mods.json";
                     string rawResponse = await client.GetStringAsync(requestUrl);
                     if (MainViewModel.s_instance.apiRequestCounter != requestID)
                     {

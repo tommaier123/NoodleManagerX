@@ -74,21 +74,18 @@ namespace NoodleManagerX.Utils
                         if (bundleVersion != null)
                         {
                             GameVersion = bundleVersion.GetValue().AsString();
-                            Console.WriteLine("Game version: " + GameVersion);
                         }
 
                         AssetTypeValueField companyName = playerSettings_baseField.Get("companyName");
                         if (companyName != null)
                         {
                             GameDeveloper = companyName.GetValue().AsString();
-                            Console.WriteLine("Game developer: " + GameDeveloper);
                         }
 
                         AssetTypeValueField productName = playerSettings_baseField.Get("productName");
                         if (productName != null)
                         {
                             GameName = productName.GetValue().AsString();
-                            Console.WriteLine("Game name: " + GameName);
                         }
                     }
                 }
