@@ -112,6 +112,7 @@ namespace NoodleManagerX.Models
         public AdbServer adbServer = new AdbServer();
         public AdbClient adbClient = new AdbClient();
 
+        private bool initialized = false;
         public bool pruning = false;//maps without metadata should be deleted
         public bool downloadPage = false;//so that loading maps get downloaded when using get page
         public volatile bool closing = false;
@@ -169,6 +170,12 @@ namespace NoodleManagerX.Models
 
                 tabSelectCommand = ReactiveCommand.Create<string>(x =>
                 {
+                    if (!initialized)
+                    {
+                        Log("Ignoring tab selection when not initialized yet");
+                        return;
+                    }
+
                     selectedTabIndex = Int32.Parse(x);
                     currentPage = 1;
                     numberOfPages = 1;
@@ -414,6 +421,7 @@ namespace NoodleManagerX.Models
 
                 MtpDevice.Connect();
                 ReloadLocalSources();
+                initialized = true;
                 _ = GetPage();
             });
         }
@@ -452,6 +460,7 @@ namespace NoodleManagerX.Models
                     case TAB_MODS:
                         mods.Clear();
                         mods.AddRange(items.Where(x => x.itemType == ItemType.Mod).Select(x => (ModItem)x));
+                        modHandler.RefreshUI();
                         break;
                 }
             });

@@ -94,8 +94,11 @@ namespace NoodleManagerX.Mods
 
         public async override Task GetPage()
         {
+            int requestID = MainViewModel.s_instance.apiRequestCounter;
+            Clear();
+
             var mods = await GetAvailableMods();
-            Console.WriteLine($"{mods.Count} mods loaded");
+            MainViewModel.Log($"{mods.Count} mods loaded");
 
             var localSelection = GetLocalSelection(mods);
             installedVersions = GetLocalInstalledVersions(mods);
@@ -105,7 +108,8 @@ namespace NoodleManagerX.Mods
             var resolveResult = dependencyGraph.Resolve(localSelection);
             if (resolveResult == ModDependencyGraph.ResolvedState.RESOLVED)
             {
-                Console.WriteLine($"Dependencies resolved: {dependencyGraph.ResolvedVersions.Count}");
+                MainViewModel.Log($"Dependencies resolved: {dependencyGraph.ResolvedVersions.Count}");
+
                 var modItems = mods.Select(
                     mod => new ModItem(
                         mod,
@@ -261,13 +265,34 @@ namespace NoodleManagerX.Mods
             try
             {
                 var modList = JsonConvert.DeserializeObject<ModInfoList>(rawRemoteModList);
-                return modList.AvailableMods;
+
+                var availableMods = modList.AvailableMods;
+                //ChangeVersionsForTest(availableMods);
+                return availableMods;
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine("Failed to deserialize mod list: " + e.Message);
                 return new();
             }
+        }
+
+        /// <summary>
+        /// Only used for spot checking version updates.
+        /// DON'T USE IN PROD BUILDS!
+        /// </summary>
+        /// <param name="availableMods"></param>
+        /// <returns></returns>
+        private List<ModInfo> ChangeVersionsForTest(List<ModInfo> availableMods)
+        {
+            var tmp = availableMods.First(info => info.Id == "SRModsList");
+            tmp.Versions.Add(new ModVersion
+            {
+                DownloadUrl = tmp.Versions[0].DownloadUrl,
+                Dependencies = tmp.Versions[0].Dependencies,
+                Version = new SemVersion(1, 2)
+            });
+            return availableMods;
         }
 
         private string GetCurrentGameVersion()
