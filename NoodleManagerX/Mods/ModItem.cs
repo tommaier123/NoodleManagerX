@@ -30,13 +30,13 @@ namespace NoodleManagerX.Mods
         public override string target { get; set; } = "Mods";
         public override ItemType itemType { get; set; } = ItemType.Mod;
 
-        private Dictionary<string, ModVersion> InstalledVersions { get; set; }
         private Dictionary<string, ModVersion> ResolvedVersions { get; set; }
 
         [DataMember] public ModInfo ModInfo { get; private set; }
         [DataMember] public ModVersion SelectedVersion { get; private set; }
         [Reactive] public string DisplayVersion { get; private set; }
-        
+        [Reactive] public bool CanDelete { get; private set; } = true;
+
         [DataMember]
         public ModVersion ResolvedVersion
         {
@@ -51,17 +51,20 @@ namespace NoodleManagerX.Mods
         {
             get
             {
-                return InstalledVersions[ModInfo.Id];
+                return ((ModHandler)handler).GetInstalledVersion(ModInfo.Id);
+            }
+            private set
+            {
+                ((ModHandler)handler).UpdateInstalledVersion(ModInfo.Id, value);
             }
         }
 
 
-        public ModItem(ModInfo modInfo, Dictionary<string, ModVersion> installedVersions, Dictionary<string, ModVersion> resolvedVersions)
+        public ModItem(ModInfo modInfo, ModVersion installedVersion, Dictionary<string, ModVersion> resolvedVersions)
         {
             this.ModInfo = modInfo;
-            this.InstalledVersions = installedVersions;
             this.ResolvedVersions = resolvedVersions;
-            SelectVersion(InstalledVersion);
+            SelectVersion(installedVersion);
 
             this.name = modInfo.Name;
             this.description = modInfo.Description;
@@ -102,22 +105,9 @@ namespace NoodleManagerX.Mods
         {
             if (!MainViewModel.s_instance.updatingLocalItems)
             {
-                if (downloaded)
+                if (downloaded && CanDelete)
                 {
                     Task.Run(Delete);
-                }
-                else
-                {
-                    blacklisted = !blacklisted;
-
-                    if (blacklisted)
-                    {
-                        MainViewModel.s_instance.blacklist.Add(filename);
-                    }
-                    else
-                    {
-                        MainViewModel.s_instance.blacklist.Remove(filename);
-                    }
                 }
             }
         }
@@ -184,6 +174,8 @@ namespace NoodleManagerX.Mods
                 MainViewModel.Log($"Failed to download and save base file for mod {ModInfo.Id}");
                 return "";
             }
+
+            ((ModHandler)handler).RefreshUI();
 
             return baseModPath;
         }
@@ -279,29 +271,21 @@ namespace NoodleManagerX.Mods
                         StorageAbstraction.DeleteFile(synthmodPath);
                     }
 
-                    // Delete orphaned dependencies
-                    foreach (var dependency in InstalledVersion.Dependencies)
-                    {
-                        var isDepOrphaned = MainViewModel.s_instance.mods.FirstOrDefault(mod => {
-                            if (mod.ModInfo.Id == ModInfo.Id)
-                            {
-                                // Ignore ourselves
-                                return false;
-                            }
+                    // Cache installed version before it is cleared
+                    var installedVersion = InstalledVersion;
 
-                            return mod.InstalledVersion?.HasDependency(dependency) ?? false;
-                        }) == null;
-                        if (isDepOrphaned)
-                        {
-                            MainViewModel.Log($"Deleting orphaned dependency {dependency.Id} for mod {ModInfo.Id}");
-                            var depModItem = MainViewModel.s_instance.mods.FirstOrDefault(mod => mod.ModInfo.Id == dependency.Id);
-                            depModItem.TryDelete();
-                        }
-                    }
+                    // Unassign versions for dependency checks
+                    SelectVersion(null);
+                    InstalledVersion = null;
 
+                    DeleteOrphanedDependencies(installedVersion);
+
+                    // Remove from localItems
                     MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x != null && !(x.itemType == itemType && x.filename == filename)).ToList();
 
-                    SelectVersion(null);
+                    // Refresh mod items after link to dependencies is severed
+                    ((ModHandler)handler).RefreshUI();
+
                     return true;
                 }
                 catch (Exception e) { MainViewModel.Log(MethodBase.GetCurrentMethod(), e); }
@@ -309,11 +293,40 @@ namespace NoodleManagerX.Mods
             return false;
         }
 
+        private void DeleteOrphanedDependencies(ModVersion installedVersion)
+        {
+            foreach (var dependency in installedVersion.Dependencies)
+            {
+                var isDepOrphaned = MainViewModel.s_instance.mods.FirstOrDefault(mod => {
+                    if (mod.ModInfo.Id == ModInfo.Id)
+                    {
+                        // Ignore ourselves
+                        return false;
+                    }
+
+                    return mod.InstalledVersion?.HasDependency(dependency.Id) ?? false;
+                }) == null;
+
+                if (isDepOrphaned)
+                {
+                    MainViewModel.Log($"Deleting orphaned dependency {dependency.Id} for mod {ModInfo.Id}");
+                    var depModItem = MainViewModel.s_instance.mods.FirstOrDefault(mod => mod.ModInfo.Id == dependency.Id);
+                    depModItem.RefreshDeleteStatus();
+                    depModItem.TryDelete();
+                }
+            }
+        }
+
+        public void RefreshDeleteStatus()
+        {
+            CanDelete = !((ModHandler)handler).IsAnInstalledDependency(ModInfo.Id);
+        }
+
         private void UpdateInstalledVersionOnDownload()
         {
             SelectedVersion = ResolvedVersion;
-            InstalledVersions[this.ModInfo.Id] = ResolvedVersion;
-            DisplayVersion = ResolvedVersion?.Version?.ToString() ?? "ERR";
+            InstalledVersion = ResolvedVersion;
+            DisplayVersion = InstalledVersion?.Version?.ToString() ?? "ERR";
         }
 
         private void SelectVersion(ModVersion version)

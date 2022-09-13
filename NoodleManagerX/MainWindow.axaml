@@ -475,7 +475,6 @@
                 <!--v version v-->
                 <Grid Grid.Column="1" RowDefinitions="auto" ColumnDefinitions="auto" VerticalAlignment="Center">
                   <TextBlock Grid.Row="0" Text="{Binding DisplayVersion}" Classes="Downloaded RightText" FontSize="30"/>
-                  <!--<TextBlock Grid.Row="1" Text="{Binding DisplayResolvedVersion}" Classes="Downloaded RightText" FontSize="30"/>-->
                 </Grid>
                 <!--v download button v-->
                 <Grid Grid.Column="2" RowDefinitions="auto,auto" VerticalAlignment="Center">
@@ -507,25 +506,13 @@
                   <Button Grid.Row="0" Classes="BlankButton" Height="30" Width="30" Margin="0,5,0,0" Command="{Binding deleteCommand}">
                     <Grid>
                       <!--delete-->
-                      <Path IsVisible="{Binding Path=blacklisted, Converter={StaticResource NotConverter}}" Fill="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=DownloadedColor|NotDownloadedColor}">
+                      <Path IsVisible="{Binding Path=CanDelete}" Fill="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=DownloadedColor|NotDownloadedColor}">
                         <Path.Data>
                           <PathGeometry Figures="m 4.3031366 2.5e-6 a 0.33180552 0.33053756 0 0 0 -0.331696 0.331245 0.33180552 0.33053756 0 0 0 0 0.0093 v 0.320911 h 0.331696 3.3045512 0.331696 v -0.330213 h -5.3e-4 A 0.33180552 0.33053756 0 0 0 7.6076748 5e-7 Z m 6.9284004 0.661458 a 0.65990719 0.66145833 0 0 0 -0.0067 5.29e-4 H 0.6860016 a 0.65990719 0.66145833 0 1 0 0 1.321882 H 11.224817 a 0.65990719 0.66145833 0 1 0 0.0067 -1.322397 z m -9.9048764 1.984374 v 0.938963 2.619477 6.0864495 c 0 0.519989 0.418372 0.938445 0.938254 0.938445 h 7.3815132 c 0.5198842 0 0.9387672 -0.418456 0.9387672 -0.938445 V 6.2042745 3.5847975 2.6458345 H 9.6464278 2.2649146 Z m 1.974672 1.322918 a 0.6613901 0.66033044 0 0 1 0.670108 0.668691 V 11.22309 a 0.6613901 0.66033044 0 1 1 -1.322132 0 V 4.6374435 a 0.6613901 0.66033044 0 0 1 0.652024 -0.668691 z m 2.645813 0 a 0.6613901 0.66033044 0 0 1 0.669591 0.668691 V 11.22309 a 0.6613901 0.66033044 0 1 1 -1.321614 0 V 4.6374435 a 0.6613901 0.66033044 0 0 1 0.652023 -0.668691 z m 2.6458122 0 a 0.6613901 0.66033044 0 0 1 0.66959 0.668691 V 11.22309 a 0.6613901 0.66033044 0 1 1 -1.322129 0 V 4.6374435 a 0.6613901 0.66033044 0 0 1 0.652539 -0.668691 z" FillRule="NonZero"/>
                         </Path.Data>
                       </Path>
-                      <!--blacklist-->
-                      <Path IsVisible="{Binding blacklisted}" Fill="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=DownloadedColor|NotDownloadedColor}">
-                        <Path.Data>
-                          <PathGeometry Figures="M 25.001953 0 C 11.236215 0 -2.3684758e-15 11.236215 0 25.001953 C 0 38.76769 11.236215 49.998047 25.001953 49.998047 C 38.76769 49.998047 49.998047 38.76769 49.998047 25.001953 C 49.998047 11.236215 38.76769 4.7369516e-15 25.001953 0 z M 25.001953 6.9980469 C 34.984614 6.9980469 43 15.019292 43 25.001953 C 43 28.721636 41.887276 32.168962 39.974609 35.029297 L 14.972656 10.025391 C 17.834318 8.1113525 21.28218 6.9980469 25.001953 6.9980469 z M 10.025391 14.972656 L 35.029297 39.974609 C 32.168962 41.887276 28.721636 43 25.001953 43 C 15.019292 43 6.9980469 34.984614 6.9980469 25.001953 C 6.9980469 21.28218 8.1113525 17.834318 10.025391 14.972656 z " FillRule="NonZero"/>
-                        </Path.Data>
-                      </Path>
                     </Grid>
-                    <ToolTip.Tip>
-                      <MultiBinding Converter="{StaticResource TwoParameterPathConverter}"
-															  ConverterParameter="Blacklist|Delete|Un-Blacklist|Un-Blacklist">
-                        <Binding Path="downloaded"/>
-                        <Binding Path="blacklisted"/>
-                      </MultiBinding>
-                    </ToolTip.Tip>
+                    <ToolTip.Tip>Delete</ToolTip.Tip>
                   </Button>
                 </Grid>
               </Grid>
