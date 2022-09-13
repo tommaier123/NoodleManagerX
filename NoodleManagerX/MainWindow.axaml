@@ -11,7 +11,7 @@
         HasSystemDecorations="False"
         Icon="resm:NoodleManagerX.Assets.Included.icon-nm.ico"
         Title="NoodleManagerX"
-		FontFamily="resm:NoodleManagerX.Assets.Included?assembly=NoodleManagerX#Noto Sans">
+				FontFamily="resm:NoodleManagerX.Assets.Fonts?assembly=NoodleManagerX#Noto Sans">
 
 	<!--<Window.Background>
 		<ImageBrush Source="C:\Users\Max\Downloads\Test.jpg" Stretch="Fill" />

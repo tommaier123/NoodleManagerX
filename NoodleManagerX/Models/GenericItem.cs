@@ -106,7 +106,7 @@ namespace NoodleManagerX.Models
             {
                 if (MainViewModel.s_instance.selectedTabIndex != MainViewModel.TAB_MAPS)
                 {
-                    MainViewModel.s_instance.OpenErrorDialog("Currently only map downloading is supported");
+                    MainViewModel.s_instance.OpenErrorDialog("Currently only map and mod downloading is supported");
                     return;
                 }
 
