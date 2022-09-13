@@ -44,44 +44,59 @@ namespace NoodleManagerX.Mods
 
             foreach (var mod in availableMods)
             {
+                // For now, assume we are using the latest version (null).
+                // In the future, explicit version selection can be added here.
+                localSelection.Add(new ModVersionSelection(mod.Id, null));
+            }
+
+            return localSelection;
+        }
+
+        private Dictionary<string, ModVersion> GetLocalInstalledVersions(List<ModInfo> availableMods)
+        {
+            Dictionary<string, ModVersion> localInstalls = new();
+
+            foreach (var mod in availableMods)
+            {
                 // Check if in local items list, and if so use version from there.
                 // Default is to assume latest (null) and resolve with that
                 var localItem = MainViewModel.s_instance.localItems.FirstOrDefault(item => item.hash == mod.Id);
                 if (localItem == null)
                 {
-                    localSelection.Add(new ModVersionSelection(mod.Id, null));
+                    localInstalls[mod.Id] = null;
                 }
                 else
                 {
                     if (localItem.ItemVersion == null)
                     {
-                        localSelection.Add(new ModVersionSelection(mod.Id, null));
+                        localInstalls[mod.Id] = null;
                     }
                     else
                     {
-                        var selectedVersion = mod.Versions.FirstOrDefault(v => localItem.ItemVersion.ComparePrecedenceTo(v.Version) == 0);
-                        if (selectedVersion == null)
+                        ModVersion localVersion = mod.Versions.FirstOrDefault(v => localItem.ItemVersion.ComparePrecedenceTo(v.Version) == 0);
+                        if (localVersion == null)
                         {
-                            MainViewModel.Log($"Locally selected version {localItem.ItemVersion} not found in mod list for mod {mod.Id}. Defaulting to latest");
-                            localSelection.Add(new ModVersionSelection(mod.Id, null));
+                            MainViewModel.Log($"Locally installed version {localItem.ItemVersion} not found in mod list for mod {mod.Id}. Defaulting to null (not installed)");
+                            localInstalls[mod.Id] = null;
                         }
                         else
                         {
-                            localSelection.Add(new ModVersionSelection(mod.Id, selectedVersion));
+                            localInstalls[mod.Id] = localVersion;
                         }
                     }
                 }
             }
 
-            return localSelection;
+            return localInstalls;
         }
-        
+
         public async override Task GetPage()
         {
             var mods = await GetAvailableMods();
             Console.WriteLine($"{mods.Count} mods loaded");
 
             var localSelection = GetLocalSelection(mods);
+            var localVersions = GetLocalInstalledVersions(mods);
 
             var dependencyGraph = new ModDependencyGraph();
             dependencyGraph.LoadMods(mods);
@@ -92,7 +107,7 @@ namespace NoodleManagerX.Mods
                 var modItems = mods.Select(
                     mod => new ModItem(
                         mod,
-                        localSelection.FirstOrDefault(selection => selection.ModId == mod.Id)?.ModVersion,
+                        localVersions,
                         dependencyGraph.ResolvedVersions
                     )
                 );
