@@ -66,8 +66,8 @@ namespace NoodleManagerX.Models
                     // Version is located within filename. Filename is always {modId}_{version}.synthmod
                     var modItem = (ModItem)item;
                     var isSameVersion = ItemVersion == null ||
-                        modItem.SelectedVersion?.Version == null ||
-                        ItemVersion.ComparePrecedenceTo(modItem.SelectedVersion?.Version) == 0;
+                        modItem.InstalledVersion?.Version == null ||
+                        ItemVersion.ComparePrecedenceTo(modItem.InstalledVersion?.Version) == 0;
                     return hash == modItem.ModInfo?.Id && isSameVersion;
                 }
                 else

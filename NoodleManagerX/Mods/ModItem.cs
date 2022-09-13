@@ -30,11 +30,12 @@ namespace NoodleManagerX.Mods
         public override string target { get; set; } = "Mods";
         public override ItemType itemType { get; set; } = ItemType.Mod;
 
+        private Dictionary<string, ModVersion> InstalledVersions { get; set; }
         private Dictionary<string, ModVersion> ResolvedVersions { get; set; }
 
         [DataMember] public ModInfo ModInfo { get; private set; }
         [DataMember] public ModVersion SelectedVersion { get; private set; }
-        [Reactive] public string DisplaySelectedVersion { get; private set; }
+        [Reactive] public string DisplayVersion { get; private set; }
         
         [DataMember]
         public ModVersion ResolvedVersion
@@ -45,12 +46,22 @@ namespace NoodleManagerX.Mods
             }
         }
 
+        [DataMember]
+        public ModVersion InstalledVersion
+        {
+            get
+            {
+                return InstalledVersions[ModInfo.Id];
+            }
+        }
 
-        public ModItem(ModInfo modInfo, ModVersion selectedVersion, Dictionary<string, ModVersion> resolvedVersions)
+
+        public ModItem(ModInfo modInfo, Dictionary<string, ModVersion> installedVersions, Dictionary<string, ModVersion> resolvedVersions)
         {
             this.ModInfo = modInfo;
+            this.InstalledVersions = installedVersions;
             this.ResolvedVersions = resolvedVersions;
-            SelectVersion(selectedVersion);
+            SelectVersion(InstalledVersion);
 
             this.name = modInfo.Name;
             this.description = modInfo.Description;
@@ -82,7 +93,7 @@ namespace NoodleManagerX.Mods
             if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
             {
                 blacklisted = false;
-                SelectResolvedVersionForDownload();
+                UpdateInstalledVersionOnDownload();
                 DownloadScheduler.Download(this);
             }
         }
@@ -145,13 +156,13 @@ namespace NoodleManagerX.Mods
 
                 if (!await ExtractModFilesToSynthDir(path))
                 {
-                    DisplaySelectedVersion = "---";
+                    DisplayVersion = "---";
                     path = "";
                 }
             }
             catch (Exception e)
             {
-                DisplaySelectedVersion = "---";
+                DisplayVersion = "---";
                 MainViewModel.Log(MethodBase.GetCurrentMethod(), e);
             }
 
@@ -269,7 +280,7 @@ namespace NoodleManagerX.Mods
                     }
 
                     // Delete orphaned dependencies
-                    foreach (var dependency in SelectedVersion.Dependencies)
+                    foreach (var dependency in InstalledVersion.Dependencies)
                     {
                         var isDepOrphaned = MainViewModel.s_instance.mods.FirstOrDefault(mod => {
                             if (mod.ModInfo.Id == ModInfo.Id)
@@ -278,14 +289,7 @@ namespace NoodleManagerX.Mods
                                 return false;
                             }
 
-                            if (mod.SelectedVersion != null)
-                            {
-                                return mod.SelectedVersion.HasDependency(dependency);
-                            }
-                            else
-                            {
-                                return mod.ResolvedVersion?.HasDependency(dependency) ?? false;
-                            }
+                            return mod.InstalledVersion?.HasDependency(dependency) ?? false;
                         }) == null;
                         if (isDepOrphaned)
                         {
@@ -305,19 +309,20 @@ namespace NoodleManagerX.Mods
             return false;
         }
 
-        private void SelectResolvedVersionForDownload()
+        private void UpdateInstalledVersionOnDownload()
         {
             SelectedVersion = ResolvedVersion;
-            DisplaySelectedVersion = ResolvedVersion?.Version?.ToString() ?? "ERR";
+            InstalledVersions[this.ModInfo.Id] = ResolvedVersion;
+            DisplayVersion = ResolvedVersion?.Version?.ToString() ?? "ERR";
         }
 
         private void SelectVersion(ModVersion version)
         {
             SelectedVersion = version;
-            DisplaySelectedVersion = SelectedVersionToDisplayString(SelectedVersion);
+            DisplayVersion = VersionToDisplayString(version);
         }
 
-        public string SelectedVersionToDisplayString(ModVersion selectedVersion)
+        public string VersionToDisplayString(ModVersion version)
         {
             var localItem = MainViewModel.s_instance.localItems.FirstOrDefault(item => item.CheckEquality(this));
             if (localItem == null)
@@ -332,23 +337,11 @@ namespace NoodleManagerX.Mods
             }
 
             var displayed = localItem.ItemVersion.ToString();
-            if (localItem.ItemVersion.ComparePrecedenceTo(selectedVersion?.Version) != 0)
+            if (localItem.ItemVersion.ComparePrecedenceTo(version?.Version) != 0)
             {
                 displayed += "*";
             }
             return displayed;
-        }
-
-        public string DisplayResolvedVersion
-        {
-            get
-            {
-                if (this.ResolvedVersion?.Version == null)
-                {
-                    return "---";
-                }
-                return this.ResolvedVersion.Version.ToString();
-            }
         }
     }
 }
