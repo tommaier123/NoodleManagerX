@@ -295,6 +295,10 @@ namespace NoodleManagerX.Mods
 
         private void DeleteOrphanedDependencies(ModVersion installedVersion)
         {
+            if (installedVersion == null)
+            {
+                MainViewModel.Log($"Installed version is null for mod '{ModInfo.Id}', cannot delete orphaned dependencies");
+            }
             foreach (var dependency in installedVersion.Dependencies)
             {
                 var isDepOrphaned = MainViewModel.s_instance.mods.FirstOrDefault(mod => {
@@ -337,20 +341,13 @@ namespace NoodleManagerX.Mods
 
         public string VersionToDisplayString(ModVersion version)
         {
-            var localItem = MainViewModel.s_instance.localItems.FirstOrDefault(item => item.CheckEquality(this));
-            if (localItem == null)
+            if (version?.Version == null)
             {
-                // Not installed
                 return "---";
             }
 
-            if (localItem.ItemVersion == null)
-            {
-                return "Latest";
-            }
-
-            var displayed = localItem.ItemVersion.ToString();
-            if (localItem.ItemVersion.ComparePrecedenceTo(version?.Version) != 0)
+            var displayed = version.Version.ToString();
+            if (ResolvedVersion.Version.ComparePrecedenceTo(version?.Version) != 0)
             {
                 displayed += "*";
             }
