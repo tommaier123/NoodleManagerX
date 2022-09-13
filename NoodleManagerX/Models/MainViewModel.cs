@@ -217,7 +217,7 @@ namespace NoodleManagerX.Models
                 {
                     if (selectedTabIndex != TAB_MAPS)
                     {
-                        OpenErrorDialog("Currently only map downloading is supported");
+                        OpenErrorDialog("Currently only map and mod downloading is supported");
                         return;
                     }
 
@@ -503,7 +503,7 @@ namespace NoodleManagerX.Models
         {
             if (selectedTabIndex != TAB_MAPS)
             {
-                OpenErrorDialog("Currently only map downloading is supported");
+                OpenErrorDialog("Currently only map and mod downloading is supported");
                 return Task.CompletedTask;
             }
 

@@ -35,6 +35,8 @@
     <EmbeddedResource Include="Assets\Included\*.ttf" />
 	  <EmbeddedResource Include="Assets\Included\*.svg" />
 	  <None Remove="Resources\classdata.tpk" />
+	  <EmbeddedResource Include="Assets\Fonts\NotoSans-Bold.ttf" />
+	  <EmbeddedResource Include="Assets\Fonts\NotoSans-Regular.ttf" />
     <EmbeddedResource Include="Assets\Included\icon-nm.ico" />
   </ItemGroup>
 	<ItemGroup Condition="'$(RuntimeIdentifier)'=='win-x64'or'$(Configuration)'=='DEBUG'">

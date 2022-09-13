@@ -1,5 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using NoodleManagerX.Models;
+using System;
 using System.Threading.Tasks;
 
 namespace MsgBox
@@ -27,7 +29,7 @@ namespace MsgBox
             AvaloniaXamlLoader.Load(this);
         }
 
-        public static Task<MessageBoxResult> Show(Window parent, string text, string title, MessageBoxButtons buttons)
+        public static async Task<MessageBoxResult> Show(Window parent, string text, string title, MessageBoxButtons buttons)
         {
             var msgbox = new MessageBox()
             {
@@ -65,10 +67,23 @@ namespace MsgBox
 
             var tcs = new TaskCompletionSource<MessageBoxResult>();
             msgbox.Closed += delegate { tcs.TrySetResult(res); };
-            if (parent != null)
-                msgbox.ShowDialog(parent);
-            else msgbox.Show();
-            return tcs.Task;
+            try
+            {
+                if (parent != null)
+                {
+                    await msgbox.ShowDialog(parent);
+                }
+                else
+                {
+                    msgbox.Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                MainViewModel.Log(ex.Message);
+            }
+
+            return await tcs.Task;
         }
 
 
