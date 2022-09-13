@@ -27,6 +27,8 @@ namespace NoodleManagerX.Mods
         public override string folder { get; set; } = "Mods";
         public override string[] extensions { get; set; } = { ".synthmod" };
 
+        private Dictionary<string, ModVersion> installedVersions = new();
+
         public override dynamic DeserializePage(string json)
         {
             return JsonConvert.DeserializeObject<ModPage>(json);
@@ -96,7 +98,7 @@ namespace NoodleManagerX.Mods
             Console.WriteLine($"{mods.Count} mods loaded");
 
             var localSelection = GetLocalSelection(mods);
-            var localVersions = GetLocalInstalledVersions(mods);
+            installedVersions = GetLocalInstalledVersions(mods);
 
             var dependencyGraph = new ModDependencyGraph();
             dependencyGraph.LoadMods(mods);
@@ -107,7 +109,7 @@ namespace NoodleManagerX.Mods
                 var modItems = mods.Select(
                     mod => new ModItem(
                         mod,
-                        localVersions,
+                        installedVersions[mod.Id],
                         dependencyGraph.ResolvedVersions
                     )
                 );
@@ -127,6 +129,51 @@ namespace NoodleManagerX.Mods
             else
             {
                 MainViewModel.s_instance.OpenErrorDialog("Failed to resolve mod dependencies");
+            }
+        }
+
+        public ModVersion GetInstalledVersion(string modId)
+        {
+            return installedVersions.GetValueOrDefault(modId);
+        }
+
+        public void UpdateInstalledVersion(string modId, ModVersion installedVersion)
+        {
+            installedVersions[modId] = installedVersion;
+        }
+
+        public bool IsAnInstalledDependency(string checkedModId)
+        {
+            foreach (var modId in installedVersions.Keys)
+            {
+                // Skip ourselves
+                if (modId == checkedModId)
+                {
+                    continue;
+                }
+
+                var version = installedVersions[modId];
+                // Skip uninstalled mods
+                if (version == null)
+                {
+                    continue;
+                }
+
+                // Installed and depends on this mod
+                if (version.HasDependency(checkedModId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void RefreshUI()
+        {
+            foreach (var modItem in MainViewModel.s_instance.mods)
+            {
+                modItem.RefreshDeleteStatus();
             }
         }
 

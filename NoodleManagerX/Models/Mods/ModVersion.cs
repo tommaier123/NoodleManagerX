@@ -24,11 +24,11 @@ namespace NoodleManagerX.Models.Mods
         public List<ModDependencyInfo> Dependencies { get; set; } = new List<ModDependencyInfo>();
 
         // TODO make this nested. Assumes max depth of 1 for dependencies right now
-        public bool HasDependency(ModDependencyInfo dep)
+        public bool HasDependency(string dependencyModId)
         {
             foreach (var dependency in this.Dependencies)
             {
-                if (dep.Id == dependency.Id)
+                if (dependencyModId == dependency.Id)
                 {
                     return true;
                 }
