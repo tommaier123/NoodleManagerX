@@ -96,6 +96,11 @@ namespace NoodleManagerX.Models
             }
         }
 
+        public static string GetFullComputerPath(string pathRelativeToSynthDir)
+        {
+            return Path.Combine(MainViewModel.s_instance.settings.synthDirectory, pathRelativeToSynthDir);
+        }
+
         public static void DeleteFile(string path)
         {
             if (MtpDevice.connected)
