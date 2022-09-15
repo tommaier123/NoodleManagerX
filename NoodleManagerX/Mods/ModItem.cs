@@ -202,7 +202,9 @@ namespace NoodleManagerX.Mods
                                 if (StorageAbstraction.FileExists(entry.FullName))
                                 {
                                     MainViewModel.Log($"WARNING: Overwriting {entry.FullName}");
-                                    await StorageAbstraction.WriteFile(await CopyStreamToMemoryStream(stream, false), entry.FullName);
+                                    // TODO use a more generic function once modding is supported on Oculus
+                                    var fullPath = StorageAbstraction.GetFullComputerPath(entry.FullName);
+                                    entry.ExtractToFile(fullPath, true);
                                 }
                                 else
                                 {
@@ -215,7 +217,9 @@ namespace NoodleManagerX.Mods
                                     else
                                     {
                                         MainViewModel.Log($"Extracting file {entry.FullName}");
-                                        await StorageAbstraction.WriteFile(await CopyStreamToMemoryStream(stream, false), entry.FullName);
+                                        // TODO use a more generic function once modding is supported on Oculus
+                                        var fullPath = StorageAbstraction.GetFullComputerPath(entry.FullName);
+                                        entry.ExtractToFile(fullPath);
                                     }
                                 }
                             }
