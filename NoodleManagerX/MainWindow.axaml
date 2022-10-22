@@ -49,7 +49,7 @@
 		<SolidColorBrush x:Key="TabActiveColor" Color="#f91c85"/>
 		<SolidColorBrush x:Key="TabInactiveColor" Color="#aa49e0"/>
 		<SolidColorBrush x:Key="ControlHeaderColor" Color="#c0322680"/>
-		<SolidColorBrush x:Key="ControlColor" Color="Red"/>
+		<SolidColorBrush x:Key="ControlColor" Color="white"/>
 		<SolidColorBrush x:Key="ConnectedColor" Color="#ffffff"/>
 		<SolidColorBrush x:Key="NotConnectedColor" Color="#888888"/>
 		<SolidColorBrush x:Key="CaretColor" Color="#ff00ff"/>

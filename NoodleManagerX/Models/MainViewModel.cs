@@ -54,7 +54,7 @@ namespace NoodleManagerX.Models
         public const int TAB_AVATARS = 3;
         public const int TAB_MODS = 4;
 
-        [Reactive] private string version { get; set; } = "V1.0.0";
+        [Reactive] private string version { get; set; } = "V1.1.0";
 
         public static MainViewModel s_instance;
 
