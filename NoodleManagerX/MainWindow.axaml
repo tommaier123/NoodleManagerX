@@ -29,7 +29,7 @@
 		<converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
 		<converters:NotConverter x:Key="NotConverter"/>
 
-		<Color x:Key="ThemeBackgroundColor">#FF282828</Color>
+		<Color x:Key="ThemeBackgroundColor">#FF202020</Color>
 		<Color x:Key="ThemeBorderLowColor">#FF505050</Color>
 		<Color x:Key="ThemeBorderMidColor">#FF808080</Color>
 		<Color x:Key="ThemeBorderHighColor">#FFA0A0A0</Color>
@@ -44,11 +44,11 @@
 		<Color x:Key="ThemeForegroundColor">#FFDEDEDE</Color>
 		<Color x:Key="HighlightColor">#FF119EDA</Color>
 
-		<SolidColorBrush x:Key="TabBarColor" Color="#c0000000"/>
+		<SolidColorBrush x:Key="TabBarColor" Color="black"/>
 		<SolidColorBrush x:Key="WindowControlColor" Color="#ffffff"/>
 		<SolidColorBrush x:Key="TabActiveColor" Color="#f91c85"/>
 		<SolidColorBrush x:Key="TabInactiveColor" Color="#aa49e0"/>
-		<SolidColorBrush x:Key="ControlHeaderColor" Color="#c0322680"/>
+		<SolidColorBrush x:Key="ControlHeaderColor" Color="#ff322680"/>
 		<SolidColorBrush x:Key="ControlColor" Color="white"/>
 		<SolidColorBrush x:Key="ConnectedColor" Color="#ffffff"/>
 		<SolidColorBrush x:Key="NotConnectedColor" Color="#888888"/>
