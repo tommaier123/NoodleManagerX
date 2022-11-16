@@ -26,7 +26,7 @@ namespace NoodleManagerX.Mods
     [DataContract]
     class ModItem : GenericItem
     {
-        public static string baseDownloadUrl = "https://raw.githubusercontent.com/bookdude13/SRModsList/dev/SynthRiders/Downloads";
+        public static string baseDownloadUrl = "https://raw.githubusercontent.com/bookdude13/SRModsList/master/SynthRiders/Downloads";
         public override string target { get; set; } = "Mods";
         public override ItemType itemType { get; set; } = ItemType.Mod;
 
@@ -132,6 +132,7 @@ namespace NoodleManagerX.Mods
             try
             {
                 string url = baseDownloadUrl + "/" + modVersion.DownloadUrl;
+                MainViewModel.Log($"Downloading from {url}");
 
                 using HttpClient client = new HttpClient();
                 using var rawResponse = await client.GetStreamAsync(url);
