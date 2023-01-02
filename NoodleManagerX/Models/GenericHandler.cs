@@ -33,7 +33,7 @@ namespace NoodleManagerX.Models
         public virtual string selectDownloadAll { get; set; } = "id,download_url,published_at,updated_at,filename,";
         public virtual string selectDownload { get; set; } = "";
 
-        public async Task LoadLocalItems()
+        public virtual async Task LoadLocalItems()
         {
             try
             {

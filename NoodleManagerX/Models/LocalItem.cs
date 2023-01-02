@@ -3,6 +3,7 @@ using NoodleManagerX.Mods;
 using Semver;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,6 +70,12 @@ namespace NoodleManagerX.Models
                         modItem.InstalledVersion?.Version == null ||
                         ItemVersion.ComparePrecedenceTo(modItem.InstalledVersion?.Version) == 0;
                     return hash == modItem.ModInfo?.Id && isSameVersion;
+                }
+                else if (itemType == ItemType.Playlist)
+                {
+                    // The hash is set to the playlistName from within the playlist file.
+                    // This matches the GenericItem.name field when pulling from the Z site
+                    return hash == item.name;
                 }
                 else
                 {

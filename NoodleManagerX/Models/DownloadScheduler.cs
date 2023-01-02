@@ -25,7 +25,7 @@ namespace NoodleManagerX.Models
 
         public static void Download(GenericItem item)
         {
-            var supportedDownloadTypes = new HashSet<ItemType> { ItemType.Map, ItemType.Mod };
+            var supportedDownloadTypes = new HashSet<ItemType> { ItemType.Map, ItemType.Mod, ItemType.Playlist };
             if (supportedDownloadTypes.Contains(item.itemType) && !item.blacklisted)
             {
                 toDownload++;
@@ -34,7 +34,7 @@ namespace NoodleManagerX.Models
             }
             else
             {
-                Console.WriteLine("Not queueing item since it's not a map or mod");
+                Console.WriteLine("Not queueing item since it's not a map, playlist or mod");
             }
         }
 
