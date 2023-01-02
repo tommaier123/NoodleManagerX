@@ -104,7 +104,7 @@ namespace NoodleManagerX.Models
         {
             downloadCommand = ReactiveCommand.Create((() =>
             {
-                if (MainViewModel.s_instance.selectedTabIndex != MainViewModel.TAB_MAPS)
+                if (!MainViewModel.s_instance.SelectedTabSupportsDownload())
                 {
                     MainViewModel.s_instance.OpenErrorDialog("Currently only map and mod downloading is supported");
                     return;

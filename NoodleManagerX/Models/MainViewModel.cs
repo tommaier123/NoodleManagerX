@@ -6,6 +6,7 @@ using DynamicData;
 using Microsoft.Win32;
 using MsgBox;
 using Newtonsoft.Json;
+using NoodleManagerX.Models.Playlists;
 using NoodleManagerX.Mods;
 using NoodleManagerX.Utils;
 using ReactiveUI;
@@ -215,9 +216,9 @@ namespace NoodleManagerX.Models
 
                 getPageCommand = ReactiveCommand.Create(() =>
                 {
-                    if (selectedTabIndex != TAB_MAPS)
+                    if (!SelectedTabSupportsDownload())
                     {
-                        OpenErrorDialog("Currently only map and mod downloading is supported");
+                        OpenErrorDialog("Currently only map, playlist and mod downloading is supported");
                         return;
                     }
 
@@ -501,9 +502,9 @@ namespace NoodleManagerX.Models
 
         public Task GetAll()
         {
-            if (selectedTabIndex != TAB_MAPS)
+            if (!SelectedTabSupportsDownload())
             {
-                OpenErrorDialog("Currently only map and mod downloading is supported");
+                OpenErrorDialog("Currently only map, playlist and mod downloading is supported");
                 return Task.CompletedTask;
             }
 
@@ -728,6 +729,12 @@ namespace NoodleManagerX.Models
                 }
                 catch (Exception e) { Log(MethodBase.GetCurrentMethod(), e); }
             });
+        }
+
+        public bool SelectedTabSupportsDownload()
+        {
+            // Mods are handled special
+            return selectedTabIndex == TAB_MAPS || selectedTabIndex == TAB_PLAYLISTS;
         }
 
         public Task SaveSettings()
