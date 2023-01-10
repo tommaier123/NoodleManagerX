@@ -1,4 +1,5 @@
 ﻿using NoodleManagerX.Models.Mods;
+using NoodleManagerX.Models.Stages;
 using NoodleManagerX.Mods;
 using Semver;
 using System;
@@ -76,6 +77,12 @@ namespace NoodleManagerX.Models
                     // The hash is set to the playlistName from within the playlist file.
                     // This matches the GenericItem.name field when pulling from the Z site
                     return hash == item.name;
+                }
+                else if (itemType == ItemType.Stage)
+                {
+                    // Consider them equal if the local filename matches _any_ of the stage's files
+                    var stageItem = (StageItem)item;
+                    return stageItem.Files.Where(fileInfo => fileInfo.File.Filename == filename).Any();
                 }
                 else
                 {
