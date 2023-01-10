@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using MsgBox;
 using Newtonsoft.Json;
 using NoodleManagerX.Models.Playlists;
+using NoodleManagerX.Models.Stages;
 using NoodleManagerX.Mods;
 using NoodleManagerX.Utils;
 using ReactiveUI;
@@ -218,7 +219,7 @@ namespace NoodleManagerX.Models
                 {
                     if (!SelectedTabSupportsDownload())
                     {
-                        OpenErrorDialog("Currently only map, playlist and mod downloading is supported");
+                        OpenErrorDialog("Currently only map, playlist, stage and mod downloading is supported");
                         return;
                     }
 
@@ -504,7 +505,7 @@ namespace NoodleManagerX.Models
         {
             if (!SelectedTabSupportsDownload())
             {
-                OpenErrorDialog("Currently only map, playlist and mod downloading is supported");
+                OpenErrorDialog("Currently only map, playlist, stage and mod downloading is supported");
                 return Task.CompletedTask;
             }
 
@@ -734,7 +735,7 @@ namespace NoodleManagerX.Models
         public bool SelectedTabSupportsDownload()
         {
             // Mods are handled special
-            return selectedTabIndex == TAB_MAPS || selectedTabIndex == TAB_PLAYLISTS;
+            return selectedTabIndex == TAB_MAPS || selectedTabIndex == TAB_PLAYLISTS || selectedTabIndex == TAB_STAGES;
         }
 
         public Task SaveSettings()

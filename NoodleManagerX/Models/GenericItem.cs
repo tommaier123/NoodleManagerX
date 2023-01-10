@@ -142,7 +142,7 @@ namespace NoodleManagerX.Models
             }));
         }
 
-        public async Task UpdateDownloaded(bool forceUpdate = false)
+        public virtual async Task UpdateDownloaded(bool forceUpdate = false)
         {
             List<LocalItem> tmp = MainViewModel.s_instance.localItems.Where(x => x != null && x.CheckEquality(this)).ToList();
 
@@ -189,7 +189,7 @@ namespace NoodleManagerX.Models
             }
         }
 
-        public void UpdateBlacklisted()
+        public virtual void UpdateBlacklisted()
         {
             if (!String.IsNullOrEmpty(filename) && MainViewModel.s_instance.blacklist.Contains(filename))
             {
@@ -237,6 +237,11 @@ namespace NoodleManagerX.Models
             return path;
         }
 
+        public virtual void RemoveFromLocalItems()
+        {
+            MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this) == false).ToList();
+        }
+
         public async Task Download()
         {
             string path = "";
@@ -245,8 +250,7 @@ namespace NoodleManagerX.Models
             {
                 if (downloaded)
                 {
-                    //remove from local items
-                    MainViewModel.s_instance.localItems = MainViewModel.s_instance.localItems.Where(x => x.CheckEquality(this) == false).ToList();
+                    RemoveFromLocalItems();
                 }
 
                 _ = Dispatcher.UIThread.InvokeAsync(() =>
@@ -303,7 +307,7 @@ namespace NoodleManagerX.Models
             return ms;
         }
 
-        public void Delete()
+        public virtual void Delete()
         {
             if (Delete(filename))
             {
