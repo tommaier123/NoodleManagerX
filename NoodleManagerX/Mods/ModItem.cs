@@ -26,7 +26,7 @@ namespace NoodleManagerX.Mods
     [DataContract]
     class ModItem : GenericItem
     {
-        public static string baseDownloadUrl = "https://raw.githubusercontent.com/bookdude13/SRModsList/master/SynthRiders/Downloads";
+        public static string baseDownloadUrl = ModDownloadSource.GetModItemBaseDownloadUrl();
         public override string target { get; set; } = "Mods";
         public override ItemType itemType { get; set; } = ItemType.Mod;
 

@@ -23,7 +23,7 @@ namespace NoodleManagerX.Mods
     class ModHandler : GenericHandler
     {
         public override ItemType itemType { get; set; } = ItemType.Mod;
-        public override string apiEndpoint { get; set; } = "https://raw.githubusercontent.com/bookdude13/SRModsList/master/SynthRiders";
+        public override string apiEndpoint { get; set; } = ModDownloadSource.GetModsBaseUrl();
         public override string folder { get; set; } = "Mods";
         public override string[] extensions { get; set; } = { ".synthmod" };
 
