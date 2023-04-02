@@ -23,7 +23,9 @@ namespace NoodleManagerX.Mods
     class ModHandler : GenericHandler
     {
         public override ItemType itemType { get; set; } = ItemType.Mod;
-        public override string apiEndpoint { get; set; } = ModDownloadSource.GetModsBaseUrl();
+
+        // Note - this is required to override, but to get the url based on the beta flag it is directly accessed later
+        public override string apiEndpoint { get; set; } = "";
         public override string folder { get; set; } = "Mods";
         public override string[] extensions { get; set; } = { ".synthmod" };
 
@@ -237,7 +239,8 @@ namespace NoodleManagerX.Mods
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string requestUrl = apiEndpoint + "/mods.json";
+                    string requestUrl = ModDownloadSource.GetModsBaseUrl() + "/mods.json";
+                    MainViewModel.Log($"Getting mod list from {requestUrl}");
                     string rawResponse = await client.GetStringAsync(requestUrl);
                     if (MainViewModel.s_instance.apiRequestCounter != requestID)
                     {
