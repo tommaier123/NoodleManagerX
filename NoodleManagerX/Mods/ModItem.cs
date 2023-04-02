@@ -26,7 +26,6 @@ namespace NoodleManagerX.Mods
     [DataContract]
     class ModItem : GenericItem
     {
-        public static string baseDownloadUrl = ModDownloadSource.GetModItemBaseDownloadUrl();
         public override string target { get; set; } = "Mods";
         public override ItemType itemType { get; set; } = ItemType.Mod;
 
@@ -131,7 +130,7 @@ namespace NoodleManagerX.Mods
 
             try
             {
-                string url = baseDownloadUrl + "/" + modVersion.DownloadUrl;
+                string url = ModDownloadSource.GetModItemBaseDownloadUrl() + "/" + modVersion.DownloadUrl;
                 MainViewModel.Log($"Downloading from {url}");
 
                 using HttpClient client = new HttpClient();
