@@ -95,7 +95,13 @@ namespace NoodleManagerX.Mods
             if (StorageAbstraction.CanDownload() && !MainViewModel.s_instance.updatingLocalItems)
             {
                 blacklisted = false;
-                UpdateInstalledVersionOnDownload();
+                
+                // Delete existing files first to clean things up, then download.
+                // This allows for file deletions between versions
+                TryDelete();
+
+                SelectedVersion = ResolvedVersion;
+
                 DownloadScheduler.Download(this);
             }
         }
@@ -106,7 +112,7 @@ namespace NoodleManagerX.Mods
             {
                 if (downloaded && CanDelete)
                 {
-                    Task.Run(Delete);
+                    Delete();
                 }
             }
         }
@@ -136,11 +142,8 @@ namespace NoodleManagerX.Mods
                 using HttpClient client = new HttpClient();
                 using var rawResponse = await client.GetStreamAsync(url);
                 using MemoryStream str = await CopyStreamToMemoryStream(rawResponse);
-                if (String.IsNullOrEmpty(filename))
-                {
-                    filename = modVersion.DownloadUrl.Split("/").Last();
-                }
 
+                filename = modVersion.DownloadUrl.Split("/").Last();
                 path = Path.Combine(target, filename);
                 await StorageAbstraction.WriteFile(str, path);
 
@@ -174,6 +177,8 @@ namespace NoodleManagerX.Mods
                 MainViewModel.Log($"Failed to download and save base file for mod {ModInfo.Id}");
                 return "";
             }
+
+            UpdateInstalledVersionOnDownload();
 
             ((ModHandler)handler).RefreshUI();
 
@@ -302,11 +307,12 @@ namespace NoodleManagerX.Mods
             if (installedVersion == null)
             {
                 MainViewModel.Log($"Installed version is null for mod '{ModInfo.Id}', cannot delete orphaned dependencies");
+                return;
             }
             foreach (var dependency in installedVersion.Dependencies)
             {
                 var isDepOrphaned = MainViewModel.s_instance.mods.FirstOrDefault(mod => {
-                    if (mod.ModInfo.Id == ModInfo.Id)
+                    if (mod.ModInfo.Id == ModInfo.Id) 
                     {
                         // Ignore ourselves
                         return false;
@@ -332,7 +338,6 @@ namespace NoodleManagerX.Mods
 
         private void UpdateInstalledVersionOnDownload()
         {
-            SelectedVersion = ResolvedVersion;
             InstalledVersion = ResolvedVersion;
             DisplayVersion = InstalledVersion?.Version?.ToString() ?? "ERR";
         }
