@@ -83,6 +83,10 @@ namespace NoodleManagerX.Models.Stages
                 }
             }
 
+            if (expectedFiles.Count == 0)
+            {
+                visible = false;
+            }
             if (numDownloaded == expectedFiles.Count)
             {
                 await Dispatcher.UIThread.InvokeAsync(() =>

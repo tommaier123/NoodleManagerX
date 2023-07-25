@@ -43,6 +43,7 @@ namespace NoodleManagerX.Models
         [Reactive] public bool downloaded { get; set; } = false;
         [Reactive] public bool blacklisted { get; set; } = false;
         [Reactive] public bool needsUpdate { get; set; } = false;
+        [Reactive] public bool visible { get; set; } = true;
         [DataMember] public string name { get; set; }
         [DataMember] public User user { get; set; }
         public GenericHandler handler

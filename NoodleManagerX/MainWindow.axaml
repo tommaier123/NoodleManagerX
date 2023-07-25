@@ -176,6 +176,7 @@
 			<Setter Property="Padding" Value="0"/>
 			<Setter Property="IsSelected" Value="{Binding selected, Mode=TwoWay}"/>
 			<Setter Property="FocusAdorner" Value="{x:Null}"/>
+			<Setter Property="IsVisible" Value="{Binding Path=visible}"/>
 			<Setter Property="ContextMenu">
 				<Setter.Value>
 					<ContextMenu Background="{StaticResource BackgroundColor}" IsVisible="{Binding Path=description, Converter={StaticResource StringToBoolConverter}}">
@@ -184,11 +185,7 @@
 				</Setter.Value>
 			</Setter>
 		</Style>
-    <Style Selector="ListBox.MyListBox ListBoxItem">
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="IsSelected" Value="{Binding selected, Mode=TwoWay}"/>
-      <Setter Property="FocusAdorner" Value="{x:Null}"/>
-    </Style>
+
 		<Style Selector="ListBox.MyListBox ItemsPresenter">
 			<Setter Property="Margin" Value="0"/>
 		</Style>
