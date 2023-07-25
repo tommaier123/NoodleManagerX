@@ -735,7 +735,7 @@ namespace NoodleManagerX.Models
         public bool SelectedTabSupportsDownload()
         {
             // Mods are handled special
-            return selectedTabIndex == TAB_MAPS || selectedTabIndex == TAB_PLAYLISTS || selectedTabIndex == TAB_STAGES;
+            return selectedTabIndex == TAB_MAPS || selectedTabIndex == TAB_PLAYLISTS || selectedTabIndex == TAB_STAGES || (selectedTabIndex == TAB_AVATARS && !MtpDevice.connected);
         }
 
         public Task SaveSettings()

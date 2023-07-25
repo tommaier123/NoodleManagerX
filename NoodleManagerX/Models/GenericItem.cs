@@ -37,6 +37,7 @@ namespace NoodleManagerX.Models
         [DataMember] public int downvote_count { get; set; }
         [DataMember] public string description { get; set; }
         [DataMember] public string filename { get; set; }
+        [DataMember] public string filename_original { get; set; }
         [Reactive] public Bitmap cover_bmp { get; set; }
         [Reactive] public bool selected { get; set; }
         [Reactive] public bool downloading { get; set; } = false;
@@ -81,7 +82,7 @@ namespace NoodleManagerX.Models
         public int downloadAttempts = 0;
 
 
-        public GenericItem() 
+        public GenericItem()
         {
             SetupCommands();
         }
@@ -97,6 +98,8 @@ namespace NoodleManagerX.Models
 
                 updatedAt = DateTime.Parse(published_at, null, System.Globalization.DateTimeStyles.RoundtripKind);
 
+                if (String.IsNullOrEmpty(filename)) { filename = filename_original; }
+
                 SetupCommands();
             });
         }
@@ -107,7 +110,7 @@ namespace NoodleManagerX.Models
             {
                 if (!MainViewModel.s_instance.SelectedTabSupportsDownload())
                 {
-                    MainViewModel.s_instance.OpenErrorDialog("Currently only map and mod downloading is supported");
+                    MainViewModel.s_instance.OpenErrorDialog("Currently not supported");
                     return;
                 }
 

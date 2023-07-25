@@ -25,7 +25,7 @@ namespace NoodleManagerX.Models
 
         public static void Download(GenericItem item)
         {
-            var supportedDownloadTypes = new HashSet<ItemType> { ItemType.Map, ItemType.Mod, ItemType.Playlist, ItemType.Stage };
+            var supportedDownloadTypes = new HashSet<ItemType> { ItemType.Map, ItemType.Mod, ItemType.Playlist, ItemType.Stage, ItemType.Avatar };
             if (supportedDownloadTypes.Contains(item.itemType) && !item.blacklisted)
             {
                 toDownload++;

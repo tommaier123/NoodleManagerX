@@ -536,9 +536,11 @@
 			<Button Grid.Column="3" Classes="BlankButton Tab" Content="STAGES" Command="{Binding tabSelectCommand}" CommandParameter="2"
 					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=2}"/>
 			<Button Grid.Column="4" Classes="BlankButton Tab" Content="AVATARS" Command="{Binding tabSelectCommand}" CommandParameter="3"
-					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=3}"/>
+					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=3}"
+					IsVisible="{Binding Path=questConnected, Converter={StaticResource NotConverter}}"/>
 			<Button Grid.Column="5" Classes="BlankButton Tab" Content="MODS" Command="{Binding tabSelectCommand}" CommandParameter="4"
-					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=4}"/>
+					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=4}"
+					IsVisible="{Binding Path=questConnected, Converter={StaticResource NotConverter}}"/>
 			<Button Grid.Column="6" Classes="BlankButton Tab" Content="TOOLS" Command="{Binding tabSelectCommand}" CommandParameter="5"
 					Foreground="{Binding Path=selectedTabIndex, Converter={StaticResource TabHilightConverter}, ConverterParameter=5}"/>
 			<Button Grid.Column="7" Classes="BlankButton Tab" Content="SETTINGS" Command="{Binding tabSelectCommand}" CommandParameter="6"
