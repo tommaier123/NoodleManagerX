@@ -28,8 +28,11 @@ A version for Mac and Linux is being worked on.
 - Auto updating
 - Fixed all known bugs of the old NoodleManager
 
+## Beta Features
+- Playlists
+- Avatars
+- Stages
+- Mods
 
 ## Work in progress:
-- Avatars, Playlists 90%
-- Stages 70%
 - Cross-platform 70%
