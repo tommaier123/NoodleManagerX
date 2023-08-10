@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NoodleManagerX.Models;
 using NoodleManagerX.Models.Mods;
-using NoodleManagerX.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO.Compression;
@@ -17,6 +16,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Semver;
+using NoodleManagerX.ThirdParty.MelonLoader;
 
 namespace NoodleManagerX.Mods
 {

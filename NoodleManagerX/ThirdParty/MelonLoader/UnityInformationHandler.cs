@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Linq;
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 
-namespace NoodleManagerX.Utils
+namespace NoodleManagerX.ThirdParty.MelonLoader
 {
     // Taken from https://github.com/LavaGang/MelonLoader/blob/master/MelonLoader/InternalUtils/UnityInformationHandler.cs
     // Uses the Apache 2.0 License
@@ -35,7 +36,7 @@ namespace NoodleManagerX.Utils
                     Console.Error.WriteLine("Couldn't find globalgamemanagers file for game version");
                     return;
                 }
-                    
+
                 instance = assetsManager.LoadAssetsFile(bundlePath, true);
                 if (instance == null)
                 {

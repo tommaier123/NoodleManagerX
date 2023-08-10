@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using NoodleManagerX.Models.Playlists;
 using NoodleManagerX.Models.Stages;
 using NoodleManagerX.Mods;
-using NoodleManagerX.Utils;
+using NoodleManagerX.ThirdParty.MelonLoader;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SharpAdbClient;
