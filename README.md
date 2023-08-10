@@ -3,7 +3,9 @@
 [![Downloads](https://img.shields.io/github/downloads/tommaier123/NoodleManagerX/total)](https://github.com/tommaier123/NoodleManagerX/releases/latest)
 [![Twitch](https://img.shields.io/twitch/status/Nova_Max_?style=social)](https://www.twitch.tv/Nova_Max_)
 [![Twitter](https://img.shields.io/twitter/follow/Nova_Max_?style=social)](https://twitter.com/Nova_Max_)
-
+<img src="https://creativecommons.org/images/deed/cc_icon_white_x2.png" height=20/>
+<img src="https://creativecommons.org/images/deed/attribution_icon_white_x2.png" height=20/>
+<img src="https://creativecommons.org/images/deed/sa_white_x2.png" height=20/>
 
 This is a standalone app to download Synth Riders custom content for PC and Quest. 
 Other android based headsets should also work but have not been tested. 
@@ -28,8 +30,11 @@ A version for Mac and Linux is being worked on.
 - Auto updating
 - Fixed all known bugs of the old NoodleManager
 
+## Beta Features
+- Playlists
+- Avatars
+- Stages
+- Mods
 
 ## Work in progress:
-- Avatars, Playlists 90%
-- Stages 70%
 - Cross-platform 70%
