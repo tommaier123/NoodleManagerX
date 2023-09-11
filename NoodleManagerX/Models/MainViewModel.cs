@@ -42,7 +42,6 @@ namespace NoodleManagerX.Models
 
         //Todo:
         //get description when rightclicking an item and display in context menu
-        //multiple files
         //don't leave thread safety up to luck
         //get a updated at timestamp for updating, published at is fine for filesystem timestamp
         //splitting into different lists isn't necessary
@@ -56,7 +55,7 @@ namespace NoodleManagerX.Models
         public const int TAB_AVATARS = 3;
         public const int TAB_MODS = 4;
 
-        [Reactive] private string version { get; set; } = "V1.1.2";
+        [Reactive] private string version { get; set; } = "V1.1.4";
 
         public static MainViewModel s_instance;
 
@@ -390,7 +389,7 @@ namespace NoodleManagerX.Models
                 // synthDirectory should be set by now
                 if (directoryValid)
                 {
-                    var gameDataDir = Path.Combine(synthDirectory, "SynthRiders_Data");
+                    var gameDataDir = Path.Combine(settings.oldDirectoryStructure ? synthDirectory : Path.GetDirectoryName(synthDirectory), "SynthRiders_Data");
                     UnityInformationHandler.Setup(gameDataDir);
                 }
 
@@ -400,7 +399,7 @@ namespace NoodleManagerX.Models
                     if (settings.synthDirectory != synthDirectory && directoryValid)
                     {
                         settings.synthDirectory = synthDirectory;
-                        var gameDataDir = Path.Combine(synthDirectory, "SynthRiders_Data");
+                        var gameDataDir = Path.Combine(settings.oldDirectoryStructure ? synthDirectory : Path.GetDirectoryName(synthDirectory), "SynthRiders_Data");
                         UnityInformationHandler.Setup(gameDataDir);
                         ReloadLocalSources(true);
                     }
@@ -551,7 +550,14 @@ namespace NoodleManagerX.Models
 
             if (!String.IsNullOrEmpty(path))
             {
-                ret = System.IO.Directory.Exists(path) && (settings.skipDirectoryCheck || System.IO.File.Exists(Path.Combine(path, "SynthRiders.exe")));
+                if (settings.oldDirectoryStructure)
+                {
+                    ret = System.IO.Directory.Exists(path) && System.IO.File.Exists(Path.Combine(path, "SynthRiders.exe"));
+                }
+                else
+                {
+                    ret = System.IO.Directory.Exists(path) && Path.GetFileName(path) == "SynthRidersUC";
+                }
             }
 
             if (showDialog && !ret)
@@ -573,13 +579,21 @@ namespace NoodleManagerX.Models
                 if (!String.IsNullOrEmpty(directory))
                 {
                     string parent = System.IO.Directory.GetParent(directory).FullName;
-                    if (CheckDirectory(parent))
+                    string child = Path.Combine(directory, "SynthRidersUC");
+                    if (CheckDirectory(parent))//maps folder selected
                     {
                         synthDirectory = parent;
                     }
-                    else
+                    else if (CheckDirectory(directory))//SynthRidersUC selected
                     {
                         synthDirectory = directory;
+                    }
+                    else //SynthRiders folder selected
+                    {
+                        if (System.IO.Directory.Exists(child))
+                        {
+                            synthDirectory = child;
+                        }
                     }
                 }
             }
@@ -596,10 +610,14 @@ namespace NoodleManagerX.Models
                     if (regBytes != null)
                     {
                         string directory = Encoding.Default.GetString(regBytes);
-                        directory = string.Concat(directory.Split(Path.GetInvalidPathChars()));
-                        if (!String.IsNullOrEmpty(directory) && CheckDirectory(directory))
+                        directory = string.Concat(directory.Split(Path.GetInvalidPathChars())).Trim('\\');
+                        if (!settings.oldDirectoryStructure)
                         {
-                            settings.synthDirectory = directory.Trim('\\');
+                            directory = Path.Combine(directory, "SynthRidersUC");
+                        }
+                        if (CheckDirectory(directory))
+                        {
+                            settings.synthDirectory = directory;
                         }
                     }
                 }
@@ -626,9 +644,9 @@ namespace NoodleManagerX.Models
                 localItems.Clear();
                 bool dbExists = false;
 
+                string path = "NmDatabase.json";
                 try
                 {
-                    string path = "NmDatabase.json";
                     MainViewModel.Log("Loading Database");
                     if (StorageAbstraction.FileExists(path))
                     {
@@ -647,14 +665,78 @@ namespace NoodleManagerX.Models
 
                 if (!dbExists)
                 {
-                    await Dispatcher.UIThread.InvokeAsync(async () =>
+                    string parent = Path.GetDirectoryName(settings.synthDirectory);
+                    if (!MtpDevice.connected && System.IO.File.Exists(Path.Combine(parent, path)))
                     {
-                        var res = await MessageBox.Show(MainWindow.s_instance, "Click OK to delete maps without metadata e.g. if they were not downloaded from synthriderz.com" + Environment.NewLine + "This will only happen once when loading a new game directory" + Environment.NewLine + "Choosing to cancel might lead to duplicate maps" + Environment.NewLine + "Building the database for the first time can take some minutes", "Warning", MessageBox.MessageBoxButtons.OkCancel);
-                        if (res == MessageBox.MessageBoxResult.Ok)
+                        bool migrating = false;
+                        await Dispatcher.UIThread.InvokeAsync(async () =>
                         {
-                            pruning = true;
+                            var res = await MessageBox.Show(MainWindow.s_instance, "Click OK to migrate everything to the new SynthRidersUC directory" + Environment.NewLine + "Do not close the Noodle Manager while this is happening", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+                            if (res == MessageBox.MessageBoxResult.Ok)
+                            {
+                                migrating = true;
+                            }
+                        });
+
+                        if (migrating)
+                        {
+                            _ = Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                progressText = "Migrating into SynthRidersUC";
+                            });
+
+                            string[] folders = { "Avatars", "CustomProfiles", "CustomSongs", "Playlist" };
+                            string[] files = { "decal.bin", "favorites.bin", "mixedrealitycameramovementfakersettings.bin", "partymode.bin", "played.bin", "songstats.bin", "twitchsettings.bin", "NmBlacklist.json", "NmDatabase.json" };
+
+                            foreach (var folder in folders)
+                            {
+                                try
+                                {
+                                    System.IO.Directory.CreateDirectory(Path.Combine(settings.synthDirectory, folder));
+                                    foreach (var file in System.IO.Directory.GetFiles(Path.Combine(parent, folder)))
+                                    {
+                                        try
+                                        {
+                                            System.IO.File.Move(file, Path.Combine(settings.synthDirectory, folder, Path.GetFileName(file)), true);
+                                        }
+                                        catch { }
+                                    }
+                                }
+                                catch { }
+                            }
+
+
+                            foreach (var file in files)
+                            {
+                                try
+                                {
+                                    System.IO.File.Copy(Path.Combine(parent, file), Path.Combine(settings.synthDirectory, file), true);
+                                }
+                                catch { }
+                            }
                         }
-                    });
+
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            updatingLocalItems = false;
+                            progress = 0;
+                            progressText = null;
+                        });
+
+                        if (migrating) await LoadLocalItems();
+                        return;
+                    }
+                    else
+                    {
+                        await Dispatcher.UIThread.InvokeAsync(async () =>
+                        {
+                            var res = await MessageBox.Show(MainWindow.s_instance, "Click OK to delete maps without metadata e.g. if they were not downloaded from synthriderz.com" + Environment.NewLine + "This will only happen once when loading a new game directory" + Environment.NewLine + "Choosing to cancel might lead to duplicate maps" + Environment.NewLine + "Building the database for the first time can take some minutes", "Warning", MessageBox.MessageBoxButtons.OkCancel);
+                            if (res == MessageBox.MessageBoxResult.Ok)
+                            {
+                                pruning = true;
+                            }
+                        });
+                    }
                 }
 
                 Log("Loading local items");

@@ -738,9 +738,9 @@
 							<TextBlock Text="Select"/>
 						</Button>
 					</Grid>
-					<Grid Grid.Row="1" ColumnDefinitions="auto,auto,*" Classes="SettingsGrid" ToolTip.Tip="Ony enable this if you know what you are doing">
-						<CheckBox Grid.Column="0" IsChecked="{Binding settings.skipDirectoryCheck}"/>
-						<TextBlock Grid.Column="1" Text="Skip Directory Check" Classes="SettingsLabel"/>
+					<Grid Grid.Row="1" ColumnDefinitions="auto,auto,*" Classes="SettingsGrid" ToolTip.Tip="Use the old directory structure">
+						<CheckBox Grid.Column="0" IsChecked="{Binding settings.oldDirectoryStructure}"/>
+						<TextBlock Grid.Column="1" Text="Old Directory Structure" Classes="SettingsLabel"/>
 					</Grid>
 					<Grid Grid.Row="2" ColumnDefinitions="auto,auto,*" Classes="SettingsGrid" ToolTip.Tip="Converted maps often have a lower mapping quality">
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.allowConverts}"/>
@@ -750,7 +750,7 @@
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.ignoreUpdates}"/>
 						<TextBlock Grid.Column="1" Text="Ignore Updates" Classes="SettingsLabel"/>
 					</Grid>
-					<Grid Grid.Row="4" ColumnDefinitions="auto,auto,*" Classes="SettingsGrid" ToolTip.Tip="Beta versions have the latest features but might contain bugs">
+					<Grid Grid.Row="4" ColumnDefinitions="auto,auto,*" Classes="SettingsGrid" ToolTip.Tip="Beta versions of NoodleManagerX and mods have the latest features but might contain bugs">
 						<CheckBox Grid.Column="0" IsChecked="{Binding settings.getBetas}"/>
 						<TextBlock Grid.Column="1" Text="Update to Beta Versions" Classes="SettingsLabel"/>
 					</Grid>

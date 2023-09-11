@@ -8,7 +8,7 @@ namespace NoodleManagerX.Models
     class Settings : ReactiveObject
     {
         [Reactive][DataMember] public string synthDirectory { get; set; } = "";
-        [Reactive][DataMember] public bool skipDirectoryCheck { get; set; } = false;
+        [Reactive][DataMember] public bool oldDirectoryStructure { get; set; } = false;
         [Reactive][DataMember] public bool allowConverts { get; set; } = false;
         [Reactive][DataMember] public bool ignoreUpdates { get; set; } = false;
         [Reactive][DataMember] public bool getBetas { get; set; } = false;

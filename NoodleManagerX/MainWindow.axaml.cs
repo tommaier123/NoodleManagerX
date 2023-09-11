@@ -21,7 +21,7 @@ namespace NoodleManagerX
         private Grid blackBar;
         private bool lastleftclick = false;
         private bool lastHandled = false;
-        private Point lastclickposition;
+        private PixelPoint lastposition;
 
         public MainWindow()
         {
@@ -47,12 +47,12 @@ namespace NoodleManagerX
                     MouseDevice mouse = (MouseDevice)x.Device;
                     bool leftclick = rawpointerevent.InputModifiers == RawInputModifiers.LeftMouseButton;
 
-                    Point mouseonclient = this.PointToClient(mouse.Position);
+                    //Point mouseonclient = this.PointToClient(mouse.Position);
 
                     if (!lastleftclick && leftclick && blackBar.IsPointerOver)//rising edge
                     {
                         lastleftclick = true;
-                        lastclickposition = mouseonclient;
+                        lastposition = mouse.Position;
                         lastHandled = x.Handled;
                         mouse = (MouseDevice)x.Device;
                     }
@@ -60,7 +60,8 @@ namespace NoodleManagerX
                     {
                         if (!lastHandled)
                         {
-                            PixelPoint p = new PixelPoint(mouse.Position.X - (int)lastclickposition.X, mouse.Position.Y - (int)lastclickposition.Y);
+                            PixelPoint p = new PixelPoint(this.Position.X + mouse.Position.X - lastposition.X, this.Position.Y + mouse.Position.Y - (int)lastposition.Y);
+                            lastposition = mouse.Position;
                             this.Position = p;
                         }
                     }
