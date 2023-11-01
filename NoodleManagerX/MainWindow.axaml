@@ -193,13 +193,17 @@
 			<Setter Property="Background" Value="{Binding Path=downloaded, Converter={StaticResource BoolColorConverter}, ConverterParameter=BackgroundDownloadedColor|BackgroundNotDownloadedColor}"/>
 		</Style>
 
-    <!--Different List Boxes-->
+		<!--Workaround for rounding error when using windows display scaling-->
+		<Style Selector="ListBox.MyListBox ListBoxItem:pointerover">
+			<Setter Property="Margin" Value="-1,0,0,0"/>
+		</Style>
+		<Style Selector="ListBox.MyListBox ListBoxItem:selected">
+			<Setter Property="Margin" Value="-1,0,0,0"/>
+		</Style>
+
+		<!--Different List Boxes-->
 		<Style Selector="ListBox.MyListBoxSmall ListBoxItem">
 			<Setter Property="Height" Value="162"/>
-		</Style>
-		<!--Workaround for rounding error when using windows display scaling-->
-		<Style Selector="ListBox.MyListBoxSmall ListBoxItem:pointerover">
-			<Setter Property="Margin" Value="-1,0,0,0"/>
 		</Style>
 		<Style Selector="ListBox.MyListBoxSmall ListBoxItem:pointerover Image">
 			<Setter Property="Width" Value="160"/>
@@ -220,10 +224,6 @@
 
 		<Style Selector="ListBox.MyListBoxBig ListBoxItem">
 			<Setter Property="Height" Value="242"/>
-		</Style>
-		<!--Workaround for rounding error when using windows display scaling-->
-		<Style Selector="ListBox.MyListBoxBig ListBoxItem:pointerover">
-			<Setter Property="Margin" Value="-1,0,0,0"/>
 		</Style>
 		<Style Selector="ListBox.MyListBoxBig ListBoxItem:pointerover Image">
 			<Setter Property="Width" Value="182"/>
