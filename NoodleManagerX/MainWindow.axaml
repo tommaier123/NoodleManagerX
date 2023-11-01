@@ -197,6 +197,10 @@
 		<Style Selector="ListBox.MyListBoxSmall ListBoxItem">
 			<Setter Property="Height" Value="162"/>
 		</Style>
+		<!--Workaround for rounding error when using windows display scaling-->
+		<Style Selector="ListBox.MyListBoxSmall ListBoxItem:pointerover">
+			<Setter Property="Margin" Value="-1,0,0,0"/>
+		</Style>
 		<Style Selector="ListBox.MyListBoxSmall ListBoxItem:pointerover Image">
 			<Setter Property="Width" Value="160"/>
 			<Setter Property="Height" Value="160"/>
@@ -210,8 +214,16 @@
 			<Setter Property="Height" Value="140"/>
 		</Style>
 
+		<Style Selector="ListBox.MyListBoxSmallNoControlHeader ListBoxItem">
+			<Setter Property="Height" Value="178"/>
+		</Style>
+
 		<Style Selector="ListBox.MyListBoxBig ListBoxItem">
 			<Setter Property="Height" Value="242"/>
+		</Style>
+		<!--Workaround for rounding error when using windows display scaling-->
+		<Style Selector="ListBox.MyListBoxBig ListBoxItem:pointerover">
+			<Setter Property="Margin" Value="-1,0,0,0"/>
 		</Style>
 		<Style Selector="ListBox.MyListBoxBig ListBoxItem:pointerover Image">
 			<Setter Property="Width" Value="182"/>
@@ -720,7 +732,7 @@
 			</Grid>
       <!-- Mods tab -->
 			<Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=4}">
-        <ListBox Items="{Binding Path=mods}" Classes="MyListBox MyListBoxSmall ModItem"/>
+        <ListBox Items="{Binding Path=mods}" Classes="MyListBox MyListBoxSmallNoControlHeader ModItem"/>
 			</Grid>
 			<!-- Tools tab -->
       <Grid IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=5}">
