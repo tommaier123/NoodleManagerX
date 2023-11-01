@@ -389,7 +389,7 @@ namespace NoodleManagerX.Models
                 // synthDirectory should be set by now
                 if (directoryValid)
                 {
-                    var gameDataDir = Path.Combine(settings.oldDirectoryStructure ? synthDirectory : Path.GetDirectoryName(synthDirectory), "SynthRiders_Data");
+                    var gameDataDir = Path.Combine(Path.GetDirectoryName(synthDirectory), "SynthRiders_Data");
                     UnityInformationHandler.Setup(gameDataDir);
                 }
 
@@ -399,7 +399,7 @@ namespace NoodleManagerX.Models
                     if (settings.synthDirectory != synthDirectory && directoryValid)
                     {
                         settings.synthDirectory = synthDirectory;
-                        var gameDataDir = Path.Combine(settings.oldDirectoryStructure ? synthDirectory : Path.GetDirectoryName(synthDirectory), "SynthRiders_Data");
+                        var gameDataDir = Path.Combine(Path.GetDirectoryName(synthDirectory), "SynthRiders_Data");
                         UnityInformationHandler.Setup(gameDataDir);
                         ReloadLocalSources(true);
                     }
@@ -550,14 +550,7 @@ namespace NoodleManagerX.Models
 
             if (!String.IsNullOrEmpty(path))
             {
-                if (settings.oldDirectoryStructure)
-                {
-                    ret = System.IO.Directory.Exists(path) && System.IO.File.Exists(Path.Combine(path, "SynthRiders.exe"));
-                }
-                else
-                {
-                    ret = System.IO.Directory.Exists(path) && Path.GetFileName(path) == "SynthRidersUC";
-                }
+                ret = System.IO.Directory.Exists(path) && Path.GetFileName(path) == "SynthRidersUC";
             }
 
             if (showDialog && !ret)
@@ -611,10 +604,7 @@ namespace NoodleManagerX.Models
                     {
                         string directory = Encoding.Default.GetString(regBytes);
                         directory = string.Concat(directory.Split(Path.GetInvalidPathChars())).Trim('\\');
-                        if (!settings.oldDirectoryStructure)
-                        {
-                            directory = Path.Combine(directory, "SynthRidersUC");
-                        }
+                        directory = Path.Combine(directory, "SynthRidersUC");
                         if (CheckDirectory(directory))
                         {
                             settings.synthDirectory = directory;
@@ -690,6 +680,13 @@ namespace NoodleManagerX.Models
 
                             foreach (var folder in folders)
                             {
+                                string source_folder = folder;
+                                string target_folder = folder;
+                                if (folder == "Playlist")
+                                {
+                                    target_folder = "CustomPlaylists";
+                                }
+
                                 try
                                 {
                                     System.IO.Directory.CreateDirectory(Path.Combine(settings.synthDirectory, folder));
