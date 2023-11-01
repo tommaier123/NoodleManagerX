@@ -11,7 +11,7 @@
         HasSystemDecorations="False"
         Icon="resm:NoodleManagerX.Assets.Included.icon-nm.ico"
         Title="NoodleManagerX"
-				FontFamily="resm:NoodleManagerX.Assets.Fonts?assembly=NoodleManagerX#Noto Sans">
+		FontFamily="resm:NoodleManagerX.Assets.Fonts?assembly=NoodleManagerX#Noto Sans">
 
 	<!--<Window.Background>
 		<ImageBrush Source="C:\Users\Max\Downloads\Test.jpg" Stretch="Fill" />
@@ -638,7 +638,7 @@
 					<ComboBoxItem Name="name" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Title</ComboBoxItem>
 					<ComboBoxItem Name="artist" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Artist</ComboBoxItem>
 					<ComboBoxItem Name="mapper" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">Mapper</ComboBoxItem>
-					<ComboBoxItem Name="user.username" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Creator</ComboBoxItem>
+					<ComboBoxItem Name="user_username" IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=1-2-3-4}">Creator</ComboBoxItem>
 				</ComboBox>
 				<ComboBox Grid.Column="1" Classes="BlankBox" ToolTip.Tip="Song Difficulty" SelectedIndex="{Binding selectedDifficultyIndex}" SelectedItem="{Binding Path=selectedDifficulty, Mode=OneWayToSource}"
 						  IsVisible="{Binding Path=selectedTabIndex, Converter={StaticResource EqualsConverter}, ConverterParameter=0}">

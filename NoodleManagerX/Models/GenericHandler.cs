@@ -136,7 +136,7 @@ namespace NoodleManagerX.Models
 
                             if (!String.IsNullOrEmpty(MainViewModel.s_instance.selectedSearchParameter?.Name) && MainViewModel.s_instance.selectedSearchParameter.Name != "all")
                             {
-                                queries = new Dictionary<string, string>() { { MainViewModel.s_instance.selectedSearchParameter.Name, "$contL" } };
+                                queries = new Dictionary<string, string>() { { MainViewModel.s_instance.selectedSearchParameter.Name.Replace("_","."), "$contL" } };
                             }
 
                             query =

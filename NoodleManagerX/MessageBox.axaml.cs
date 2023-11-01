@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MsgBox
 {
-    public class MessageBox : Window
+    public partial class MessageBox : Window
     {
         public enum MessageBoxButtons
         {

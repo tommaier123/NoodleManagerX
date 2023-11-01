@@ -17,10 +17,11 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AssetsTools.NET" Version="2.0.12" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.18" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.18" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.18" />
-    <PackageReference Include="Avalonia.Svg.Skia" Version="0.10.18" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.5" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.5" />
+    <PackageReference Include="Avalonia.Svg.Skia" Version="11.0.0.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.5" />
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="13.4.0" />
     <PackageReference Include="MediaDevices" Version="1.10.0" />
     <PackageReference Include="NAudio" Version="2.2.1" />

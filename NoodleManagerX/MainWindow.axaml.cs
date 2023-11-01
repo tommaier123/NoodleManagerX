@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace NoodleManagerX
 {
-    public class MainWindow : Window
+    public partial class MainWindow : Window
     {
         public static MainWindow s_instance;
         public static BrushConverter BrushConverter = new BrushConverter();
@@ -40,38 +40,38 @@ namespace NoodleManagerX
             this.AttachDevTools();
 #endif
 #pragma warning disable 0618
-            Application.Current.InputManager.Process.Subscribe(x =>
-            {
-                if (x is RawPointerEventArgs rawpointerevent)
-                {
-                    MouseDevice mouse = (MouseDevice)x.Device;
-                    bool leftclick = rawpointerevent.InputModifiers == RawInputModifiers.LeftMouseButton;
+            //Application.Current.InputManager.Process.Subscribe(x =>
+            //{
+            //    if (x is RawPointerEventArgs rawpointerevent)
+            //    {
+            //        MouseDevice mouse = (MouseDevice)x.Device;
+            //        bool leftclick = rawpointerevent.InputModifiers == RawInputModifiers.LeftMouseButton;
 
-                    //Point mouseonclient = this.PointToClient(mouse.Position);
+            //        //Point mouseonclient = this.PointToClient(mouse.Position);
 
-                    if (!lastleftclick && leftclick && blackBar.IsPointerOver)//rising edge
-                    {
-                        lastleftclick = true;
-                        lastposition = mouse.Position;
-                        lastHandled = x.Handled;
-                        mouse = (MouseDevice)x.Device;
-                    }
-                    else if (lastleftclick && leftclick)//hold
-                    {
-                        if (!lastHandled)
-                        {
-                            PixelPoint p = new PixelPoint(this.Position.X + mouse.Position.X - lastposition.X, this.Position.Y + mouse.Position.Y - (int)lastposition.Y);
-                            lastposition = mouse.Position;
-                            this.Position = p;
-                        }
-                    }
-                    else//falling edge
-                    {
-                        lastleftclick = false;
-                        lastHandled = false;
-                    }
-                }
-            });
+            //        if (!lastleftclick && leftclick && blackBar.IsPointerOver)//rising edge
+            //        {
+            //            lastleftclick = true;
+            //            lastposition = mouse.Position;
+            //            lastHandled = x.Handled;
+            //            mouse = (MouseDevice)x.Device;
+            //        }
+            //        else if (lastleftclick && leftclick)//hold
+            //        {
+            //            if (!lastHandled)
+            //            {
+            //                PixelPoint p = new PixelPoint(this.Position.X + mouse.Position.X - lastposition.X, this.Position.Y + mouse.Position.Y - (int)lastposition.Y);
+            //                lastposition = mouse.Position;
+            //                this.Position = p;
+            //            }
+            //        }
+            //        else//falling edge
+            //        {
+            //            lastleftclick = false;
+            //            lastHandled = false;
+            //        }
+            //    }
+            //});
 #pragma warning disable 0618
         }
 

@@ -1,8 +1,11 @@
 ﻿<Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="NoodleManagerX.App">
+             x:Class="NoodleManagerX.App"
+			 xmlns:local="using:ILoveAvaloniaUI"
+             RequestedThemeVariant="Dark">>
     <Application.Styles>
-        <StyleInclude Source="avares://Avalonia.Themes.Default/DefaultTheme.xaml"/>
-        <StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseDark.xaml"/>
+		<Application.Styles>
+			<FluentTheme />
+		</Application.Styles>
     </Application.Styles>
 </Application>
