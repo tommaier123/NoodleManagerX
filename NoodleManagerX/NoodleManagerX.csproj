@@ -1,6 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)'=='DEBUG'">
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'!='DEBUG'">
     <OutputType>WinExe</OutputType>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <TargetFrameworks>net6.0-windows</TargetFrameworks>
     <ApplicationIcon>icon-nm.ico</ApplicationIcon>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
