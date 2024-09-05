@@ -676,7 +676,9 @@ namespace NoodleManagerX.Models
                             });
 
                             string[] folders = { "Avatars", "CustomProfiles", "CustomSongs", "CustomStages", "Playlist", "IndicatorTex" };
-                            
+
+                            string[] files = { "mixedrealitycameramovementfakersettings.bin", "NmBlacklist.json", "NmDatabase.json" };
+
                             foreach (var folder in folders)
                             {
                                 string source_folder = folder;
@@ -701,6 +703,15 @@ namespace NoodleManagerX.Models
                                         }
                                         catch { }
                                     }
+                                }
+                                catch { }
+                            }
+
+                            foreach (var file in files)
+                            {
+                                try
+                                {
+                                    System.IO.File.Copy(Path.Combine(parent, file), Path.Combine(settings.synthDirectory, file), true);
                                 }
                                 catch { }
                             }
