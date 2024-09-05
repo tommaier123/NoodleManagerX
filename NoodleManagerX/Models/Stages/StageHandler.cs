@@ -14,7 +14,7 @@ namespace NoodleManagerX.Models.Stages
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/models/stages";
         public override string folder { get; set; } = "CustomStages";
         public override string join { get; set; } = "files&join=files.file&join=experience_beatmap&join=id";
-        public override string[] extensions { get; set; } = { ".stage", ".spinstage", ".stagequest", ".spinstagequest" };
+        public override string[] extensions { get; set; } = { ".stage", ".stagedroid"};
 
         public override Task LoadLocalItems()
         {
