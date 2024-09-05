@@ -13,7 +13,7 @@ namespace NoodleManagerX.Models.Playlists
         [DataMember] public List<PlaylistEntryItem> items { get; set; }
         public string duration { get { return items != null ? items.Count().ToString() : "0"; } }
 
-        public override string target { get; set; } = "Playlist";
+        public override string target { get; set; } = "CustomPlaylists";
         public override ItemType itemType { get; set; } = ItemType.Playlist;
     }
 

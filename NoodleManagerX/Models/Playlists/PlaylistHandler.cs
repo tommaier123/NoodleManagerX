@@ -16,7 +16,7 @@ namespace NoodleManagerX.Models.Playlists
         public override ItemType itemType { get; set; } = ItemType.Playlist;
         public override string join { get; set; } = "items||id";
         public override string apiEndpoint { get; set; } = "https://synthriderz.com/api/playlists";
-        public override string folder { get; set; } = "Playlist";
+        public override string folder { get; set; } = "CustomPlaylists";
         public override string[] extensions { get; set; } = { ".playlist" };
 
         public override dynamic DeserializePage(string json)
