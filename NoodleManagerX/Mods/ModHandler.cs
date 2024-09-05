@@ -26,7 +26,7 @@ namespace NoodleManagerX.Mods
 
         // Note - this is required to override, but to get the url based on the beta flag it is directly accessed later
         public override string apiEndpoint { get; set; } = "";
-        public override string folder { get; set; } = "Mods";
+        public override string folder { get; set; } = @"..\Mods";
         public override string[] extensions { get; set; } = { ".synthmod" };
 
         private Dictionary<string, ModVersion> installedVersions = new();

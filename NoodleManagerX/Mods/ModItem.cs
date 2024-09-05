@@ -26,7 +26,7 @@ namespace NoodleManagerX.Mods
     [DataContract]
     class ModItem : GenericItem
     {
-        public override string target { get; set; } = "Mods";
+        public override string target { get; set; } = @"..\Mods";
         public override ItemType itemType { get; set; } = ItemType.Mod;
 
         private Dictionary<string, ModVersion> ResolvedVersions { get; set; }

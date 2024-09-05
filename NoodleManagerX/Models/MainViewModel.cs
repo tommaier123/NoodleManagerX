@@ -675,9 +675,8 @@ namespace NoodleManagerX.Models
                                 progressText = "Migrating into SynthRidersUC";
                             });
 
-                            string[] folders = { "Avatars", "CustomProfiles", "CustomSongs", "Playlist" };
-                            string[] files = { "decal.bin", "favorites.bin", "mixedrealitycameramovementfakersettings.bin", "partymode.bin", "played.bin", "songstats.bin", "twitchsettings.bin", "NmBlacklist.json", "NmDatabase.json" };
-
+                            string[] folders = { "Avatars", "CustomProfiles", "CustomSongs", "CustomStages", "Playlist", "IndicatorTex" };
+                            
                             foreach (var folder in folders)
                             {
                                 string source_folder = folder;
@@ -685,6 +684,10 @@ namespace NoodleManagerX.Models
                                 if (folder == "Playlist")
                                 {
                                     target_folder = "CustomPlaylists";
+                                }
+                                else if (folder == "IndicatorTex")
+                                {
+                                    target_folder = "CustomIndicators";
                                 }
 
                                 try
@@ -698,16 +701,6 @@ namespace NoodleManagerX.Models
                                         }
                                         catch { }
                                     }
-                                }
-                                catch { }
-                            }
-
-
-                            foreach (var file in files)
-                            {
-                                try
-                                {
-                                    System.IO.File.Copy(Path.Combine(parent, file), Path.Combine(settings.synthDirectory, file), true);
                                 }
                                 catch { }
                             }
