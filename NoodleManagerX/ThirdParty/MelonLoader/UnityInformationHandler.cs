@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Linq;
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
+using NoodleManagerX.Models;
 
 namespace NoodleManagerX.ThirdParty.MelonLoader
 {
@@ -20,9 +21,9 @@ namespace NoodleManagerX.ThirdParty.MelonLoader
 
         internal static void Setup(string gameDataDirectory)
         {
-            AssetsManager assetsManager = new AssetsManager();
-            ReadGameInfo(gameDataDirectory, assetsManager);
-            assetsManager.UnloadAll();
+            //AssetsManager assetsManager = new AssetsManager();
+            //ReadGameInfo(gameDataDirectory, assetsManager);
+            //assetsManager.UnloadAll();
         }
 
         private static void ReadGameInfo(string gameDataDirectory, AssetsManager assetsManager)
@@ -33,14 +34,14 @@ namespace NoodleManagerX.ThirdParty.MelonLoader
                 string bundlePath = Path.Combine(gameDataDirectory, "globalgamemanagers");
                 if (!File.Exists(bundlePath))
                 {
-                    Console.Error.WriteLine("Couldn't find globalgamemanagers file for game version");
+                    MainViewModel.Log("Couldn't find globalgamemanagers file for game version");
                     return;
                 }
 
                 instance = assetsManager.LoadAssetsFile(bundlePath, true);
                 if (instance == null)
                 {
-                    Console.Error.WriteLine("Couldn't load assets file");
+                    MainViewModel.Log("Couldn't load assets file");
                     return;
                 }
 
@@ -93,7 +94,7 @@ namespace NoodleManagerX.ThirdParty.MelonLoader
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine("Failed to Initialize Assets Manager! " + ex.Message);
+                MainViewModel.Log("Failed to Initialize Assets Manager! " + ex.Message);
             }
 
             if (instance != null)
