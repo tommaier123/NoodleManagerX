@@ -4,6 +4,9 @@
 [![Twitch](https://img.shields.io/twitch/status/Nova_Max_?style=social)](https://www.twitch.tv/Nova_Max_)
 [![Twitter](https://img.shields.io/twitter/follow/Nova_Max_?style=social)](https://twitter.com/Nova_Max_)
 
+## I am no longer actively maintaining this project. Therefore, I can give no guarantee about support, bug fixes, or security issues coming from the end-of-life .NET runtime. Use at your own risk.
+### DM me on Discord to be added as a maintainer.
+
 This is a standalone app to download Synth Riders custom content for PC and Quest. 
 Other android based headsets should also work but have not been tested. 
 A version for Mac and Linux is being worked on.
